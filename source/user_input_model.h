@@ -1,0 +1,76 @@
+//
+// Copyright (C) YuqiaoZhang(HanetakaChou)
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published
+// by the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+//
+
+#ifndef _USER_INPUT_MODEL_H_
+#define _USER_INPUT_MODEL_H_ 1
+
+#include "../thirdparty/McRT-Malloc/include/mcrt_vector.h"
+#include "../thirdparty/McRT-Malloc/include/mcrt_string.h"
+#include "../thirdparty/McRT-Malloc/include/mcrt_unordered_map.h"
+#include "../thirdparty/Brioche-Analytic-Rendering-Interface/include/brx_anari.h"
+#include "../thirdparty/Brioche-Motion/include/brx_motion.h"
+
+struct ui_asset_image_model_t
+{
+    bool m_force_srgb;
+    brx_anari_image *m_image;
+};
+
+struct ui_asset_model_model_2_t
+{
+    mcrt_vector<brx_anari_surface_group *> m_surface_groups;
+    mcrt_vector<brx_motion_skeleton *> m_skeletons;
+};
+
+struct ui_asset_model_model_t
+{
+    mcrt_string m_file_name;
+    uint64_t m_file_timestamp;
+    mcrt_vector<brx_anari_surface_group *> m_surface_groups;
+    mcrt_vector<brx_anari_surface_group_instance *> m_surface_group_instances;
+    mcrt_vector<brx_motion_skeleton *> m_skeletons;
+    mcrt_vector<brx_motion_skeleton_instance *> m_skeleton_instances;
+};
+
+struct ui_asset_motion_model_t
+{
+    mcrt_string m_file_name;
+    uint64_t m_file_timestamp;
+    mcrt_vector<brx_motion_animation *> m_animations;
+    mcrt_vector<brx_motion_animation_instance *> m_animation_instances;
+};
+
+struct ui_model_t
+{
+    mcrt_unordered_map<mcrt_string, ui_asset_image_model_t> m_asset_images;
+    mcrt_unordered_map<mcrt_string, ui_asset_model_model_2_t> m_asset_models;
+    ui_asset_model_model_t m_asset_model;
+    ui_asset_motion_model_t m_asset_motion;
+    float m_scene_color_clear_value[3];
+};
+
+struct user_camera_model_t
+{
+};
+
+extern void ui_model_init(ui_model_t *out_user_camera_model);
+
+extern void ui_model_uninit(brx_anari_device *device, ui_model_t *out_user_camera_model);
+
+extern void user_camera_model_init(brx_anari_device *device, user_camera_model_t *out_user_camera_model);
+
+#endif
