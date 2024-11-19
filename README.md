@@ -1,0 +1,21 @@
+## Brioche Asset Import  
+
+- [ ] Scene  
+    - [ ] Mesh  
+        - [x] [MMD (PMX)](https://github.com/MMD-Blender/blender_mmd_tools/tree/main)  
+        - [x] [glTF (glTF, glB, VRM)](https://github.com/saturday06/VRM-Addon-for-Blender/blob/main/src/io_scene_vrm/common/human_bone_mapper/mmd_mapping.py)  
+    - [ ] Animation  
+        - [x] [MMD (VMD)](https://github.com/MMD-Blender/blender_mmd_tools/tree/main)  
+        - [ ] [~~glTF (glTF, glB, VRMA)~~](https://github.com/saturday06/VRM-Addon-for-Blender/blob/main/src/io_scene_vrm/common/human_bone_mapper/mmd_mapping.py)     
+- [ ] Image  
+    - [ ] [Albedo Image](https://www.pbr-book.org/4ed/Radiometry,_Spectra,_and_Color/Color#FromRGBtoSpectra)  
+        - [x] [WebP](https://chromium.googlesource.com/webm/libwebp)  
+        - [x] [PNG](https://github.com/pnggroup/libpng)  
+        - [x] [JPEG](https://github.com/libjpeg-turbo/libjpeg-turbo)  
+        - [ ] TIFF  
+        - [x] [TGA](https://tgalib.sourceforge.net/)  
+        - [ ] BMP  
+        - [ ] PNM  
+    - [ ] [Illuminant Image](https://www.pbr-book.org/4ed/Radiometry,_Spectra,_and_Color/Color#x6-RGBIlluminants)  
+        - [x] [OpenEXR](https://github.com/AcademySoftwareFoundation/openexr)  
+        - [ ] [Radiance HDR](https://radsite.lbl.gov/radiance/refer/filefmts.pdf)  
