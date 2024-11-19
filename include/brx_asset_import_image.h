@@ -1,0 +1,43 @@
+//
+// Copyright (C) YuqiaoZhang(HanetakaChou)
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published
+// by the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+//
+
+#ifndef _BRX_ASSET_IMPORT_IMAGE_H_
+#define _BRX_ASSET_IMPORT_IMAGE_H_ 1
+
+#include "brx_asset_import_input_stream.h"
+#include "../../Brioche/include/brx_sampled_asset_image_format.h"
+#include <cstddef>
+#include <cstdint>
+
+class brx_asset_import_image
+{
+public:
+    virtual BRX_SAMPLED_ASSET_IMAGE_FORMAT get_format(bool force_srgb) const = 0;
+    virtual uint32_t get_mip_level_count() const = 0;
+    virtual uint32_t get_row_pitch(uint32_t mip_level_index) const = 0;
+    virtual uint32_t get_row_size(uint32_t mip_level_index) const = 0;
+    virtual uint32_t get_row_count(uint32_t mip_level_index) const = 0;
+    virtual uint32_t get_width(uint32_t mip_level_index) const = 0;
+    virtual uint32_t get_height(uint32_t mip_level_index) const = 0;
+    virtual void const *get_pixel_data(uint32_t mip_level_index) const = 0;
+};
+
+extern "C" brx_asset_import_image *brx_asset_import_create_image_from_input_stream(brx_asset_import_input_stream_factory *input_stream_factory, char const *input_stream_name);
+extern "C" brx_asset_import_image *brx_asset_import_create_image_from_memory(void const *data_base, size_t data_size);
+extern "C" void brx_asset_import_destory_image(brx_asset_import_image *image);
+
+#endif

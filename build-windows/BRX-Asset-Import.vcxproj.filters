@@ -1,0 +1,170 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="include">
+      <UniqueIdentifier>{df644262-f578-4952-a6b0-a2b75ad21e44}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source">
+      <UniqueIdentifier>{349cdf46-1f63-4741-9481-73e48c7c3295}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty">
+      <UniqueIdentifier>{257c03c2-1307-4c5e-8d81-f954ee95c54b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\DirectXMesh">
+      <UniqueIdentifier>{61f2fadd-15aa-4d7a-9481-6430dd1096c3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\DirectXMesh\DirectXmesh">
+      <UniqueIdentifier>{487ec675-16b5-4061-a69f-f840f15a4afd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\OpenCV">
+      <UniqueIdentifier>{d0aed924-1f1e-46db-b90b-020be69997ad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\OpenCV\bin">
+      <UniqueIdentifier>{3bab80e7-371e-44a4-b2bf-7e0428186092}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\OpenCV\bin\x64">
+      <UniqueIdentifier>{4459101e-357f-4c55-9692-975a5f072528}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\mmd">
+      <UniqueIdentifier>{85622f8d-1d5b-418e-965d-5237794fbf91}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\mmd\kaitai">
+      <UniqueIdentifier>{ddcd010d-23f1-4de0-be68-ac8dfb94f4e7}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\brx_asset_import_input_stream.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\import_image_asset.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\import_scene_asset.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\brx_asset_import_file_input_stream.h">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\brx_asset_import_memory_input_stream.h">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\DirectXMesh\DirectXMesh\DirectXMesh.h">
+      <Filter>thirdparty\DirectXMesh\DirectXmesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\DirectXMesh\DirectXMesh\scoped.h">
+      <Filter>thirdparty\DirectXMesh\DirectXmesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\internal_import_png_image.h">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\internal_import_jpeg_image.h">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\internal_import_image.h">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\internal_import_webp_image.h">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\brx_asset_import_image.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\brx_asset_import_scene.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\mmd\mmd_pmx.h">
+      <Filter>thirdparty\mmd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\mmd\mmd_vmd.h">
+      <Filter>thirdparty\mmd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\mmd\kaitai\exceptions.h">
+      <Filter>thirdparty\mmd\kaitai</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\mmd\kaitai\kaitaistream.h">
+      <Filter>thirdparty\mmd\kaitai</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\mmd\kaitai\kaitaistruct.h">
+      <Filter>thirdparty\mmd\kaitai</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\brx_asset_import_rgb_image.h">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\brx_asset_import_model_scene.h">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\internal_import_gltf_scene.h">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\internal_import_scene.h">
+      <Filter>source</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\source\brx_asset_import_file_input_stream.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\brx_asset_import_memory_input_stream.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\import_dds_image_asset.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\internal_import_gltf_scene_old.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\import_gltf_scene_asset_cgltf.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\import_pvr_image_asset.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\thirdparty\DirectXMesh\DirectXMesh\DirectXMeshNormals.cpp">
+      <Filter>thirdparty\DirectXMesh\DirectXmesh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\thirdparty\DirectXMesh\DirectXMesh\DirectXMeshTangentFrame.cpp">
+      <Filter>thirdparty\DirectXMesh\DirectXmesh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\internal_import_png_image.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\internal_import_jpeg_image.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\internal_import_image.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\internal_import_webp_image.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\thirdparty\mmd\mmd_pmx.cpp">
+      <Filter>thirdparty\mmd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\thirdparty\mmd\mmd_vmd.cpp">
+      <Filter>thirdparty\mmd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\thirdparty\mmd\kaitai\kaitaistream.cpp">
+      <Filter>thirdparty\mmd\kaitai</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\brx_asset_import_rgb_image.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\brx_asset_import_model_scene.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\internal_import_gltf_scene.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\internal_import_scene.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="..\..\OpenCV\build\x64\vc15\bin\opencv_world3410.dll">
+      <Filter>thirdparty\OpenCV\bin\x64</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="..\..\OpenCV\build\x64\vc15\bin\opencv_ffmpeg3410_64.dll">
+      <Filter>thirdparty\OpenCV\bin\x64</Filter>
+    </CopyFileToFolders>
+  </ItemGroup>
+</Project>
