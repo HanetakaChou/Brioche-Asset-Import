@@ -1,0 +1,32 @@
+[submodule "thirdparty/libjpeg"]
+	path = thirdparty/libjpeg
+	url = git@github.com:HanetakaChou/libjpeg.git
+	branch = master
+[submodule "thirdparty/libpng"]
+	path = thirdparty/libpng
+	url = git@github.com:HanetakaChou/libpng.git
+	branch = master
+[submodule "thirdparty/zlib"]
+	path = thirdparty/zlib
+	url = git@github.com:HanetakaChou/zlib.git
+	branch = master
+[submodule "thirdparty/libwebp"]
+	path = thirdparty/libwebp
+	url = git@github.com:HanetakaChou/libwebp.git
+	branch = master
+[submodule "thirdparty/OpenEXR"]
+	path = thirdparty/OpenEXR
+	url = git@github.com:HanetakaChou/OpenEXR.git
+	branch = master
+[submodule "thirdparty/libdeflate"]
+	path = thirdparty/libdeflate
+	url = git@github.com:HanetakaChou/libdeflate.git
+	branch = master
+[submodule "thirdparty/cgltf"]
+	path = thirdparty/cgltf
+	url = git@github.com:HanetakaChou/cgltf.git
+	branch = master
+[submodule "thirdparty/DirectXMesh"]
+	path = thirdparty/DirectXMesh
+	url = git@github.com:HanetakaChou/DirectXMesh.git
+	branch = master
