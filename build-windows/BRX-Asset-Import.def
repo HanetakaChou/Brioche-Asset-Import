@@ -1,0 +1,5 @@
+EXPORTS
+	brx_asset_import_create_scene_from_memory
+	brx_asset_import_destroy_scene
+	brx_asset_import_create_image_from_memory
+	brx_asset_import_destroy_image
