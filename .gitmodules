@@ -1,0 +1,35 @@
+[submodule "thirdparty/libjpeg"]
+	path = thirdparty/libjpeg
+	url = git@github.com:HanetakaChou/Brioche-Asset-Import.git
+	branch = libjpeg
+[submodule "thirdparty/libpng"]
+	path = thirdparty/libpng
+	url = git@github.com:HanetakaChou/Brioche-Asset-Import.git
+	branch = libpng
+[submodule "thirdparty/zlib"]
+	path = thirdparty/zlib
+	url = git@github.com:HanetakaChou/Brioche-Asset-Import.git
+	branch = zlib
+[submodule "thirdparty/libwebp"]
+	path = thirdparty/libwebp
+	url = git@github.com:HanetakaChou/Brioche-Asset-Import.git
+	branch = libwebp
+[submodule "thirdparty/OpenEXR"]
+	path = thirdparty/OpenEXR
+	url = git@github.com:HanetakaChou/Brioche-Asset-Import.git
+	branch = OpenEXR
+[submodule "thirdparty/cgltf"]
+	path = thirdparty/cgltf
+	url = git@github.com:HanetakaChou/Brioche-Asset-Import.git
+	branch = cgltf
+[submodule "thirdparty/DirectXMesh"]
+	path = thirdparty/DirectXMesh
+	url = git@github.com:HanetakaChou/DirectXMesh.git
+	branch = master
+[submodule "thirdparty/Imath"]
+	path = thirdparty/Imath
+	url = git@github.com:HanetakaChou/Brioche-Asset-Import.git
+	branch = cgltf
+[submodule "thirdparty/libdeflate"]
+	path = thirdparty/libdeflate
+	url = git@github.com:HanetakaChou/Brioche-Asset-Import.git
