@@ -7,128 +7,76 @@
 // Licensed under the MIT License.
 //-------------------------------------------------------------------------------------
 
-#pragma once
+#ifndef _SCOPED_H_
+#define _SCOPED_H_ 1
 
-#include <cassert>
-#include <cstddef>
-#include <cstdint>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdlib.h>
 #include <memory>
-#include <tuple>
-
-#ifndef _WIN32
-#include <cstdlib>
 
 struct aligned_deleter
 {
-    void operator()(void *p) noexcept { free(p); }
+    void operator()(void *p) noexcept
+    {
+#if defined(__GNUC__)
+        free(p);
+#elif defined(_MSC_VER)
+        _aligned_free(p);
+#else
+#error Unknown Compiler
+#endif
+    }
 };
 
 using ScopedAlignedArrayFloat = std::unique_ptr<float[], aligned_deleter>;
 
-inline ScopedAlignedArrayFloat make_AlignedArrayFloat(uint64_t count)
+static inline ScopedAlignedArrayFloat make_AlignedArrayFloat(uint64_t count)
 {
-    uint64_t size = sizeof(float) * count;
-    size = (size + 15u) & ~0xF;
-    if (size > static_cast<uint64_t>(UINT32_MAX))
-        return nullptr;
+    constexpr uint64_t const alignment = 16;
 
-    auto ptr = aligned_alloc(16, static_cast<size_t>(size));
+    // [alignUp](https://github.com/oneapi-src/oneTBB/blob/tbb_2019/src/tbbmalloc/shared_utils.h#L42)
+    uint64_t const size = ((((static_cast<uint64_t>(sizeof(float)) * count) - static_cast<uint64_t>(1U)) | (alignment - static_cast<uint64_t>(1U))) + static_cast<uint64_t>(1U));
+
+    if (size > static_cast<uint64_t>(UINT32_MAX))
+    {
+        return nullptr;
+    }
+
+#if defined(__GNUC__)
+    auto ptr = aligned_alloc(static_cast<size_t>(alignment), static_cast<size_t>(size));
+#elif defined(_MSC_VER)
+    auto ptr = _aligned_malloc(static_cast<size_t>(size), static_cast<size_t>(alignment));
+#else
+#error Unknown Compiler
+#endif
+
     return ScopedAlignedArrayFloat(static_cast<float *>(ptr));
 }
 
 using ScopedAlignedArrayXMVECTOR = std::unique_ptr<DirectX::XMVECTOR[], aligned_deleter>;
 
-inline ScopedAlignedArrayXMVECTOR make_AlignedArrayXMVECTOR(uint64_t count)
+static inline ScopedAlignedArrayXMVECTOR make_AlignedArrayXMVECTOR(uint64_t count)
 {
-    uint64_t size = sizeof(DirectX::XMVECTOR) * count;
+    constexpr uint64_t const alignment = 16;
+
+    uint64_t const size = sizeof(DirectX::XMVECTOR) * count;
+    static_assert(0U == (static_cast<uint64_t>(sizeof(DirectX::XMVECTOR)) % alignment), "");
+
     if (size > static_cast<uint64_t>(UINT32_MAX))
+    {
         return nullptr;
-    auto ptr = aligned_alloc(16, static_cast<size_t>(size));
+    }
+
+#if defined(__GNUC__)
+    auto ptr = aligned_alloc(static_cast<size_t>(alignment), static_cast<size_t>(size));
+#elif defined(_MSC_VER)
+    auto ptr = _aligned_malloc(static_cast<size_t>(size), static_cast<size_t>(alignment));
+#else
+#error Unknown Compiler
+#endif
+
     return ScopedAlignedArrayXMVECTOR(static_cast<DirectX::XMVECTOR *>(ptr));
 }
 
-#else // WIN32
-//---------------------------------------------------------------------------------
-#include <malloc.h>
-
-struct aligned_deleter
-{
-    void operator()(void *p) noexcept { _aligned_free(p); }
-};
-
-using ScopedAlignedArrayFloat = std::unique_ptr<float[], aligned_deleter>;
-
-inline ScopedAlignedArrayFloat make_AlignedArrayFloat(uint64_t count)
-{
-    const uint64_t size = sizeof(float) * count;
-    if (size > static_cast<uint64_t>(UINT32_MAX))
-        return nullptr;
-    auto ptr = _aligned_malloc(static_cast<size_t>(size), 16);
-    return ScopedAlignedArrayFloat(static_cast<float *>(ptr));
-}
-
-using ScopedAlignedArrayXMVECTOR = std::unique_ptr<DirectX::XMVECTOR[], aligned_deleter>;
-
-inline ScopedAlignedArrayXMVECTOR make_AlignedArrayXMVECTOR(uint64_t count)
-{
-    const uint64_t size = sizeof(DirectX::XMVECTOR) * count;
-    if (size > static_cast<uint64_t>(UINT32_MAX))
-        return nullptr;
-    auto ptr = _aligned_malloc(static_cast<size_t>(size), 16);
-    return ScopedAlignedArrayXMVECTOR(static_cast<DirectX::XMVECTOR *>(ptr));
-}
-
-//---------------------------------------------------------------------------------
-struct handle_closer
-{
-    void operator()(HANDLE h) noexcept
-    {
-        assert(h != INVALID_HANDLE_VALUE);
-        if (h)
-            CloseHandle(h);
-    }
-};
-
-using ScopedHandle = std::unique_ptr<void, handle_closer>;
-
-inline HANDLE safe_handle(HANDLE h) noexcept { return (h == INVALID_HANDLE_VALUE) ? nullptr : h; }
-
-//---------------------------------------------------------------------------------
-struct find_closer
-{
-    void operator()(HANDLE h) noexcept
-    {
-        assert(h != INVALID_HANDLE_VALUE);
-        if (h)
-            FindClose(h);
-    }
-};
-
-using ScopedFindHandle = std::unique_ptr<void, find_closer>;
-
-//---------------------------------------------------------------------------------
-class auto_delete_file
-{
-public:
-    auto_delete_file(HANDLE hFile) noexcept : m_handle(hFile) {}
-
-    auto_delete_file(const auto_delete_file &) = delete;
-    auto_delete_file &operator=(const auto_delete_file &) = delete;
-
-    ~auto_delete_file()
-    {
-        if (m_handle)
-        {
-            FILE_DISPOSITION_INFO info = {};
-            info.DeleteFile = TRUE;
-            std::ignore = SetFileInformationByHandle(m_handle, FileDispositionInfo, &info, sizeof(info));
-        }
-    }
-
-    void clear() noexcept { m_handle = nullptr; }
-
-private:
-    HANDLE m_handle;
-};
-
-#endif // WIN32
+#endif

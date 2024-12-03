@@ -9,9 +9,9 @@
 // http://go.microsoft.com/fwlink/?LinkID=324981
 //-------------------------------------------------------------------------------------
 
-#include "DirectXMeshP.h"
-
-using namespace DirectX;
+#include "DirectXMesh.h"
+#include "scoped.h"
+#include <cstring>
 
 namespace
 {
@@ -19,17 +19,20 @@ namespace
     // Compute normals with equal weighting
     //---------------------------------------------------------------------------------
     template <class index_t>
-    HRESULT ComputeNormalsEqualWeight(
+    bool inline ComputeNormalsEqualWeight(
         _In_reads_(nFaces * 3) const index_t *indices, size_t nFaces,
-        _In_reads_(nVerts) const XMFLOAT3 *positions, size_t nVerts,
-        bool cw, _Out_writes_(nVerts) XMFLOAT3 *normals) noexcept
+        _In_reads_(nVerts) const DirectX::XMFLOAT3 *positions, size_t nVerts,
+        bool cw, _Out_writes_(nVerts) DirectX::XMFLOAT3 *normals) noexcept
     {
         auto temp = make_AlignedArrayXMVECTOR(nVerts);
         if (!temp)
-            return E_OUTOFMEMORY;
+        {
+            // E_OUTOFMEMORY
+            return false;
+        }
 
-        XMVECTOR *vertNormals = temp.get();
-        memset(vertNormals, 0, sizeof(XMVECTOR) * nVerts);
+        DirectX::XMVECTOR *vertNormals = temp.get();
+        std::memset(vertNormals, 0, sizeof(DirectX::XMVECTOR) * nVerts);
 
         for (size_t face = 0; face < nFaces; ++face)
         {
@@ -38,23 +41,28 @@ namespace
             index_t i2 = indices[face * 3 + 2];
 
             if (i0 == index_t(-1) || i1 == index_t(-1) || i2 == index_t(-1))
+            {
                 continue;
+            }
 
             if (i0 >= nVerts || i1 >= nVerts || i2 >= nVerts)
-                return E_UNEXPECTED;
+            {
+                // E_UNEXPECTED
+                return false;
+            }
 
-            const XMVECTOR p1 = XMLoadFloat3(&positions[i0]);
-            const XMVECTOR p2 = XMLoadFloat3(&positions[i1]);
-            const XMVECTOR p3 = XMLoadFloat3(&positions[i2]);
+            const DirectX::XMVECTOR p1 = DirectX::XMLoadFloat3(&positions[i0]);
+            const DirectX::XMVECTOR p2 = DirectX::XMLoadFloat3(&positions[i1]);
+            const DirectX::XMVECTOR p3 = DirectX::XMLoadFloat3(&positions[i2]);
 
-            const XMVECTOR u = XMVectorSubtract(p2, p1);
-            const XMVECTOR v = XMVectorSubtract(p3, p1);
+            const DirectX::XMVECTOR u = DirectX::XMVectorSubtract(p2, p1);
+            const DirectX::XMVECTOR v = DirectX::XMVectorSubtract(p3, p1);
 
-            const XMVECTOR faceNormal = XMVector3Normalize(XMVector3Cross(u, v));
+            const DirectX::XMVECTOR faceNormal = DirectX::XMVector3Normalize(DirectX::XMVector3Cross(u, v));
 
-            vertNormals[i0] = XMVectorAdd(vertNormals[i0], faceNormal);
-            vertNormals[i1] = XMVectorAdd(vertNormals[i1], faceNormal);
-            vertNormals[i2] = XMVectorAdd(vertNormals[i2], faceNormal);
+            vertNormals[i0] = DirectX::XMVectorAdd(vertNormals[i0], faceNormal);
+            vertNormals[i1] = DirectX::XMVectorAdd(vertNormals[i1], faceNormal);
+            vertNormals[i2] = DirectX::XMVectorAdd(vertNormals[i2], faceNormal);
         }
 
         // Store results
@@ -62,38 +70,42 @@ namespace
         {
             for (size_t vert = 0; vert < nVerts; ++vert)
             {
-                XMVECTOR n = XMVector3Normalize(vertNormals[vert]);
-                n = XMVectorNegate(n);
-                XMStoreFloat3(&normals[vert], n);
+                DirectX::XMVECTOR n = DirectX::XMVector3Normalize(vertNormals[vert]);
+                n = DirectX::XMVectorNegate(n);
+                DirectX::XMStoreFloat3(&normals[vert], n);
             }
         }
         else
         {
             for (size_t vert = 0; vert < nVerts; ++vert)
             {
-                const XMVECTOR n = XMVector3Normalize(vertNormals[vert]);
-                XMStoreFloat3(&normals[vert], n);
+                const DirectX::XMVECTOR n = DirectX::XMVector3Normalize(vertNormals[vert]);
+                DirectX::XMStoreFloat3(&normals[vert], n);
             }
         }
 
-        return S_OK;
+        // S_OK
+        return true;
     }
 
     //---------------------------------------------------------------------------------
     // Compute normals with weighting by angle
     //---------------------------------------------------------------------------------
     template <class index_t>
-    HRESULT ComputeNormalsWeightedByAngle(
+    bool ComputeNormalsWeightedByAngle(
         _In_reads_(nFaces * 3) const index_t *indices, size_t nFaces,
-        _In_reads_(nVerts) const XMFLOAT3 *positions, size_t nVerts,
-        bool cw, _Out_writes_(nVerts) XMFLOAT3 *normals) noexcept
+        _In_reads_(nVerts) const DirectX::XMFLOAT3 *positions, size_t nVerts,
+        bool cw, _Out_writes_(nVerts) DirectX::XMFLOAT3 *normals) noexcept
     {
         auto temp = make_AlignedArrayXMVECTOR(nVerts);
         if (!temp)
-            return E_OUTOFMEMORY;
+        {
+            // E_OUTOFMEMORY
+            return false;
+        }
 
-        XMVECTOR *vertNormals = temp.get();
-        memset(vertNormals, 0, sizeof(XMVECTOR) * nVerts);
+        DirectX::XMVECTOR *vertNormals = temp.get();
+        std::memset(vertNormals, 0, sizeof(DirectX::XMVECTOR) * nVerts);
 
         for (size_t face = 0; face < nFaces; ++face)
         {
@@ -102,44 +114,49 @@ namespace
             index_t i2 = indices[face * 3 + 2];
 
             if (i0 == index_t(-1) || i1 == index_t(-1) || i2 == index_t(-1))
+            {
                 continue;
+            }
 
             if (i0 >= nVerts || i1 >= nVerts || i2 >= nVerts)
-                return E_UNEXPECTED;
+            {
+                // E_UNEXPECTED
+                return false;
+            }
 
-            const XMVECTOR p0 = XMLoadFloat3(&positions[i0]);
-            const XMVECTOR p1 = XMLoadFloat3(&positions[i1]);
-            const XMVECTOR p2 = XMLoadFloat3(&positions[i2]);
+            const DirectX::XMVECTOR p0 = DirectX::XMLoadFloat3(&positions[i0]);
+            const DirectX::XMVECTOR p1 = DirectX::XMLoadFloat3(&positions[i1]);
+            const DirectX::XMVECTOR p2 = DirectX::XMLoadFloat3(&positions[i2]);
 
-            const XMVECTOR u = XMVectorSubtract(p1, p0);
-            const XMVECTOR v = XMVectorSubtract(p2, p0);
+            const DirectX::XMVECTOR u = DirectX::XMVectorSubtract(p1, p0);
+            const DirectX::XMVECTOR v = DirectX::XMVectorSubtract(p2, p0);
 
-            const XMVECTOR faceNormal = XMVector3Normalize(XMVector3Cross(u, v));
+            const DirectX::XMVECTOR faceNormal = DirectX::XMVector3Normalize(DirectX::XMVector3Cross(u, v));
 
             // Corner 0 -> 1 - 0, 2 - 0
-            const XMVECTOR a = XMVector3Normalize(u);
-            const XMVECTOR b = XMVector3Normalize(v);
-            XMVECTOR w0 = XMVector3Dot(a, b);
-            w0 = XMVectorClamp(w0, g_XMNegativeOne, g_XMOne);
-            w0 = XMVectorACos(w0);
+            const DirectX::XMVECTOR a = DirectX::XMVector3Normalize(u);
+            const DirectX::XMVECTOR b = DirectX::XMVector3Normalize(v);
+            DirectX::XMVECTOR w0 = DirectX::XMVector3Dot(a, b);
+            w0 = DirectX::XMVectorClamp(w0, DirectX::g_XMNegativeOne, DirectX::g_XMOne);
+            w0 = DirectX::XMVectorACos(w0);
 
             // Corner 1 -> 2 - 1, 0 - 1
-            const XMVECTOR c = XMVector3Normalize(XMVectorSubtract(p2, p1));
-            const XMVECTOR d = XMVector3Normalize(XMVectorSubtract(p0, p1));
-            XMVECTOR w1 = XMVector3Dot(c, d);
-            w1 = XMVectorClamp(w1, g_XMNegativeOne, g_XMOne);
-            w1 = XMVectorACos(w1);
+            const DirectX::XMVECTOR c = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(p2, p1));
+            const DirectX::XMVECTOR d = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(p0, p1));
+            DirectX::XMVECTOR w1 = DirectX::XMVector3Dot(c, d);
+            w1 = DirectX::XMVectorClamp(w1, DirectX::g_XMNegativeOne, DirectX::g_XMOne);
+            w1 = DirectX::XMVectorACos(w1);
 
             // Corner 2 -> 0 - 2, 1 - 2
-            const XMVECTOR e = XMVector3Normalize(XMVectorSubtract(p0, p2));
-            const XMVECTOR f = XMVector3Normalize(XMVectorSubtract(p1, p2));
-            XMVECTOR w2 = XMVector3Dot(e, f);
-            w2 = XMVectorClamp(w2, g_XMNegativeOne, g_XMOne);
-            w2 = XMVectorACos(w2);
+            const DirectX::XMVECTOR e = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(p0, p2));
+            const DirectX::XMVECTOR f = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(p1, p2));
+            DirectX::XMVECTOR w2 = DirectX::XMVector3Dot(e, f);
+            w2 = DirectX::XMVectorClamp(w2, DirectX::g_XMNegativeOne, DirectX::g_XMOne);
+            w2 = DirectX::XMVectorACos(w2);
 
-            vertNormals[i0] = XMVectorMultiplyAdd(faceNormal, w0, vertNormals[i0]);
-            vertNormals[i1] = XMVectorMultiplyAdd(faceNormal, w1, vertNormals[i1]);
-            vertNormals[i2] = XMVectorMultiplyAdd(faceNormal, w2, vertNormals[i2]);
+            vertNormals[i0] = DirectX::XMVectorMultiplyAdd(faceNormal, w0, vertNormals[i0]);
+            vertNormals[i1] = DirectX::XMVectorMultiplyAdd(faceNormal, w1, vertNormals[i1]);
+            vertNormals[i2] = DirectX::XMVectorMultiplyAdd(faceNormal, w2, vertNormals[i2]);
         }
 
         // Store results
@@ -147,38 +164,42 @@ namespace
         {
             for (size_t vert = 0; vert < nVerts; ++vert)
             {
-                XMVECTOR n = XMVector3Normalize(vertNormals[vert]);
-                n = XMVectorNegate(n);
-                XMStoreFloat3(&normals[vert], n);
+                DirectX::XMVECTOR n = DirectX::XMVector3Normalize(vertNormals[vert]);
+                n = DirectX::XMVectorNegate(n);
+                DirectX::XMStoreFloat3(&normals[vert], n);
             }
         }
         else
         {
             for (size_t vert = 0; vert < nVerts; ++vert)
             {
-                const XMVECTOR n = XMVector3Normalize(vertNormals[vert]);
-                XMStoreFloat3(&normals[vert], n);
+                const DirectX::XMVECTOR n = DirectX::XMVector3Normalize(vertNormals[vert]);
+                DirectX::XMStoreFloat3(&normals[vert], n);
             }
         }
 
-        return S_OK;
+        // S_OK
+        return true;
     }
 
     //---------------------------------------------------------------------------------
     // Compute normals with weighting by face area
     //---------------------------------------------------------------------------------
     template <class index_t>
-    HRESULT ComputeNormalsWeightedByArea(
+    bool ComputeNormalsWeightedByArea(
         _In_reads_(nFaces * 3) const index_t *indices, size_t nFaces,
-        _In_reads_(nVerts) const XMFLOAT3 *positions, size_t nVerts,
-        bool cw, _Out_writes_(nVerts) XMFLOAT3 *normals) noexcept
+        _In_reads_(nVerts) const DirectX::XMFLOAT3 *positions, size_t nVerts,
+        bool cw, _Out_writes_(nVerts) DirectX::XMFLOAT3 *normals) noexcept
     {
         auto temp = make_AlignedArrayXMVECTOR(nVerts);
         if (!temp)
-            return E_OUTOFMEMORY;
+        {
+            // E_OUTOFMEMORY
+            return false;
+        }
 
-        XMVECTOR *vertNormals = temp.get();
-        memset(vertNormals, 0, sizeof(XMVECTOR) * nVerts);
+        DirectX::XMVECTOR *vertNormals = temp.get();
+        std::memset(vertNormals, 0, sizeof(DirectX::XMVECTOR) * nVerts);
 
         for (size_t face = 0; face < nFaces; ++face)
         {
@@ -187,39 +208,44 @@ namespace
             index_t i2 = indices[face * 3 + 2];
 
             if (i0 == index_t(-1) || i1 == index_t(-1) || i2 == index_t(-1))
+            {
                 continue;
+            }
 
             if (i0 >= nVerts || i1 >= nVerts || i2 >= nVerts)
-                return E_UNEXPECTED;
+            {
+                // E_UNEXPECTED
+                return false;
+            }
 
-            const XMVECTOR p0 = XMLoadFloat3(&positions[i0]);
-            const XMVECTOR p1 = XMLoadFloat3(&positions[i1]);
-            const XMVECTOR p2 = XMLoadFloat3(&positions[i2]);
+            const DirectX::XMVECTOR p0 = DirectX::XMLoadFloat3(&positions[i0]);
+            const DirectX::XMVECTOR p1 = DirectX::XMLoadFloat3(&positions[i1]);
+            const DirectX::XMVECTOR p2 = DirectX::XMLoadFloat3(&positions[i2]);
 
-            const XMVECTOR u = XMVectorSubtract(p1, p0);
-            const XMVECTOR v = XMVectorSubtract(p2, p0);
+            const DirectX::XMVECTOR u = DirectX::XMVectorSubtract(p1, p0);
+            const DirectX::XMVECTOR v = DirectX::XMVectorSubtract(p2, p0);
 
-            const XMVECTOR faceNormal = XMVector3Normalize(XMVector3Cross(u, v));
+            const DirectX::XMVECTOR faceNormal = DirectX::XMVector3Normalize(DirectX::XMVector3Cross(u, v));
 
             // Corner 0 -> 1 - 0, 2 - 0
-            XMVECTOR w0 = XMVector3Cross(u, v);
-            w0 = XMVector3Length(w0);
+            DirectX::XMVECTOR w0 = DirectX::XMVector3Cross(u, v);
+            w0 = DirectX::XMVector3Length(w0);
 
             // Corner 1 -> 2 - 1, 0 - 1
-            const XMVECTOR c = XMVectorSubtract(p2, p1);
-            const XMVECTOR d = XMVectorSubtract(p0, p1);
-            XMVECTOR w1 = XMVector3Cross(c, d);
-            w1 = XMVector3Length(w1);
+            const DirectX::XMVECTOR c = DirectX::XMVectorSubtract(p2, p1);
+            const DirectX::XMVECTOR d = DirectX::XMVectorSubtract(p0, p1);
+            DirectX::XMVECTOR w1 = DirectX::XMVector3Cross(c, d);
+            w1 = DirectX::XMVector3Length(w1);
 
             // Corner 2 -> 0 - 2, 1 - 2
-            const XMVECTOR e = XMVectorSubtract(p0, p2);
-            const XMVECTOR f = XMVectorSubtract(p1, p2);
-            XMVECTOR w2 = XMVector3Cross(e, f);
-            w2 = XMVector3Length(w2);
+            const DirectX::XMVECTOR e = DirectX::XMVectorSubtract(p0, p2);
+            const DirectX::XMVECTOR f = DirectX::XMVectorSubtract(p1, p2);
+            DirectX::XMVECTOR w2 = DirectX::XMVector3Cross(e, f);
+            w2 = DirectX::XMVector3Length(w2);
 
-            vertNormals[i0] = XMVectorMultiplyAdd(faceNormal, w0, vertNormals[i0]);
-            vertNormals[i1] = XMVectorMultiplyAdd(faceNormal, w1, vertNormals[i1]);
-            vertNormals[i2] = XMVectorMultiplyAdd(faceNormal, w2, vertNormals[i2]);
+            vertNormals[i0] = DirectX::XMVectorMultiplyAdd(faceNormal, w0, vertNormals[i0]);
+            vertNormals[i1] = DirectX::XMVectorMultiplyAdd(faceNormal, w1, vertNormals[i1]);
+            vertNormals[i2] = DirectX::XMVectorMultiplyAdd(faceNormal, w2, vertNormals[i2]);
         }
 
         // Store results
@@ -227,21 +253,22 @@ namespace
         {
             for (size_t vert = 0; vert < nVerts; ++vert)
             {
-                XMVECTOR n = XMVector3Normalize(vertNormals[vert]);
-                n = XMVectorNegate(n);
-                XMStoreFloat3(&normals[vert], n);
+                DirectX::XMVECTOR n = DirectX::XMVector3Normalize(vertNormals[vert]);
+                n = DirectX::XMVectorNegate(n);
+                DirectX::XMStoreFloat3(&normals[vert], n);
             }
         }
         else
         {
             for (size_t vert = 0; vert < nVerts; ++vert)
             {
-                const XMVECTOR n = XMVector3Normalize(vertNormals[vert]);
-                XMStoreFloat3(&normals[vert], n);
+                const DirectX::XMVECTOR n = DirectX::XMVector3Normalize(vertNormals[vert]);
+                DirectX::XMStoreFloat3(&normals[vert], n);
             }
         }
 
-        return S_OK;
+        // S_OK
+        return true;
     }
 }
 
@@ -250,24 +277,31 @@ namespace
 //=====================================================================================
 
 //-------------------------------------------------------------------------------------
-_Use_decl_annotations_
-    HRESULT
-    DirectX::ComputeNormals(
-        const uint16_t *indices,
-        size_t nFaces,
-        const XMFLOAT3 *positions,
-        size_t nVerts,
-        CNORM_FLAGS flags,
-        XMFLOAT3 *normals) noexcept
+_Use_decl_annotations_ extern bool DirectX::ComputeNormals(
+    const uint16_t *indices,
+    size_t nFaces,
+    const DirectX::XMFLOAT3 *positions,
+    size_t nVerts,
+    CNORM_FLAGS flags,
+    DirectX::XMFLOAT3 *normals) noexcept
 {
     if (!indices || !positions || !nFaces || !nVerts || !normals)
-        return E_INVALIDARG;
+    {
+        // E_INVALIDARG
+        return false;
+    }
 
     if (nVerts >= UINT16_MAX)
-        return E_INVALIDARG;
+    {
+        // E_INVALIDARG
+        return false;
+    }
 
     if ((uint64_t(nFaces) * 3) >= UINT32_MAX)
-        return HRESULT_E_ARITHMETIC_OVERFLOW;
+    {
+        // HRESULT_E_ARITHMETIC_OVERFLOW
+        return false;
+    }
 
     const bool cw = (flags & CNORM_WIND_CW) ? true : false;
 
@@ -285,24 +319,31 @@ _Use_decl_annotations_
     }
 }
 
-_Use_decl_annotations_
-    HRESULT
-    DirectX::ComputeNormals(
-        const uint32_t *indices,
-        size_t nFaces,
-        const XMFLOAT3 *positions,
-        size_t nVerts,
-        CNORM_FLAGS flags,
-        XMFLOAT3 *normals) noexcept
+_Use_decl_annotations_ extern bool DirectX::ComputeNormals(
+    const uint32_t *indices,
+    size_t nFaces,
+    const DirectX::XMFLOAT3 *positions,
+    size_t nVerts,
+    CNORM_FLAGS flags,
+    DirectX::XMFLOAT3 *normals) noexcept
 {
     if (!indices || !positions || !nFaces || !nVerts || !normals)
-        return E_INVALIDARG;
+    {
+        // E_INVALIDARG
+        return false;
+    }
 
     if (nVerts >= UINT32_MAX)
-        return E_INVALIDARG;
+    {
+        // E_INVALIDARG
+        return false;
+    }
 
     if ((uint64_t(nFaces) * 3) >= UINT32_MAX)
-        return HRESULT_E_ARITHMETIC_OVERFLOW;
+    {
+        // HRESULT_E_ARITHMETIC_OVERFLOW
+        return false;
+    }
 
     const bool cw = (flags & CNORM_WIND_CW) ? true : false;
 
