@@ -1,0 +1,200 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="dllmain.cpp">
+      <Filter>build-windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jsimd_none.c">
+      <Filter>simd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jaricom.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jcapimin.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jcapistd.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jcarith.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jccoefct.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jccolor.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jcdctmgr.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jchuff.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jcicc.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jcinit.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jcmainct.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jcmarker.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jcmaster.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jcomapi.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jcparam.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jcphuff.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jcprepct.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jcsample.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jctrans.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jdapimin.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jdapistd.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jdarith.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jdatadst.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jdatasrc.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jdcoefct.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jdcolor.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jddctmgr.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jdhuff.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jdicc.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jdinput.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jdmainct.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jdmarker.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jdmaster.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jdmerge.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jdphuff.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jdpostct.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jdsample.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jdtrans.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jerror.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jfdctflt.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jfdctfst.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jfdctint.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jidctflt.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jidctfst.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jidctint.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jidctred.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jmemmgr.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jmemnobs.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jquant1.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jquant2.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jutils.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\jconfigint.cc">
+      <Filter>build</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="win">
+      <UniqueIdentifier>{57fb9f9b-3d19-4e5c-bb81-c728fd0f19a5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="build-windows">
+      <UniqueIdentifier>{5b538046-320a-40a7-92ad-6f9f72491492}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="simd">
+      <UniqueIdentifier>{a3354841-6ce2-4e85-93c1-c408c219d8bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source">
+      <UniqueIdentifier>{e52ccd78-c6bf-4658-97d9-3d11dab412f9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="build">
+      <UniqueIdentifier>{063e4a13-2ba8-43c7-bcad-b4084c0509bb}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\win\jpeg62-memsrcdst.def">
+      <Filter>win</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\jconfig.h">
+      <Filter>build</Filter>
+    </ClInclude>
+    <ClInclude Include="..\jconfigint.h">
+      <Filter>build</Filter>
+    </ClInclude>
+    <ClInclude Include="..\jversion.h">
+      <Filter>build</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

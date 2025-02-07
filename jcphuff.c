@@ -52,27 +52,35 @@
  * flags (this defines __thumb__).
  */
 
-/* NOTE: Both GCC and Clang define __GNUC__ */
-#if (defined(__GNUC__) && (defined(__arm__) || defined(__aarch64__))) || \
-    defined(_M_ARM) || defined(_M_ARM64)
-#if !defined(__thumb__) || defined(__thumb2__)
 #define USE_CLZ_INTRINSIC
+
+#if defined(__GNUC__)
+#define JPEG_NBITS_NONZERO(x) (32 - __builtin_clz(x))
+#elif defined(_MSC_VER)
+#if defined(__clang__)
+ // Clang-CL
+#define JPEG_NBITS_NONZERO(x) (32 - __builtin_clz(x))
+#else
+ // MSVC
+static inline int __msvc_clz(unsigned x)
+{
+#if defined(_M_ARM) || defined(_M_ARM64)
+    return (int)_CountLeadingZeros(x);
+#elif defined(_M_X64) || defined(_M_IX86)
+    unsigned long r;
+    _BitScanReverse(&r, x);
+    return (int)(r ^ 31);
+#else
+#error Unknown Architecture
 #endif
+}
+#define JPEG_NBITS_NONZERO(x) (32 - __msvc_clz(x))
+#endif
+#else
+#error Unknown Compiler
 #endif
 
-#ifdef USE_CLZ_INTRINSIC
-#if defined(_MSC_VER) && !defined(__clang__)
-#define JPEG_NBITS_NONZERO(x)  (32 - _CountLeadingZeros(x))
-#else
-#define JPEG_NBITS_NONZERO(x)  (32 - __builtin_clz(x))
-#endif
-#define JPEG_NBITS(x)          (x ? JPEG_NBITS_NONZERO(x) : 0)
-#else
-#include "jpeg_nbits_table.h"
-#define JPEG_NBITS(x)          (jpeg_nbits_table[x])
-#define JPEG_NBITS_NONZERO(x)  JPEG_NBITS(x)
-#endif
-
+#define JPEG_NBITS(x) (x ? JPEG_NBITS_NONZERO(x) : 0)
 
 /* Expanded entropy encoder object for progressive Huffman encoding. */
 
@@ -188,11 +196,7 @@ count_zeroes(size_t *x)
   _BitScanForward(&result, *x);
   *x >>= result;
 #else
-  int result = 0;
-  while ((*x & 1) == 0) {
-    ++result;
-    *x >>= 1;
-  }
+#error not implemented
 #endif
   return (int)result;
 }
