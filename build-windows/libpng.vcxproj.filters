@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="build-windows">
+      <UniqueIdentifier>{8a947c06-a71e-4044-9503-05774e2f1167}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="intel">
+      <UniqueIdentifier>{68bb9f5c-631e-478d-a1f5-f2ca9ea57766}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="build">
+      <UniqueIdentifier>{60de6b8b-70ad-4493-a1ee-944ace106b3a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="dllmain.cpp">
+      <Filter>build-windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\intel\filter_sse2_intrinsics.c">
+      <Filter>intel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\intel\intel_init.c">
+      <Filter>intel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\pngwrite.c" />
+    <ClCompile Include="..\pngwtran.c" />
+    <ClCompile Include="..\pngwutil.c" />
+    <ClCompile Include="..\png.c" />
+    <ClCompile Include="..\pngerror.c" />
+    <ClCompile Include="..\pngget.c" />
+    <ClCompile Include="..\pngmem.c" />
+    <ClCompile Include="..\pngpread.c" />
+    <ClCompile Include="..\pngread.c" />
+    <ClCompile Include="..\pngrio.c" />
+    <ClCompile Include="..\pngrtran.c" />
+    <ClCompile Include="..\pngrutil.c" />
+    <ClCompile Include="..\pngset.c" />
+    <ClCompile Include="..\pngtrans.c" />
+    <ClCompile Include="..\pngwio.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\pnglibconf.h">
+      <Filter>build</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
