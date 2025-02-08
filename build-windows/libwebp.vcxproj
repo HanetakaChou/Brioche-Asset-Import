@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\sharpyuv\sharpyuv.c" />
+    <ClCompile Include="..\sharpyuv\sharpyuv_cpu.c" />
+    <ClCompile Include="..\sharpyuv\sharpyuv_csp.c" />
+    <ClCompile Include="..\sharpyuv\sharpyuv_dsp.c" />
+    <ClCompile Include="..\sharpyuv\sharpyuv_gamma.c" />
+    <ClCompile Include="..\sharpyuv\sharpyuv_sse2.c" />
+    <ClCompile Include="..\src\dec\alpha_dec.c" />
+    <ClCompile Include="..\src\dec\buffer_dec.c" />
+    <ClCompile Include="..\src\dec\frame_dec.c" />
+    <ClCompile Include="..\src\dec\idec_dec.c" />
+    <ClCompile Include="..\src\dec\io_dec.c" />
+    <ClCompile Include="..\src\dec\quant_dec.c" />
+    <ClCompile Include="..\src\dec\tree_dec.c" />
+    <ClCompile Include="..\src\dec\vp8l_dec.c" />
+    <ClCompile Include="..\src\dec\vp8_dec.c" />
+    <ClCompile Include="..\src\dec\webp_dec.c" />
+    <ClCompile Include="..\src\dsp\alpha_processing.c" />
+    <ClCompile Include="..\src\dsp\alpha_processing_sse2.c" />
+    <ClCompile Include="..\src\dsp\alpha_processing_sse41.c" />
+    <ClCompile Include="..\src\dsp\cost.c" />
+    <ClCompile Include="..\src\dsp\cost_sse2.c" />
+    <ClCompile Include="..\src\dsp\cpu.c" />
+    <ClCompile Include="..\src\dsp\dec.c" />
+    <ClCompile Include="..\src\dsp\dec_clip_tables.c" />
+    <ClCompile Include="..\src\dsp\dec_sse2.c" />
+    <ClCompile Include="..\src\dsp\dec_sse41.c" />
+    <ClCompile Include="..\src\dsp\enc.c" />
+    <ClCompile Include="..\src\dsp\enc_sse2.c" />
+    <ClCompile Include="..\src\dsp\enc_sse41.c" />
+    <ClCompile Include="..\src\dsp\filters.c" />
+    <ClCompile Include="..\src\dsp\filters_sse2.c" />
+    <ClCompile Include="..\src\dsp\lossless.c" />
+    <ClCompile Include="..\src\dsp\lossless_enc.c" />
+    <ClCompile Include="..\src\dsp\lossless_enc_sse2.c" />
+    <ClCompile Include="..\src\dsp\lossless_enc_sse41.c" />
+    <ClCompile Include="..\src\dsp\lossless_sse2.c" />
+    <ClCompile Include="..\src\dsp\lossless_sse41.c" />
+    <ClCompile Include="..\src\dsp\rescaler.c" />
+    <ClCompile Include="..\src\dsp\rescaler_sse2.c" />
+    <ClCompile Include="..\src\dsp\ssim.c" />
+    <ClCompile Include="..\src\dsp\ssim_sse2.c" />
+    <ClCompile Include="..\src\dsp\upsampling.c" />
+    <ClCompile Include="..\src\dsp\upsampling_sse2.c" />
+    <ClCompile Include="..\src\dsp\upsampling_sse41.c" />
+    <ClCompile Include="..\src\dsp\yuv.c" />
+    <ClCompile Include="..\src\dsp\yuv_sse2.c" />
+    <ClCompile Include="..\src\dsp\yuv_sse41.c" />
+    <ClCompile Include="..\src\enc\alpha_enc.c" />
+    <ClCompile Include="..\src\enc\analysis_enc.c" />
+    <ClCompile Include="..\src\enc\backward_references_cost_enc.c" />
+    <ClCompile Include="..\src\enc\backward_references_enc.c" />
+    <ClCompile Include="..\src\enc\config_enc.c" />
+    <ClCompile Include="..\src\enc\cost_enc.c" />
+    <ClCompile Include="..\src\enc\filter_enc.c" />
+    <ClCompile Include="..\src\enc\frame_enc.c" />
+    <ClCompile Include="..\src\enc\histogram_enc.c" />
+    <ClCompile Include="..\src\enc\iterator_enc.c" />
+    <ClCompile Include="..\src\enc\near_lossless_enc.c" />
+    <ClCompile Include="..\src\enc\picture_csp_enc.c" />
+    <ClCompile Include="..\src\enc\picture_enc.c" />
+    <ClCompile Include="..\src\enc\picture_psnr_enc.c" />
+    <ClCompile Include="..\src\enc\picture_rescale_enc.c" />
+    <ClCompile Include="..\src\enc\picture_tools_enc.c" />
+    <ClCompile Include="..\src\enc\predictor_enc.c" />
+    <ClCompile Include="..\src\enc\quant_enc.c" />
+    <ClCompile Include="..\src\enc\syntax_enc.c" />
+    <ClCompile Include="..\src\enc\token_enc.c" />
+    <ClCompile Include="..\src\enc\tree_enc.c" />
+    <ClCompile Include="..\src\enc\vp8l_enc.c" />
+    <ClCompile Include="..\src\enc\webp_enc.c" />
+    <ClCompile Include="..\src\utils\bit_reader_utils.c" />
+    <ClCompile Include="..\src\utils\bit_writer_utils.c" />
+    <ClCompile Include="..\src\utils\color_cache_utils.c" />
+    <ClCompile Include="..\src\utils\filters_utils.c" />
+    <ClCompile Include="..\src\utils\huffman_encode_utils.c" />
+    <ClCompile Include="..\src\utils\huffman_utils.c" />
+    <ClCompile Include="..\src\utils\quant_levels_dec_utils.c" />
+    <ClCompile Include="..\src\utils\quant_levels_utils.c" />
+    <ClCompile Include="..\src\utils\random_utils.c" />
+    <ClCompile Include="..\src\utils\rescaler_utils.c" />
+    <ClCompile Include="..\src\utils\thread_utils.c" />
+    <ClCompile Include="..\src\utils\utils.c" />
+    <ClCompile Include="dllmain.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\webp\config.h" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{6c9aa094-2d34-4086-9743-ee91fff06782}</ProjectGuid>
+    <RootNamespace>libwebp</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>ClangCL</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>ClangCL</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>ClangCL</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>ClangCL</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <TargetName>libwebp</TargetName>
+    <OutDir>$(SolutionDir)\bin\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)\obj\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <TargetName>libwebp</TargetName>
+    <OutDir>$(SolutionDir)\bin\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)\obj\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <TargetName>libwebp</TargetName>
+    <OutDir>$(SolutionDir)\bin\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)\obj\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <TargetName>libwebp</TargetName>
+    <OutDir>$(SolutionDir)\bin\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)\obj\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WEBP_DLL;HAVE_CONFIG_H;_WIN32_WINNT=0x0601;_WINDOWS;_USRDLL;_DEBUG;WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalOptions>-Werror=return-type %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableUAC>false</EnableUAC>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WEBP_DLL;HAVE_CONFIG_H;_WIN32_WINNT=0x0601;_WINDOWS;_USRDLL;NDEBUG;WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalOptions>-Werror=return-type %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableUAC>false</EnableUAC>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WEBP_DLL;HAVE_CONFIG_H;_WIN32_WINNT=0x0601;_WINDOWS;_USRDLL;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalOptions>-Werror=return-type %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableUAC>false</EnableUAC>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WEBP_DLL;HAVE_CONFIG_H;_WIN32_WINNT=0x0601;_WINDOWS;_USRDLL;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalOptions>-Werror=return-type %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableUAC>false</EnableUAC>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

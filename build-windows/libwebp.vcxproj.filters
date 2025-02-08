@@ -1,0 +1,285 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="build-windows">
+      <UniqueIdentifier>{fbcc96bf-7982-4fd5-8f3c-5513f3b13074}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source">
+      <UniqueIdentifier>{147ff9a2-4796-4fc3-83fe-500d7d81981e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\webpdecode">
+      <UniqueIdentifier>{6d1feb40-3e47-4cde-b84e-55e1b3a2be90}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\webpdsp">
+      <UniqueIdentifier>{a4b95569-3c77-4b2b-b4e0-fe28cd3d458a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\webpencode">
+      <UniqueIdentifier>{289c72db-567f-458f-b664-4aecd7a8c95f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\webputils">
+      <UniqueIdentifier>{56485d88-46fc-4e6b-b608-fc8534daf967}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="build">
+      <UniqueIdentifier>{a3e1940a-1d95-4200-a714-450548126458}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\sharpyuv">
+      <UniqueIdentifier>{82281aa1-973b-4fd6-add2-517c3dcf0d13}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="dllmain.cpp">
+      <Filter>build-windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\utils\utils.c">
+      <Filter>source\webputils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\utils\bit_reader_utils.c">
+      <Filter>source\webputils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\utils\bit_writer_utils.c">
+      <Filter>source\webputils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\utils\color_cache_utils.c">
+      <Filter>source\webputils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\utils\filters_utils.c">
+      <Filter>source\webputils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\utils\huffman_encode_utils.c">
+      <Filter>source\webputils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\utils\huffman_utils.c">
+      <Filter>source\webputils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\utils\quant_levels_dec_utils.c">
+      <Filter>source\webputils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\utils\quant_levels_utils.c">
+      <Filter>source\webputils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\utils\random_utils.c">
+      <Filter>source\webputils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\utils\rescaler_utils.c">
+      <Filter>source\webputils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\utils\thread_utils.c">
+      <Filter>source\webputils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\enc\vp8l_enc.c">
+      <Filter>source\webpencode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\enc\webp_enc.c">
+      <Filter>source\webpencode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\enc\alpha_enc.c">
+      <Filter>source\webpencode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\enc\analysis_enc.c">
+      <Filter>source\webpencode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\enc\backward_references_cost_enc.c">
+      <Filter>source\webpencode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\enc\backward_references_enc.c">
+      <Filter>source\webpencode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\enc\config_enc.c">
+      <Filter>source\webpencode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\enc\cost_enc.c">
+      <Filter>source\webpencode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\enc\filter_enc.c">
+      <Filter>source\webpencode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\enc\frame_enc.c">
+      <Filter>source\webpencode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\enc\histogram_enc.c">
+      <Filter>source\webpencode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\enc\iterator_enc.c">
+      <Filter>source\webpencode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\enc\near_lossless_enc.c">
+      <Filter>source\webpencode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\enc\picture_csp_enc.c">
+      <Filter>source\webpencode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\enc\picture_enc.c">
+      <Filter>source\webpencode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\enc\picture_psnr_enc.c">
+      <Filter>source\webpencode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\enc\picture_rescale_enc.c">
+      <Filter>source\webpencode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\enc\picture_tools_enc.c">
+      <Filter>source\webpencode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\enc\predictor_enc.c">
+      <Filter>source\webpencode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\enc\quant_enc.c">
+      <Filter>source\webpencode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\enc\syntax_enc.c">
+      <Filter>source\webpencode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\enc\token_enc.c">
+      <Filter>source\webpencode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\enc\tree_enc.c">
+      <Filter>source\webpencode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\dsp\yuv_sse2.c">
+      <Filter>source\webpdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\dsp\yuv_sse41.c">
+      <Filter>source\webpdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\dsp\alpha_processing.c">
+      <Filter>source\webpdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\dsp\alpha_processing_sse2.c">
+      <Filter>source\webpdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\dsp\alpha_processing_sse41.c">
+      <Filter>source\webpdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\dsp\cost.c">
+      <Filter>source\webpdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\dsp\cost_sse2.c">
+      <Filter>source\webpdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\dsp\cpu.c">
+      <Filter>source\webpdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\dsp\dec.c">
+      <Filter>source\webpdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\dsp\dec_clip_tables.c">
+      <Filter>source\webpdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\dsp\dec_sse2.c">
+      <Filter>source\webpdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\dsp\dec_sse41.c">
+      <Filter>source\webpdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\dsp\enc.c">
+      <Filter>source\webpdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\dsp\enc_sse2.c">
+      <Filter>source\webpdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\dsp\enc_sse41.c">
+      <Filter>source\webpdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\dsp\filters.c">
+      <Filter>source\webpdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\dsp\filters_sse2.c">
+      <Filter>source\webpdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\dsp\lossless.c">
+      <Filter>source\webpdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\dsp\lossless_enc.c">
+      <Filter>source\webpdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\dsp\lossless_enc_sse2.c">
+      <Filter>source\webpdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\dsp\lossless_enc_sse41.c">
+      <Filter>source\webpdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\dsp\lossless_sse2.c">
+      <Filter>source\webpdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\dsp\lossless_sse41.c">
+      <Filter>source\webpdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\dsp\rescaler.c">
+      <Filter>source\webpdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\dsp\rescaler_sse2.c">
+      <Filter>source\webpdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\dsp\ssim.c">
+      <Filter>source\webpdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\dsp\ssim_sse2.c">
+      <Filter>source\webpdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\dsp\upsampling.c">
+      <Filter>source\webpdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\dsp\upsampling_sse2.c">
+      <Filter>source\webpdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\dsp\upsampling_sse41.c">
+      <Filter>source\webpdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\dsp\yuv.c">
+      <Filter>source\webpdsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\dec\webp_dec.c">
+      <Filter>source\webpdecode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\dec\alpha_dec.c">
+      <Filter>source\webpdecode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\dec\buffer_dec.c">
+      <Filter>source\webpdecode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\dec\frame_dec.c">
+      <Filter>source\webpdecode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\dec\idec_dec.c">
+      <Filter>source\webpdecode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\dec\io_dec.c">
+      <Filter>source\webpdecode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\dec\quant_dec.c">
+      <Filter>source\webpdecode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\dec\tree_dec.c">
+      <Filter>source\webpdecode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\dec\vp8_dec.c">
+      <Filter>source\webpdecode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\dec\vp8l_dec.c">
+      <Filter>source\webpdecode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sharpyuv\sharpyuv_sse2.c">
+      <Filter>source\sharpyuv</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sharpyuv\sharpyuv.c">
+      <Filter>source\sharpyuv</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sharpyuv\sharpyuv_cpu.c">
+      <Filter>source\sharpyuv</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sharpyuv\sharpyuv_csp.c">
+      <Filter>source\sharpyuv</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sharpyuv\sharpyuv_dsp.c">
+      <Filter>source\sharpyuv</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sharpyuv\sharpyuv_gamma.c">
+      <Filter>source\sharpyuv</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\webp\config.h">
+      <Filter>build</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
