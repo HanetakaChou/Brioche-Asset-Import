@@ -22,69 +22,69 @@ mmd_pmx_t::mmd_pmx_t(kaitai::kstream *p__io, kaitai::kstruct *p__parent, mmd_pmx
 
 void mmd_pmx_t::_read()
 {
-    m_header = std::unique_ptr<header_t>(new header_t(m__io, this, m__root));
+    m_header = std::make_unique<header_t>(m__io, this, m__root);
     m_num_vertices = m__io->read_u4le();
-    m_vertices = std::unique_ptr<std::vector<std::unique_ptr<vertex_t>>>(new std::vector<std::unique_ptr<vertex_t>>());
+    m_vertices = std::make_unique<std::vector<std::unique_ptr<vertex_t>>>();
     const int l_vertices = num_vertices();
     for (int i = 0; i < l_vertices; i++)
     {
-        m_vertices->push_back(std::move(std::unique_ptr<vertex_t>(new vertex_t(m__io, this, m__root))));
+        m_vertices->push_back(std::make_unique<vertex_t>(m__io, this, m__root));
     }
     m_face_num_vertices = m__io->read_u4le();
-    m_faces = std::unique_ptr<std::vector<std::unique_ptr<face_t>>>(new std::vector<std::unique_ptr<face_t>>());
+    m_faces = std::make_unique<std::vector<std::unique_ptr<face_t>>>();
     const int l_faces = (face_num_vertices() / 3);
     for (int i = 0; i < l_faces; i++)
     {
-        m_faces->push_back(std::move(std::unique_ptr<face_t>(new face_t(m__io, this, m__root))));
+        m_faces->push_back(std::make_unique<face_t>(m__io, this, m__root));
     }
     m_num_textures = m__io->read_u4le();
-    m_textures = std::unique_ptr<std::vector<std::unique_ptr<texture_t>>>(new std::vector<std::unique_ptr<texture_t>>());
+    m_textures = std::make_unique<std::vector<std::unique_ptr<texture_t>>>();
     const int l_textures = num_textures();
     for (int i = 0; i < l_textures; i++)
     {
-        m_textures->push_back(std::move(std::unique_ptr<texture_t>(new texture_t(m__io, this, m__root))));
+        m_textures->push_back(std::make_unique<texture_t>(m__io, this, m__root));
     }
     m_num_materials = m__io->read_u4le();
-    m_materials = std::unique_ptr<std::vector<std::unique_ptr<material_t>>>(new std::vector<std::unique_ptr<material_t>>());
+    m_materials = std::make_unique<std::vector<std::unique_ptr<material_t>>>();
     const int l_materials = num_materials();
     for (int i = 0; i < l_materials; i++)
     {
-        m_materials->push_back(std::move(std::unique_ptr<material_t>(new material_t(m__io, this, m__root))));
+        m_materials->push_back(std::make_unique<material_t>(m__io, this, m__root));
     }
     m_num_bones = m__io->read_u4le();
-    m_bones = std::unique_ptr<std::vector<std::unique_ptr<bone_t>>>(new std::vector<std::unique_ptr<bone_t>>());
+    m_bones = std::make_unique<std::vector<std::unique_ptr<bone_t>>>();
     const int l_bones = num_bones();
     for (int i = 0; i < l_bones; i++)
     {
-        m_bones->push_back(std::move(std::unique_ptr<bone_t>(new bone_t(m__io, this, m__root))));
+        m_bones->push_back(std::make_unique<bone_t>(m__io, this, m__root));
     }
     m_num_morphs = m__io->read_u4le();
-    m_morphs = std::unique_ptr<std::vector<std::unique_ptr<morph_t>>>(new std::vector<std::unique_ptr<morph_t>>());
+    m_morphs = std::make_unique<std::vector<std::unique_ptr<morph_t>>>();
     const int l_morphs = num_morphs();
     for (int i = 0; i < l_morphs; i++)
     {
-        m_morphs->push_back(std::move(std::unique_ptr<morph_t>(new morph_t(m__io, this, m__root))));
+        m_morphs->push_back(std::make_unique<morph_t>(m__io, this, m__root));
     }
     m_num_frames = m__io->read_u4le();
-    m_frames = std::unique_ptr<std::vector<std::unique_ptr<frame_t>>>(new std::vector<std::unique_ptr<frame_t>>());
+    m_frames = std::make_unique<std::vector<std::unique_ptr<frame_t>>>();
     const int l_frames = num_frames();
     for (int i = 0; i < l_frames; i++)
     {
-        m_frames->push_back(std::move(std::unique_ptr<frame_t>(new frame_t(m__io, this, m__root))));
+        m_frames->push_back(std::make_unique<frame_t>(m__io, this, m__root));
     }
     m_num_rigid_bodies = m__io->read_u4le();
-    m_rigid_bodies = std::unique_ptr<std::vector<std::unique_ptr<rigid_body_t>>>(new std::vector<std::unique_ptr<rigid_body_t>>());
+    m_rigid_bodies = std::make_unique<std::vector<std::unique_ptr<rigid_body_t>>>();
     const int l_rigid_bodies = num_rigid_bodies();
     for (int i = 0; i < l_rigid_bodies; i++)
     {
-        m_rigid_bodies->push_back(std::move(std::unique_ptr<rigid_body_t>(new rigid_body_t(m__io, this, m__root))));
+        m_rigid_bodies->push_back(std::make_unique<rigid_body_t>(m__io, this, m__root));
     }
     m_num_joints = m__io->read_u4le();
-    m_joints = std::unique_ptr<std::vector<std::unique_ptr<joint_t>>>(new std::vector<std::unique_ptr<joint_t>>());
+    m_joints = std::make_unique<std::vector<std::unique_ptr<joint_t>>>();
     const int l_joints = num_joints();
     for (int i = 0; i < l_joints; i++)
     {
-        m_joints->push_back(std::move(std::unique_ptr<joint_t>(new joint_t(m__io, this, m__root))));
+        m_joints->push_back(std::make_unique<joint_t>(m__io, this, m__root));
     }
 }
 
@@ -109,19 +109,19 @@ mmd_pmx_t::bone_ik_link_t::bone_ik_link_t(kaitai::kstream *p__io, mmd_pmx_t::bon
 
 void mmd_pmx_t::bone_ik_link_t::_read()
 {
-    m_index = std::unique_ptr<sized_index_t>(new sized_index_t(_root()->header()->bone_index_size(), m__io, this, m__root));
+    m_index = std::make_unique<sized_index_t>(_root()->header()->bone_index_size(), m__io, this, m__root);
     m_angle_limitation = m__io->read_u1();
     n_lower_limitation_angle = true;
     if (angle_limitation() == 1)
     {
         n_lower_limitation_angle = false;
-        m_lower_limitation_angle = std::unique_ptr<vec3_t>(new vec3_t(m__io, this, m__root));
+        m_lower_limitation_angle = std::make_unique<vec3_t>(m__io, this, m__root);
     }
     n_upper_limitation_angle = true;
     if (angle_limitation() == 1)
     {
         n_upper_limitation_angle = false;
-        m_upper_limitation_angle = std::unique_ptr<vec3_t>(new vec3_t(m__io, this, m__root));
+        m_upper_limitation_angle = std::make_unique<vec3_t>(m__io, this, m__root);
     }
 }
 
@@ -174,7 +174,7 @@ mmd_pmx_t::bdef1_weights_t::bdef1_weights_t(kaitai::kstream *p__io, mmd_pmx_t::v
 
 void mmd_pmx_t::bdef1_weights_t::_read()
 {
-    m_bone_index = std::unique_ptr<sized_index_t>(new sized_index_t(_root()->header()->bone_index_size(), m__io, this, m__root));
+    m_bone_index = std::make_unique<sized_index_t>(_root()->header()->bone_index_size(), m__io, this, m__root);
 }
 
 mmd_pmx_t::bdef1_weights_t::~bdef1_weights_t()
@@ -199,14 +199,14 @@ mmd_pmx_t::vertex_t::vertex_t(kaitai::kstream *p__io, mmd_pmx_t *p__parent, mmd_
 
 void mmd_pmx_t::vertex_t::_read()
 {
-    m_position = std::unique_ptr<vec3_t>(new vec3_t(m__io, this, m__root));
-    m_normal = std::unique_ptr<vec3_t>(new vec3_t(m__io, this, m__root));
-    m_uv = std::unique_ptr<vec2_t>(new vec2_t(m__io, this, m__root));
-    m_additional_uvs = std::unique_ptr<std::vector<std::unique_ptr<vec4_t>>>(new std::vector<std::unique_ptr<vec4_t>>());
+    m_position = std::make_unique<vec3_t>(m__io, this, m__root);
+    m_normal = std::make_unique<vec3_t>(m__io, this, m__root);
+    m_uv = std::make_unique<vec2_t>(m__io, this, m__root);
+    m_additional_uvs = std::make_unique<std::vector<std::unique_ptr<vec4_t>>>();
     const int l_additional_uvs = _root()->header()->additional_uv_count();
     for (int i = 0; i < l_additional_uvs; i++)
     {
-        m_additional_uvs->push_back(std::move(std::unique_ptr<vec4_t>(new vec4_t(m__io, this, m__root))));
+        m_additional_uvs->push_back(std::make_unique<vec4_t>(m__io, this, m__root));
     }
     m_type = static_cast<mmd_pmx_t::bone_type_t>(m__io->read_u1());
     n_skin_weights = true;
@@ -215,31 +215,31 @@ void mmd_pmx_t::vertex_t::_read()
     case mmd_pmx_t::BONE_TYPE_BDEF4:
     {
         n_skin_weights = false;
-        m_skin_weights = std::unique_ptr<bdef4_weights_t>(new bdef4_weights_t(m__io, this, m__root));
+        m_skin_weights = std::make_unique<bdef4_weights_t>(m__io, this, m__root);
         break;
     }
     case mmd_pmx_t::BONE_TYPE_BDEF1:
     {
         n_skin_weights = false;
-        m_skin_weights = std::unique_ptr<bdef1_weights_t>(new bdef1_weights_t(m__io, this, m__root));
+        m_skin_weights = std::make_unique<bdef1_weights_t>(m__io, this, m__root);
         break;
     }
     case mmd_pmx_t::BONE_TYPE_BDEF2:
     {
         n_skin_weights = false;
-        m_skin_weights = std::unique_ptr<bdef2_weights_t>(new bdef2_weights_t(m__io, this, m__root));
+        m_skin_weights = std::make_unique<bdef2_weights_t>(m__io, this, m__root);
         break;
     }
     case mmd_pmx_t::BONE_TYPE_QDEF:
     {
         n_skin_weights = false;
-        m_skin_weights = std::unique_ptr<qdef_weights_t>(new qdef_weights_t(m__io, this, m__root));
+        m_skin_weights = std::make_unique<qdef_weights_t>(m__io, this, m__root);
         break;
     }
     case mmd_pmx_t::BONE_TYPE_SDEF:
     {
         n_skin_weights = false;
-        m_skin_weights = std::unique_ptr<sdef_weights_t>(new sdef_weights_t(m__io, this, m__root));
+        m_skin_weights = std::make_unique<sdef_weights_t>(m__io, this, m__root);
         break;
     }
     }
@@ -275,17 +275,17 @@ mmd_pmx_t::material_morph_element_t::material_morph_element_t(kaitai::kstream *p
 
 void mmd_pmx_t::material_morph_element_t::_read()
 {
-    m_index = std::unique_ptr<sized_index_t>(new sized_index_t(_root()->header()->material_index_size(), m__io, this, m__root));
+    m_index = std::make_unique<sized_index_t>(_root()->header()->material_index_size(), m__io, this, m__root);
     m_type = m__io->read_u1();
-    m_diffuse = std::unique_ptr<color4_t>(new color4_t(m__io, this, m__root));
-    m_specular = std::unique_ptr<color3_t>(new color3_t(m__io, this, m__root));
+    m_diffuse = std::make_unique<color4_t>(m__io, this, m__root);
+    m_specular = std::make_unique<color3_t>(m__io, this, m__root);
     m_shininess = m__io->read_f4le();
-    m_ambient = std::unique_ptr<color3_t>(new color3_t(m__io, this, m__root));
-    m_edge_color = std::unique_ptr<color4_t>(new color4_t(m__io, this, m__root));
+    m_ambient = std::make_unique<color3_t>(m__io, this, m__root);
+    m_edge_color = std::make_unique<color4_t>(m__io, this, m__root);
     m_edge_size = m__io->read_f4le();
-    m_texture_color = std::unique_ptr<color4_t>(new color4_t(m__io, this, m__root));
-    m_sphere_texture_color = std::unique_ptr<color4_t>(new color4_t(m__io, this, m__root));
-    m_toon_color = std::unique_ptr<color4_t>(new color4_t(m__io, this, m__root));
+    m_texture_color = std::make_unique<color4_t>(m__io, this, m__root);
+    m_sphere_texture_color = std::make_unique<color4_t>(m__io, this, m__root);
+    m_toon_color = std::make_unique<color4_t>(m__io, this, m__root);
 }
 
 mmd_pmx_t::material_morph_element_t::~material_morph_element_t()
@@ -309,9 +309,9 @@ mmd_pmx_t::bone_morph_element_t::bone_morph_element_t(kaitai::kstream *p__io, mm
 
 void mmd_pmx_t::bone_morph_element_t::_read()
 {
-    m_index = std::unique_ptr<sized_index_t>(new sized_index_t(_root()->header()->bone_index_size(), m__io, this, m__root));
-    m_position = std::unique_ptr<vec3_t>(new vec3_t(m__io, this, m__root));
-    m_rotation = std::unique_ptr<vec4_t>(new vec4_t(m__io, this, m__root));
+    m_index = std::make_unique<sized_index_t>(_root()->header()->bone_index_size(), m__io, this, m__root);
+    m_position = std::make_unique<vec3_t>(m__io, this, m__root);
+    m_rotation = std::make_unique<vec4_t>(m__io, this, m__root);
 }
 
 mmd_pmx_t::bone_morph_element_t::~bone_morph_element_t()
@@ -360,7 +360,7 @@ mmd_pmx_t::bone_grant_t::bone_grant_t(kaitai::kstream *p__io, mmd_pmx_t::bone_t 
 
 void mmd_pmx_t::bone_grant_t::_read()
 {
-    m_parent_index = std::unique_ptr<sized_index_t>(new sized_index_t(_root()->header()->bone_index_size(), m__io, this, m__root));
+    m_parent_index = std::make_unique<sized_index_t>(_root()->header()->bone_index_size(), m__io, this, m__root);
     m_ratio = m__io->read_f4le();
 }
 
@@ -411,8 +411,8 @@ mmd_pmx_t::vertex_morph_element_t::vertex_morph_element_t(kaitai::kstream *p__io
 
 void mmd_pmx_t::vertex_morph_element_t::_read()
 {
-    m_index = std::unique_ptr<sized_index_t>(new sized_index_t(_root()->header()->vertex_index_size(), m__io, this, m__root));
-    m_position = std::unique_ptr<vec3_t>(new vec3_t(m__io, this, m__root));
+    m_index = std::make_unique<sized_index_t>(_root()->header()->vertex_index_size(), m__io, this, m__root);
+    m_position = std::make_unique<vec3_t>(m__io, this, m__root);
 }
 
 mmd_pmx_t::vertex_morph_element_t::~vertex_morph_element_t()
@@ -438,16 +438,16 @@ mmd_pmx_t::sdef_weights_t::sdef_weights_t(kaitai::kstream *p__io, mmd_pmx_t::ver
 
 void mmd_pmx_t::sdef_weights_t::_read()
 {
-    m_bone_indices = std::unique_ptr<std::vector<std::unique_ptr<sized_index_t>>>(new std::vector<std::unique_ptr<sized_index_t>>());
+    m_bone_indices = std::make_unique<std::vector<std::unique_ptr<sized_index_t>>>();
     const int l_bone_indices = 2;
     for (int i = 0; i < l_bone_indices; i++)
     {
-        m_bone_indices->push_back(std::move(std::unique_ptr<sized_index_t>(new sized_index_t(_root()->header()->bone_index_size(), m__io, this, m__root))));
+        m_bone_indices->push_back(std::make_unique<sized_index_t>(_root()->header()->bone_index_size(), m__io, this, m__root));
     }
     m_weight1 = m__io->read_f4le();
-    m_c = std::unique_ptr<vec3_t>(new vec3_t(m__io, this, m__root));
-    m_r0 = std::unique_ptr<vec3_t>(new vec3_t(m__io, this, m__root));
-    m_r1 = std::unique_ptr<vec3_t>(new vec3_t(m__io, this, m__root));
+    m_c = std::make_unique<vec3_t>(m__io, this, m__root);
+    m_r0 = std::make_unique<vec3_t>(m__io, this, m__root);
+    m_r1 = std::make_unique<vec3_t>(m__io, this, m__root);
 }
 
 mmd_pmx_t::sdef_weights_t::~sdef_weights_t()
@@ -463,7 +463,7 @@ std::vector<double> *mmd_pmx_t::sdef_weights_t::weights()
 {
     if (f_weights)
         return m_weights.get();
-    m_weights = std::unique_ptr<std::vector<double>>(new std::vector<double>{weight1(), (1.0 - weight1())});
+    m_weights = std::make_unique<std::vector<double>>(std::initializer_list<double>{weight1(), (1.0 - weight1())});
     f_weights = true;
     return m_weights.get();
 }
@@ -483,13 +483,13 @@ void mmd_pmx_t::text_t::_read()
     case 0:
     {
         n_value = false;
-        m_value = std::unique_ptr<text_utf16_t>(new text_utf16_t(m__io, this, m__root));
+        m_value = std::make_unique<text_utf16_t>(m__io, this, m__root);
         break;
     }
     case 1:
     {
         n_value = false;
-        m_value = std::unique_ptr<text_utf8_t>(new text_utf8_t(m__io, this, m__root));
+        m_value = std::make_unique<text_utf8_t>(m__io, this, m__root);
         break;
     }
     }
@@ -517,7 +517,7 @@ mmd_pmx_t::group_morph_element_t::group_morph_element_t(kaitai::kstream *p__io, 
 
 void mmd_pmx_t::group_morph_element_t::_read()
 {
-    m_index = std::unique_ptr<sized_index_t>(new sized_index_t(_root()->header()->morph_index_size(), m__io, this, m__root));
+    m_index = std::make_unique<sized_index_t>(_root()->header()->morph_index_size(), m__io, this, m__root);
     m_ratio = m__io->read_f4le();
 }
 
@@ -550,23 +550,23 @@ mmd_pmx_t::joint_t::joint_t(kaitai::kstream *p__io, mmd_pmx_t *p__parent, mmd_pm
 
 void mmd_pmx_t::joint_t::_read()
 {
-    m_name = std::unique_ptr<text_t>(new text_t(m__io, this, m__root));
-    m_english_name = std::unique_ptr<text_t>(new text_t(m__io, this, m__root));
+    m_name = std::make_unique<text_t>(m__io, this, m__root);
+    m_english_name = std::make_unique<text_t>(m__io, this, m__root);
     m_type = static_cast<mmd_pmx_t::joint_type_t>(m__io->read_u1());
-    m_rigid_body_indices = std::unique_ptr<std::vector<std::unique_ptr<sized_index_t>>>(new std::vector<std::unique_ptr<sized_index_t>>());
+    m_rigid_body_indices = std::make_unique<std::vector<std::unique_ptr<sized_index_t>>>();
     const int l_rigid_body_indices = 2;
     for (int i = 0; i < l_rigid_body_indices; i++)
     {
-        m_rigid_body_indices->push_back(std::move(std::unique_ptr<sized_index_t>(new sized_index_t(_root()->header()->rigid_body_index_size(), m__io, this, m__root))));
+        m_rigid_body_indices->push_back(std::make_unique<sized_index_t>(_root()->header()->rigid_body_index_size(), m__io, this, m__root));
     }
-    m_position = std::unique_ptr<vec3_t>(new vec3_t(m__io, this, m__root));
-    m_rotation = std::unique_ptr<vec3_t>(new vec3_t(m__io, this, m__root));
-    m_position_constraint_lower = std::unique_ptr<vec3_t>(new vec3_t(m__io, this, m__root));
-    m_position_constraint_upper = std::unique_ptr<vec3_t>(new vec3_t(m__io, this, m__root));
-    m_rotation_constraint_lower = std::unique_ptr<vec3_t>(new vec3_t(m__io, this, m__root));
-    m_rotation_constraint_upper = std::unique_ptr<vec3_t>(new vec3_t(m__io, this, m__root));
-    m_spring_position = std::unique_ptr<vec3_t>(new vec3_t(m__io, this, m__root));
-    m_spring_rotation = std::unique_ptr<vec3_t>(new vec3_t(m__io, this, m__root));
+    m_position = std::make_unique<vec3_t>(m__io, this, m__root);
+    m_rotation = std::make_unique<vec3_t>(m__io, this, m__root);
+    m_position_constraint_lower = std::make_unique<vec3_t>(m__io, this, m__root);
+    m_position_constraint_upper = std::make_unique<vec3_t>(m__io, this, m__root);
+    m_rotation_constraint_lower = std::make_unique<vec3_t>(m__io, this, m__root);
+    m_rotation_constraint_upper = std::make_unique<vec3_t>(m__io, this, m__root);
+    m_spring_position = std::make_unique<vec3_t>(m__io, this, m__root);
+    m_spring_rotation = std::make_unique<vec3_t>(m__io, this, m__root);
 }
 
 mmd_pmx_t::joint_t::~joint_t()
@@ -598,10 +598,10 @@ mmd_pmx_t::bone_t::bone_t(kaitai::kstream *p__io, mmd_pmx_t *p__parent, mmd_pmx_
 
 void mmd_pmx_t::bone_t::_read()
 {
-    m_name = std::unique_ptr<text_t>(new text_t(m__io, this, m__root));
-    m_english_name = std::unique_ptr<text_t>(new text_t(m__io, this, m__root));
-    m_position = std::unique_ptr<vec3_t>(new vec3_t(m__io, this, m__root));
-    m_parent_index = std::unique_ptr<sized_index_t>(new sized_index_t(_root()->header()->bone_index_size(), m__io, this, m__root));
+    m_name = std::make_unique<text_t>(m__io, this, m__root);
+    m_english_name = std::make_unique<text_t>(m__io, this, m__root);
+    m_position = std::make_unique<vec3_t>(m__io, this, m__root);
+    m_parent_index = std::make_unique<sized_index_t>(_root()->header()->bone_index_size(), m__io, this, m__root);
     m_transformation_class = m__io->read_u4le();
     m_indexed_tail_position = m__io->read_bits_int_le(1);
     m_rotatable = m__io->read_bits_int_le(1);
@@ -623,37 +623,37 @@ void mmd_pmx_t::bone_t::_read()
     if (indexed_tail_position())
     {
         n_connect_index = false;
-        m_connect_index = std::unique_ptr<sized_index_t>(new sized_index_t(_root()->header()->bone_index_size(), m__io, this, m__root));
+        m_connect_index = std::make_unique<sized_index_t>(_root()->header()->bone_index_size(), m__io, this, m__root);
     }
     n_offset_position = true;
     if (!(indexed_tail_position()))
     {
         n_offset_position = false;
-        m_offset_position = std::unique_ptr<vec3_t>(new vec3_t(m__io, this, m__root));
+        m_offset_position = std::make_unique<vec3_t>(m__io, this, m__root);
     }
     n_grant = true;
     if (((inherit_rotation()) || (inherit_translation())))
     {
         n_grant = false;
-        m_grant = std::unique_ptr<bone_grant_t>(new bone_grant_t(m__io, this, m__root));
+        m_grant = std::make_unique<bone_grant_t>(m__io, this, m__root);
     }
     n_fixed_axis = true;
     if (has_fixed_axis())
     {
         n_fixed_axis = false;
-        m_fixed_axis = std::unique_ptr<vec3_t>(new vec3_t(m__io, this, m__root));
+        m_fixed_axis = std::make_unique<vec3_t>(m__io, this, m__root);
     }
     n_local_x_vector = true;
     if (has_local_axes())
     {
         n_local_x_vector = false;
-        m_local_x_vector = std::unique_ptr<vec3_t>(new vec3_t(m__io, this, m__root));
+        m_local_x_vector = std::make_unique<vec3_t>(m__io, this, m__root);
     }
     n_local_z_vector = true;
     if (has_local_axes())
     {
         n_local_z_vector = false;
-        m_local_z_vector = std::unique_ptr<vec3_t>(new vec3_t(m__io, this, m__root));
+        m_local_z_vector = std::make_unique<vec3_t>(m__io, this, m__root);
     }
     n_key = true;
     if (external_parent_deform())
@@ -665,7 +665,7 @@ void mmd_pmx_t::bone_t::_read()
     if (has_ik())
     {
         n_ik = false;
-        m_ik = std::unique_ptr<bone_ik_t>(new bone_ik_t(m__io, this, m__root));
+        m_ik = std::make_unique<bone_ik_t>(m__io, this, m__root);
     }
 }
 
@@ -714,15 +714,15 @@ mmd_pmx_t::frame_t::frame_t(kaitai::kstream *p__io, mmd_pmx_t *p__parent, mmd_pm
 
 void mmd_pmx_t::frame_t::_read()
 {
-    m_name = std::unique_ptr<text_t>(new text_t(m__io, this, m__root));
-    m_english_name = std::unique_ptr<text_t>(new text_t(m__io, this, m__root));
+    m_name = std::make_unique<text_t>(m__io, this, m__root);
+    m_english_name = std::make_unique<text_t>(m__io, this, m__root);
     m_type = m__io->read_u1();
     m_num_elements = m__io->read_u4le();
-    m_elements = std::unique_ptr<std::vector<std::unique_ptr<frame_element_t>>>(new std::vector<std::unique_ptr<frame_element_t>>());
+    m_elements = std::make_unique<std::vector<std::unique_ptr<frame_element_t>>>();
     const int l_elements = num_elements();
     for (int i = 0; i < l_elements; i++)
     {
-        m_elements->push_back(std::move(std::unique_ptr<frame_element_t>(new frame_element_t(m__io, this, m__root))));
+        m_elements->push_back(std::make_unique<frame_element_t>(m__io, this, m__root));
     }
 }
 
@@ -746,13 +746,13 @@ mmd_pmx_t::qdef_weights_t::qdef_weights_t(kaitai::kstream *p__io, mmd_pmx_t::ver
 
 void mmd_pmx_t::qdef_weights_t::_read()
 {
-    m_bone_indices = std::unique_ptr<std::vector<std::unique_ptr<sized_index_t>>>(new std::vector<std::unique_ptr<sized_index_t>>());
+    m_bone_indices = std::make_unique<std::vector<std::unique_ptr<sized_index_t>>>();
     const int l_bone_indices = 4;
     for (int i = 0; i < l_bone_indices; i++)
     {
-        m_bone_indices->push_back(std::move(std::unique_ptr<sized_index_t>(new sized_index_t(_root()->header()->bone_index_size(), m__io, this, m__root))));
+        m_bone_indices->push_back(std::make_unique<sized_index_t>(_root()->header()->bone_index_size(), m__io, this, m__root));
     }
-    m_weights = std::unique_ptr<std::vector<float>>(new std::vector<float>());
+    m_weights = std::make_unique<std::vector<float>>();
     const int l_weights = 4;
     for (int i = 0; i < l_weights; i++)
     {
@@ -779,11 +779,11 @@ mmd_pmx_t::face_t::face_t(kaitai::kstream *p__io, mmd_pmx_t *p__parent, mmd_pmx_
 
 void mmd_pmx_t::face_t::_read()
 {
-    m_indices = std::unique_ptr<std::vector<std::unique_ptr<sized_index_t>>>(new std::vector<std::unique_ptr<sized_index_t>>());
+    m_indices = std::make_unique<std::vector<std::unique_ptr<sized_index_t>>>();
     const int l_indices = 3;
     for (int i = 0; i < l_indices; i++)
     {
-        m_indices->push_back(std::move(std::unique_ptr<sized_index_t>(new sized_index_t(_root()->header()->vertex_index_size(), m__io, this, m__root))));
+        m_indices->push_back(std::make_unique<sized_index_t>(_root()->header()->vertex_index_size(), m__io, this, m__root));
     }
 }
 
@@ -831,12 +831,12 @@ mmd_pmx_t::morph_t::morph_t(kaitai::kstream *p__io, mmd_pmx_t *p__parent, mmd_pm
 
 void mmd_pmx_t::morph_t::_read()
 {
-    m_name = std::unique_ptr<text_t>(new text_t(m__io, this, m__root));
-    m_english_name = std::unique_ptr<text_t>(new text_t(m__io, this, m__root));
+    m_name = std::make_unique<text_t>(m__io, this, m__root);
+    m_english_name = std::make_unique<text_t>(m__io, this, m__root);
     m_panel = m__io->read_u1();
     m_type = static_cast<mmd_pmx_t::morph_type_t>(m__io->read_u1());
     m_num_elements = m__io->read_u4le();
-    m_elements = std::unique_ptr<std::vector<std::unique_ptr<kaitai::kstruct>>>(new std::vector<std::unique_ptr<kaitai::kstruct>>());
+    m_elements = std::make_unique<std::vector<std::unique_ptr<kaitai::kstruct>>>();
     const int l_elements = num_elements();
     for (int i = 0; i < l_elements; i++)
     {
@@ -844,57 +844,57 @@ void mmd_pmx_t::morph_t::_read()
         {
         case mmd_pmx_t::MORPH_TYPE_ADDITIONAL_UV4:
         {
-            m_elements->push_back(std::move(std::unique_ptr<uv_morph_element_t>(new uv_morph_element_t(m__io, this, m__root))));
+            m_elements->push_back(std::make_unique<uv_morph_element_t>(m__io, this, m__root));
             break;
         }
         case mmd_pmx_t::MORPH_TYPE_ADDITIONAL_UV1:
         {
-            m_elements->push_back(std::move(std::unique_ptr<uv_morph_element_t>(new uv_morph_element_t(m__io, this, m__root))));
+            m_elements->push_back(std::make_unique<uv_morph_element_t>(m__io, this, m__root));
             break;
         }
         case mmd_pmx_t::MORPH_TYPE_VERTEX:
         {
-            m_elements->push_back(std::move(std::unique_ptr<vertex_morph_element_t>(new vertex_morph_element_t(m__io, this, m__root))));
+            m_elements->push_back(std::make_unique<vertex_morph_element_t>(m__io, this, m__root));
             break;
         }
         case mmd_pmx_t::MORPH_TYPE_MATERIAL:
         {
-            m_elements->push_back(std::move(std::unique_ptr<material_morph_element_t>(new material_morph_element_t(m__io, this, m__root))));
+            m_elements->push_back(std::make_unique<material_morph_element_t>(m__io, this, m__root));
             break;
         }
         case mmd_pmx_t::MORPH_TYPE_FLIP:
         {
-            m_elements->push_back(std::move(std::unique_ptr<group_morph_element_t>(new group_morph_element_t(m__io, this, m__root))));
+            m_elements->push_back(std::make_unique<group_morph_element_t>(m__io, this, m__root));
             break;
         }
         case mmd_pmx_t::MORPH_TYPE_ADDITIONAL_UV3:
         {
-            m_elements->push_back(std::move(std::unique_ptr<uv_morph_element_t>(new uv_morph_element_t(m__io, this, m__root))));
+            m_elements->push_back(std::make_unique<uv_morph_element_t>(m__io, this, m__root));
             break;
         }
         case mmd_pmx_t::MORPH_TYPE_ADDITIONAL_UV2:
         {
-            m_elements->push_back(std::move(std::unique_ptr<uv_morph_element_t>(new uv_morph_element_t(m__io, this, m__root))));
+            m_elements->push_back(std::make_unique<uv_morph_element_t>(m__io, this, m__root));
             break;
         }
         case mmd_pmx_t::MORPH_TYPE_UV:
         {
-            m_elements->push_back(std::move(std::unique_ptr<uv_morph_element_t>(new uv_morph_element_t(m__io, this, m__root))));
+            m_elements->push_back(std::make_unique<uv_morph_element_t>(m__io, this, m__root));
             break;
         }
         case mmd_pmx_t::MORPH_TYPE_GROUP:
         {
-            m_elements->push_back(std::move(std::unique_ptr<group_morph_element_t>(new group_morph_element_t(m__io, this, m__root))));
+            m_elements->push_back(std::make_unique<group_morph_element_t>(m__io, this, m__root));
             break;
         }
         case mmd_pmx_t::MORPH_TYPE_IMPULSE:
         {
-            m_elements->push_back(std::move(std::unique_ptr<impulse_morph_element_t>(new impulse_morph_element_t(m__io, this, m__root))));
+            m_elements->push_back(std::make_unique<impulse_morph_element_t>(m__io, this, m__root));
             break;
         }
         case mmd_pmx_t::MORPH_TYPE_BONE:
         {
-            m_elements->push_back(std::move(std::unique_ptr<bone_morph_element_t>(new bone_morph_element_t(m__io, this, m__root))));
+            m_elements->push_back(std::make_unique<bone_morph_element_t>(m__io, this, m__root));
             break;
         }
         }
@@ -968,12 +968,12 @@ void mmd_pmx_t::frame_element_t::_read()
     {
     case 0:
     {
-        m_index = std::unique_ptr<sized_index_t>(new sized_index_t(_root()->header()->bone_index_size(), m__io, this, m__root));
+        m_index = std::make_unique<sized_index_t>(_root()->header()->bone_index_size(), m__io, this, m__root);
         break;
     }
     default:
     {
-        m_index = std::unique_ptr<sized_index_t>(new sized_index_t(_root()->header()->morph_index_size(), m__io, this, m__root));
+        m_index = std::make_unique<sized_index_t>(_root()->header()->morph_index_size(), m__io, this, m__root);
         break;
     }
     }
@@ -1000,10 +1000,10 @@ mmd_pmx_t::impulse_morph_element_t::impulse_morph_element_t(kaitai::kstream *p__
 
 void mmd_pmx_t::impulse_morph_element_t::_read()
 {
-    m_rigid_body_index = std::unique_ptr<sized_index_t>(new sized_index_t(_root()->header()->rigid_body_index_size(), m__io, this, m__root));
+    m_rigid_body_index = std::make_unique<sized_index_t>(_root()->header()->rigid_body_index_size(), m__io, this, m__root);
     m_local = m__io->read_u1();
-    m_translational_velocity = std::unique_ptr<vec3_t>(new vec3_t(m__io, this, m__root));
-    m_angular_velocity = std::unique_ptr<vec3_t>(new vec3_t(m__io, this, m__root));
+    m_translational_velocity = std::make_unique<vec3_t>(m__io, this, m__root);
+    m_angular_velocity = std::make_unique<vec3_t>(m__io, this, m__root);
 }
 
 mmd_pmx_t::impulse_morph_element_t::~impulse_morph_element_t()
@@ -1026,15 +1026,15 @@ mmd_pmx_t::bone_ik_t::bone_ik_t(kaitai::kstream *p__io, mmd_pmx_t::bone_t *p__pa
 
 void mmd_pmx_t::bone_ik_t::_read()
 {
-    m_effector = std::unique_ptr<sized_index_t>(new sized_index_t(_root()->header()->bone_index_size(), m__io, this, m__root));
+    m_effector = std::make_unique<sized_index_t>(_root()->header()->bone_index_size(), m__io, this, m__root);
     m_iteration = m__io->read_u4le();
     m_max_angle = m__io->read_f4le();
     m_num_links = m__io->read_u4le();
-    m_links = std::unique_ptr<std::vector<std::unique_ptr<bone_ik_link_t>>>(new std::vector<std::unique_ptr<bone_ik_link_t>>());
+    m_links = std::make_unique<std::vector<std::unique_ptr<bone_ik_link_t>>>();
     const int l_links = num_links();
     for (int i = 0; i < l_links; i++)
     {
-        m_links->push_back(std::move(std::unique_ptr<bone_ik_link_t>(new bone_ik_link_t(m__io, this, m__root))));
+        m_links->push_back(std::make_unique<bone_ik_link_t>(m__io, this, m__root));
     }
 }
 
@@ -1080,8 +1080,8 @@ mmd_pmx_t::uv_morph_element_t::uv_morph_element_t(kaitai::kstream *p__io, mmd_pm
 
 void mmd_pmx_t::uv_morph_element_t::_read()
 {
-    m_index = std::unique_ptr<sized_index_t>(new sized_index_t(_root()->header()->vertex_index_size(), m__io, this, m__root));
-    m_uv = std::unique_ptr<vec4_t>(new vec4_t(m__io, this, m__root));
+    m_index = std::make_unique<sized_index_t>(_root()->header()->vertex_index_size(), m__io, this, m__root);
+    m_uv = std::make_unique<vec4_t>(m__io, this, m__root);
 }
 
 mmd_pmx_t::uv_morph_element_t::~uv_morph_element_t()
@@ -1104,11 +1104,11 @@ mmd_pmx_t::bdef2_weights_t::bdef2_weights_t(kaitai::kstream *p__io, mmd_pmx_t::v
 
 void mmd_pmx_t::bdef2_weights_t::_read()
 {
-    m_bone_indices = std::unique_ptr<std::vector<std::unique_ptr<sized_index_t>>>(new std::vector<std::unique_ptr<sized_index_t>>());
+    m_bone_indices = std::make_unique<std::vector<std::unique_ptr<sized_index_t>>>();
     const int l_bone_indices = 2;
     for (int i = 0; i < l_bone_indices; i++)
     {
-        m_bone_indices->push_back(std::move(std::unique_ptr<sized_index_t>(new sized_index_t(_root()->header()->bone_index_size(), m__io, this, m__root))));
+        m_bone_indices->push_back(std::make_unique<sized_index_t>(_root()->header()->bone_index_size(), m__io, this, m__root));
     }
     m_weight1 = m__io->read_f4le();
 }
@@ -1126,7 +1126,7 @@ std::vector<double> *mmd_pmx_t::bdef2_weights_t::weights()
 {
     if (f_weights)
         return m_weights.get();
-    m_weights = std::unique_ptr<std::vector<double>>(new std::vector<double>{weight1(), (1.0 - weight1())});
+    m_weights = std::make_unique<std::vector<double>>(std::initializer_list<double>{weight1(), (1.0 - weight1())});
     f_weights = true;
     return m_weights.get();
 }
@@ -1159,10 +1159,10 @@ void mmd_pmx_t::header_t::_read()
     m_bone_index_size = m__io->read_u1();
     m_morph_index_size = m__io->read_u1();
     m_rigid_body_index_size = m__io->read_u1();
-    m_model_name = std::unique_ptr<text_t>(new text_t(m__io, this, m__root));
-    m_english_model_name = std::unique_ptr<text_t>(new text_t(m__io, this, m__root));
-    m_comment = std::unique_ptr<text_t>(new text_t(m__io, this, m__root));
-    m_english_comment = std::unique_ptr<text_t>(new text_t(m__io, this, m__root));
+    m_model_name = std::make_unique<text_t>(m__io, this, m__root);
+    m_english_model_name = std::make_unique<text_t>(m__io, this, m__root);
+    m_comment = std::make_unique<text_t>(m__io, this, m__root);
+    m_english_comment = std::make_unique<text_t>(m__io, this, m__root);
 }
 
 mmd_pmx_t::header_t::~header_t()
@@ -1213,12 +1213,12 @@ mmd_pmx_t::material_t::material_t(kaitai::kstream *p__io, mmd_pmx_t *p__parent, 
 
 void mmd_pmx_t::material_t::_read()
 {
-    m_name = std::unique_ptr<text_t>(new text_t(m__io, this, m__root));
-    m_english_name = std::unique_ptr<text_t>(new text_t(m__io, this, m__root));
-    m_diffuse = std::unique_ptr<color4_t>(new color4_t(m__io, this, m__root));
-    m_specular = std::unique_ptr<color3_t>(new color3_t(m__io, this, m__root));
+    m_name = std::make_unique<text_t>(m__io, this, m__root);
+    m_english_name = std::make_unique<text_t>(m__io, this, m__root);
+    m_diffuse = std::make_unique<color4_t>(m__io, this, m__root);
+    m_specular = std::make_unique<color3_t>(m__io, this, m__root);
     m_shininess = m__io->read_f4le();
-    m_ambient = std::unique_ptr<color3_t>(new color3_t(m__io, this, m__root));
+    m_ambient = std::make_unique<color3_t>(m__io, this, m__root);
     m_no_cull = m__io->read_bits_int_le(1);
     m_ground_shadow = m__io->read_bits_int_le(1);
     m_cast_shadow = m__io->read_bits_int_le(1);
@@ -1228,10 +1228,10 @@ void mmd_pmx_t::material_t::_read()
     m_render_points = m__io->read_bits_int_le(1);
     m_render_lines = m__io->read_bits_int_le(1);
     m__io->align_to_byte();
-    m_edge_color = std::unique_ptr<color4_t>(new color4_t(m__io, this, m__root));
+    m_edge_color = std::make_unique<color4_t>(m__io, this, m__root);
     m_edge_size = m__io->read_f4le();
-    m_texture_index = std::unique_ptr<sized_index_t>(new sized_index_t(_root()->header()->texture_index_size(), m__io, this, m__root));
-    m_sphere_texture_index = std::unique_ptr<sized_index_t>(new sized_index_t(_root()->header()->texture_index_size(), m__io, this, m__root));
+    m_texture_index = std::make_unique<sized_index_t>(_root()->header()->texture_index_size(), m__io, this, m__root);
+    m_sphere_texture_index = std::make_unique<sized_index_t>(_root()->header()->texture_index_size(), m__io, this, m__root);
     m_sphere_op_mode = static_cast<mmd_pmx_t::sphere_op_mode_t>(m__io->read_u1());
     m_is_common_toon = m__io->read_u1();
     n_toon_index = true;
@@ -1240,17 +1240,17 @@ void mmd_pmx_t::material_t::_read()
     case 0:
     {
         n_toon_index = false;
-        m_toon_index = std::unique_ptr<sized_index_t>(new sized_index_t(_root()->header()->texture_index_size(), m__io, this, m__root));
+        m_toon_index = std::make_unique<sized_index_t>(_root()->header()->texture_index_size(), m__io, this, m__root);
         break;
     }
     case 1:
     {
         n_toon_index = false;
-        m_toon_index = std::unique_ptr<common_toon_index_t>(new common_toon_index_t(m__io, this, m__root));
+        m_toon_index = std::make_unique<common_toon_index_t>(m__io, this, m__root);
         break;
     }
     }
-    m_comment = std::unique_ptr<text_t>(new text_t(m__io, this, m__root));
+    m_comment = std::make_unique<text_t>(m__io, this, m__root);
     m_face_num_vertices = m__io->read_u4le();
 }
 
@@ -1346,13 +1346,13 @@ mmd_pmx_t::bdef4_weights_t::bdef4_weights_t(kaitai::kstream *p__io, mmd_pmx_t::v
 
 void mmd_pmx_t::bdef4_weights_t::_read()
 {
-    m_bone_indices = std::unique_ptr<std::vector<std::unique_ptr<sized_index_t>>>(new std::vector<std::unique_ptr<sized_index_t>>());
+    m_bone_indices = std::make_unique<std::vector<std::unique_ptr<sized_index_t>>>();
     const int l_bone_indices = 4;
     for (int i = 0; i < l_bone_indices; i++)
     {
-        m_bone_indices->push_back(std::move(std::unique_ptr<sized_index_t>(new sized_index_t(_root()->header()->bone_index_size(), m__io, this, m__root))));
+        m_bone_indices->push_back(std::make_unique<sized_index_t>(_root()->header()->bone_index_size(), m__io, this, m__root));
     }
-    m_weights = std::unique_ptr<std::vector<float>>(new std::vector<float>());
+    m_weights = std::make_unique<std::vector<float>>();
     const int l_weights = 4;
     for (int i = 0; i < l_weights; i++)
     {
@@ -1383,17 +1383,17 @@ mmd_pmx_t::rigid_body_t::rigid_body_t(kaitai::kstream *p__io, mmd_pmx_t *p__pare
 
 void mmd_pmx_t::rigid_body_t::_read()
 {
-    m_name = std::unique_ptr<text_t>(new text_t(m__io, this, m__root));
-    m_english_name = std::unique_ptr<text_t>(new text_t(m__io, this, m__root));
-    m_bone_index = std::unique_ptr<sized_index_t>(new sized_index_t(_root()->header()->bone_index_size(), m__io, this, m__root));
+    m_name = std::make_unique<text_t>(m__io, this, m__root);
+    m_english_name = std::make_unique<text_t>(m__io, this, m__root);
+    m_bone_index = std::make_unique<sized_index_t>(_root()->header()->bone_index_size(), m__io, this, m__root);
     m_group_index = m__io->read_u1();
     m_group_target = m__io->read_u2le();
     m_shape_type = m__io->read_u1();
     m_width = m__io->read_f4le();
     m_height = m__io->read_f4le();
     m_depth = m__io->read_f4le();
-    m_position = std::unique_ptr<vec3_t>(new vec3_t(m__io, this, m__root));
-    m_rotation = std::unique_ptr<vec3_t>(new vec3_t(m__io, this, m__root));
+    m_position = std::make_unique<vec3_t>(m__io, this, m__root);
+    m_rotation = std::make_unique<vec3_t>(m__io, this, m__root);
     m_weight = m__io->read_f4le();
     m_position_damping = m__io->read_f4le();
     m_rotation_damping = m__io->read_f4le();
@@ -1421,7 +1421,7 @@ mmd_pmx_t::texture_t::texture_t(kaitai::kstream *p__io, mmd_pmx_t *p__parent, mm
 
 void mmd_pmx_t::texture_t::_read()
 {
-    m_name = std::unique_ptr<text_t>(new text_t(m__io, this, m__root));
+    m_name = std::make_unique<text_t>(m__io, this, m__root);
 }
 
 mmd_pmx_t::texture_t::~texture_t()

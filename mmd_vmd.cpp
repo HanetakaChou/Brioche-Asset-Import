@@ -16,27 +16,27 @@ mmd_vmd_t::mmd_vmd_t(kaitai::kstream *p__io, kaitai::kstruct *p__parent, mmd_vmd
 
 void mmd_vmd_t::_read()
 {
-    m_header = std::unique_ptr<header_t>(new header_t(m__io, this, m__root));
+    m_header = std::make_unique<header_t>(m__io, this, m__root);
     m_num_motions = m__io->read_u4le();
-    m_motions = std::unique_ptr<std::vector<std::unique_ptr<motion_t>>>(new std::vector<std::unique_ptr<motion_t>>());
+    m_motions = std::make_unique<std::vector<std::unique_ptr<motion_t>>>();
     const int l_motions = num_motions();
     for (int i = 0; i < l_motions; i++)
     {
-        m_motions->push_back(std::move(std::unique_ptr<motion_t>(new motion_t(m__io, this, m__root))));
+        m_motions->push_back(std::make_unique<motion_t>(m__io, this, m__root));
     }
     m_num_morphs = m__io->read_u4le();
-    m_morphs = std::unique_ptr<std::vector<std::unique_ptr<morph_t>>>(new std::vector<std::unique_ptr<morph_t>>());
+    m_morphs = std::make_unique<std::vector<std::unique_ptr<morph_t>>>();
     const int l_morphs = num_morphs();
     for (int i = 0; i < l_morphs; i++)
     {
-        m_morphs->push_back(std::move(std::unique_ptr<morph_t>(new morph_t(m__io, this, m__root))));
+        m_morphs->push_back(std::make_unique<morph_t>(m__io, this, m__root));
     }
     m_num_cameras = m__io->read_u4le();
-    m_cameras = std::unique_ptr<std::vector<std::unique_ptr<camera_t>>>(new std::vector<std::unique_ptr<camera_t>>());
+    m_cameras = std::make_unique<std::vector<std::unique_ptr<camera_t>>>();
     const int l_cameras = num_cameras();
     for (int i = 0; i < l_cameras; i++)
     {
-        m_cameras->push_back(std::move(std::unique_ptr<camera_t>(new camera_t(m__io, this, m__root))));
+        m_cameras->push_back(std::make_unique<camera_t>(m__io, this, m__root));
     }
     m_reserved = m__io->read_bytes(8);
     if (!(reserved() == std::string("\x00\x00\x00\x00\x00\x00\x00\x00", 8)))
@@ -116,9 +116,9 @@ void mmd_vmd_t::camera_t::_read()
 {
     m_frame_number = m__io->read_u4le();
     m_distance = m__io->read_f4le();
-    m_position = std::unique_ptr<vec3_t>(new vec3_t(m__io, this, m__root));
-    m_rotation = std::unique_ptr<vec3_t>(new vec3_t(m__io, this, m__root));
-    m_interpolation = std::unique_ptr<std::vector<uint8_t>>(new std::vector<uint8_t>());
+    m_position = std::make_unique<vec3_t>(m__io, this, m__root);
+    m_rotation = std::make_unique<vec3_t>(m__io, this, m__root);
+    m_interpolation = std::make_unique<std::vector<uint8_t>>();
     const int l_interpolation = 24;
     for (int i = 0; i < l_interpolation; i++)
     {
@@ -151,9 +151,9 @@ void mmd_vmd_t::motion_t::_read()
 {
     m_bone_name = kaitai::kstream::bytes_to_str(kaitai::kstream::bytes_terminate(m__io->read_bytes(15), 0, false), std::string("Shift_JIS"));
     m_frame_number = m__io->read_u4le();
-    m_position = std::unique_ptr<vec3_t>(new vec3_t(m__io, this, m__root));
-    m_rotation = std::unique_ptr<vec4_t>(new vec4_t(m__io, this, m__root));
-    m_interpolation = std::unique_ptr<std::vector<uint8_t>>(new std::vector<uint8_t>());
+    m_position = std::make_unique<vec3_t>(m__io, this, m__root);
+    m_rotation = std::make_unique<vec4_t>(m__io, this, m__root);
+    m_interpolation = std::unique_ptr<std::vector<uint8_t>>();
     const int l_interpolation = 64;
     for (int i = 0; i < l_interpolation; i++)
     {
