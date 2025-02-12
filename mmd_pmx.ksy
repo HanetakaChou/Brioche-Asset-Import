@@ -6,8 +6,6 @@ meta:
   endian: le
   license: MIT
   bit-endian: le
-  imports:
-    - vector_types
 
 doc: |
   PMX is the newer format for storing MikuMikuDance (MMD) model data.
@@ -20,60 +18,60 @@ doc-ref: https://gist.github.com/felixjones/f8a06bd48f9da9a4539f
 seq:
   - id: header
     type: header
-  - id: vertex_count
+  - id: num_vertices
     type: u4
   - id: vertices
     type: vertex
     repeat: expr
-    repeat-expr: vertex_count
-  - id: face_vertex_count
+    repeat-expr: num_vertices
+  - id: face_num_vertices
     type: u4
   - id: faces
     type: face
     repeat: expr
-    repeat-expr: face_vertex_count / 3
-  - id: texture_count
+    repeat-expr: face_num_vertices / 3
+  - id: num_textures
     type: u4
   - id: textures
     type: texture
     repeat: expr
-    repeat-expr: texture_count
-  - id: material_count
+    repeat-expr: num_textures
+  - id: num_materials
     type: u4
   - id: materials
     type: material
     repeat: expr
-    repeat-expr: material_count
-  - id: bone_count
+    repeat-expr: num_materials
+  - id: num_bones
     type: u4
   - id: bones
     type: bone
     repeat: expr
-    repeat-expr: bone_count
-  - id: morph_count
+    repeat-expr: num_bones
+  - id: num_morphs
     type: u4
   - id: morphs
     type: morph
     repeat: expr
-    repeat-expr: morph_count
-  - id: frame_count
+    repeat-expr: num_morphs
+  - id: num_frames
     type: u4
   - id: frames
     type: frame
     repeat: expr
-    repeat-expr: frame_count
-  - id: rigid_body_count
+    repeat-expr: num_frames
+  - id: num_rigid_bodies
     type: u4
   - id: rigid_bodies
     type: rigid_body
     repeat: expr
-    repeat-expr: rigid_body_count
-  - id: joint_count
+    repeat-expr: num_rigid_bodies
+  - id: num_joints
     type: u4
   - id: joints
     type: joint
     repeat: expr
-    repeat-expr: joint_count
+    repeat-expr: num_joints
 
 types:
 
@@ -119,15 +117,15 @@ types:
   vertex:
     seq:
       - id: position
-        type: vector_types::vec3
+        type: vec3
       - id: normal
-        type: vector_types::vec3
+        type: vec3
         doc: normal vector, which is supposed to be normalized.
       - id: uv
-        type: vector_types::vec2
+        type: vec2
         doc: texture coordinate.
       - id: additional_uvs
-        type: vector_types::vec4
+        type: vec4
         repeat: expr
         repeat-expr: _root.header.additional_uv_count
       - id: type
@@ -183,11 +181,11 @@ types:
       - id: weight1
         type: f4
       - id: c
-        type: vector_types::vec3
+        type: vec3
       - id: r0
-        type: vector_types::vec3
+        type: vec3
       - id: r1
-        type: vector_types::vec3
+        type: vec3
     instances:
       weights:
         value: '[weight1, 1.0 - weight1]'
@@ -224,13 +222,13 @@ types:
       - id: english_name
         type: text
       - id: diffuse
-        type: vector_types::color4
+        type: color4
       - id: specular
-        type: vector_types::color3
+        type: color3
       - id: shininess
         type: f4
       - id: ambient
-        type: vector_types::color3
+        type: color3
       - id: no_cull
         type: b1
         doc: Disables back-face culling
@@ -256,7 +254,7 @@ types:
         type: b1
         doc: Rendered as lines (since 2.1)
       - id: edge_color
-        type: vector_types::color4
+        type: color4
       - id: edge_size
         type: f4
       - id: texture_index
@@ -280,7 +278,7 @@ types:
             1: common_toon_index
       - id: comment
         type: text
-      - id: face_vertex_count
+      - id: face_num_vertices
         type: u4
 
   bone:
@@ -290,7 +288,7 @@ types:
       - id: english_name
         type: text
       - id: position
-        type: vector_types::vec3
+        type: vec3
       - id: parent_index
         type: sized_index(_root.header.bone_index_size)
       - id: transformation_class
@@ -335,19 +333,19 @@ types:
         type: sized_index(_root.header.bone_index_size)
         if: indexed_tail_position
       - id: offset_position
-        type: vector_types::vec3
+        type: vec3
         if: not indexed_tail_position
       - id: grant
         type: bone_grant
         if: inherit_rotation or inherit_translation
       - id: fixed_axis
-        type: vector_types::vec3
+        type: vec3
         if: has_fixed_axis
       - id: local_x_vector
-        type: vector_types::vec3
+        type: vec3
         if: has_local_axes
       - id: local_z_vector
-        type: vector_types::vec3
+        type: vec3
         if: has_local_axes
       - id: key
         type: u4
@@ -386,12 +384,12 @@ types:
         type: u4
       - id: max_angle
         type: f4
-      - id: link_count
+      - id: num_links
         type: u4
       - id: links
         type: bone_ik_link
         repeat: expr
-        repeat-expr: link_count
+        repeat-expr: num_links
 
   bone_ik_link:
     seq:
@@ -400,10 +398,10 @@ types:
       - id: angle_limitation
         type: u1
       - id: lower_limitation_angle
-        type: vector_types::vec3
+        type: vec3
         if: angle_limitation == 1
       - id: upper_limitation_angle
-        type: vector_types::vec3
+        type: vec3
         if: angle_limitation == 1
 
   morph:
@@ -417,7 +415,7 @@ types:
       - id: type
         type: u1
         enum: morph_type
-      - id: element_count
+      - id: num_elements
         type: u4
       - id: elements
         type:
@@ -435,7 +433,7 @@ types:
             'morph_type::flip': group_morph_element
             'morph_type::impulse': impulse_morph_element
         repeat: expr
-        repeat-expr: element_count
+        repeat-expr: num_elements
 
   group_morph_element:
     seq:
@@ -449,23 +447,23 @@ types:
       - id: index
         type: sized_index(_root.header.vertex_index_size)
       - id: position
-        type: vector_types::vec3
+        type: vec3
 
   bone_morph_element:
     seq:
       - id: index
         type: sized_index(_root.header.bone_index_size)
       - id: position
-        type: vector_types::vec3
+        type: vec3
       - id: rotation
-        type: vector_types::vec4
+        type: vec4
 
   uv_morph_element:
     seq:
       - id: index
         type: sized_index(_root.header.vertex_index_size)
       - id: uv
-        type: vector_types::vec4
+        type: vec4
 
   material_morph_element:
     seq:
@@ -475,23 +473,23 @@ types:
         type: u1
         doc: 0 = Multiply, 1 = Additive
       - id: diffuse
-        type: vector_types::color4
+        type: color4
       - id: specular
-        type: vector_types::color3
+        type: color3
       - id: shininess
         type: f4
       - id: ambient
-        type: vector_types::color3
+        type: color3
       - id: edge_color
-        type: vector_types::color4
+        type: color4
       - id: edge_size
         type: f4
       - id: texture_color
-        type: vector_types::color4
+        type: color4
       - id: sphere_texture_color
-        type: vector_types::color4
+        type: color4
       - id: toon_color
-        type: vector_types::color4
+        type: color4
 
   impulse_morph_element:
     seq:
@@ -500,9 +498,9 @@ types:
       - id: local
         type: u1
       - id: translational_velocity
-        type: vector_types::vec3
+        type: vec3
       - id: angular_velocity
-        type: vector_types::vec3
+        type: vec3
         doc: |
           another source had this as torque, but it would be odd for one
           value to represent a velocity while the other represented a force
@@ -515,12 +513,12 @@ types:
         type: text
       - id: type
         type: u1
-      - id: element_count
+      - id: num_elements
         type: u4
       - id: elements
         type: frame_element
         repeat: expr
-        repeat-expr: element_count
+        repeat-expr: num_elements
 
   frame_element:
     seq:
@@ -556,9 +554,9 @@ types:
       - id: depth
         type: f4
       - id: position
-        type: vector_types::vec3
+        type: vec3
       - id: rotation
-        type: vector_types::vec3
+        type: vec3
       - id: weight
         type: f4
       - id: position_damping
@@ -590,21 +588,21 @@ types:
         repeat: expr
         repeat-expr: 2
       - id: position
-        type: vector_types::vec3
+        type: vec3
       - id: rotation
-        type: vector_types::vec3
+        type: vec3
       - id: position_constraint_lower
-        type: vector_types::vec3
+        type: vec3
       - id: position_constraint_upper
-        type: vector_types::vec3
+        type: vec3
       - id: rotation_constraint_lower
-        type: vector_types::vec3
+        type: vec3
       - id: rotation_constraint_upper
-        type: vector_types::vec3
+        type: vec3
       - id: spring_position
-        type: vector_types::vec3
+        type: vec3
       - id: spring_rotation
-        type: vector_types::vec3
+        type: vec3
 
   sized_index:
     doc: Variable-length type storing an index of a vertex, bone, etc.
@@ -659,6 +657,53 @@ types:
         type: str
         size: length
         encoding: UTF-8
+
+  vec2:
+    seq:
+      - id: x
+        type: f4
+      - id: y
+        type: f4
+
+  vec3:
+    seq:
+      - id: x
+        type: f4
+      - id: y
+        type: f4
+      - id: z
+        type: f4
+
+  vec4:
+    seq:
+      - id: x
+        type: f4
+      - id: y
+        type: f4
+      - id: z
+        type: f4
+      - id: w
+        type: f4
+
+  color3:
+    seq:
+      - id: r
+        type: f4
+      - id: g
+        type: f4
+      - id: b
+        type: f4
+
+  color4:
+    seq:
+      - id: r
+        type: f4
+      - id: g
+        type: f4
+      - id: b
+        type: f4
+      - id: a
+        type: f4
 
 enums:
 

@@ -6,8 +6,6 @@ meta:
   encoding: Shift_JIS
   endian: le
   license: MIT
-  imports:
-    - vector_types
 
 doc: |
   VMD is the format used by MikuMikuDance (MMD) for storing animation data.
@@ -17,24 +15,24 @@ doc: |
 seq:
   - id: header
     type: header
-  - id: motion_count
+  - id: num_motions
     type: u4
   - id: motions
     type: motion
     repeat: expr
-    repeat-expr: motion_count
-  - id: morph_count
+    repeat-expr: num_motions
+  - id: num_morphs
     type: u4
   - id: morphs
     type: morph
     repeat: expr
-    repeat-expr: morph_count
-  - id: camera_count
+    repeat-expr: num_morphs
+  - id: num_cameras
     type: u4
   - id: cameras
     type: camera
     repeat: expr
-    repeat-expr: camera_count
+    repeat-expr: num_cameras
   - id: reserved
     contents: "\0\0\0\0\0\0\0\0"
 
@@ -56,9 +54,9 @@ types:
       - id: frame_number
         type: u4
       - id: position
-        type: vector_types::vec3
+        type: vec3
       - id: rotation
-        type: vector_types::vec4
+        type: vec4
       - id: interpolation
         type: u1
         repeat: expr
@@ -81,9 +79,9 @@ types:
       - id: distance
         type: f4
       - id: position
-        type: vector_types::vec3
+        type: vec3
       - id: rotation
-        type: vector_types::vec3
+        type: vec3
       - id: interpolation
         type: u1
         repeat: expr
@@ -93,3 +91,49 @@ types:
       - id: perspective
         type: u1
 
+  vec2:
+    seq:
+      - id: x
+        type: f4
+      - id: y
+        type: f4
+
+  vec3:
+    seq:
+      - id: x
+        type: f4
+      - id: y
+        type: f4
+      - id: z
+        type: f4
+
+  vec4:
+    seq:
+      - id: x
+        type: f4
+      - id: y
+        type: f4
+      - id: z
+        type: f4
+      - id: w
+        type: f4
+
+  color3:
+    seq:
+      - id: r
+        type: f4
+      - id: g
+        type: f4
+      - id: b
+        type: f4
+
+  color4:
+    seq:
+      - id: r
+        type: f4
+      - id: g
+        type: f4
+      - id: b
+        type: f4
+      - id: a
+        type: f4

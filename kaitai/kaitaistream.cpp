@@ -698,9 +698,7 @@ uint8_t kaitai::kstream::byte_array_max(const std::string val)
 #define KS_STR_DEFAULT_ENCODING "UTF-8"
 #endif
 
-#ifdef KS_STR_ENCODING_ICONV
-
-#include <iconv.h>
+#include "../../../libiconv/include/iconv.h"
 #include <cerrno>
 #include <stdexcept>
 
@@ -771,11 +769,3 @@ std::string kaitai::kstream::bytes_to_str(std::string src, std::string src_enc)
 
     return dst;
 }
-#elif defined(KS_STR_ENCODING_NONE)
-std::string kaitai::kstream::bytes_to_str(std::string src, std::string src_enc)
-{
-    return src;
-}
-#else
-#error Need to decide how to handle strings: please define one of: KS_STR_ENCODING_ICONV, KS_STR_ENCODING_NONE
-#endif
