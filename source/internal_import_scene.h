@@ -22,6 +22,6 @@
 #include <cstddef>
 #include <cstdint>
 
-extern bool internal_import_scene(brx_asset_import_input_stream_factory* input_stream_factory, char const* file_name, mcrt_vector<brx_asset_import_model_group>& out_groups);
+extern bool internal_import_scene(brx_asset_import_input_stream_factory *input_stream_factory, char const *file_name, mcrt_vector<brx_asset_import_model_surface_group> &out_surface_groups);
 
 #endif

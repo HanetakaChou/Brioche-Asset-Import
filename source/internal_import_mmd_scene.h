@@ -18,20 +18,8 @@
 #ifndef _INTERNAL_IMPORT_MMD_SCENE_H_
 #define _INTERNAL_IMPORT_MMD_SCENE_H_ 1
 
-#include "../../McRT-Malloc/include/mcrt_vector.h"
-#include "../include/brx_asset_import_scene.h"
+#include "brx_asset_import_model_scene.h"
 #include <cstddef>
 #include <cstdint>
-
-
-// GLMMDModel::UpdateAnimation
-// PMXModel::Update
-
-extern bool internal_import_mmd_scene(
-	void const* data_base,
-	size_t data_size,
-	mcrt_vector<mcrt_vector<brx_asset_import_geometry_vertex_position>> &out_morph_target_vertex_position_data,
-	mcrt_vector<brx_asset_import_skeleton_animation_joint_transform> &out_inverse_bind_pose_data
-);
 
 #endif

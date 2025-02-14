@@ -21,8 +21,8 @@
 
 extern "C" brx_asset_import_scene *brx_asset_import_create_scene(brx_asset_import_input_stream_factory *input_stream_factory, char const *file_name)
 {
-    mcrt_vector<brx_asset_import_model_group> groups;
-    internal_import_scene(input_stream_factory, file_name, groups);
+    mcrt_vector<brx_asset_import_model_surface_group> surface_groups;
+    internal_import_scene(input_stream_factory, file_name, surface_groups);
 
     return NULL;
 }
@@ -39,8 +39,8 @@ brx_asset_import_model_surface::brx_asset_import_model_surface(
       m_vertex_joints(std::move(vertex_joints)),
       m_texture_urls(std::move(texture_urls))
 {
-    std::memcpy(this->m_vrm_morph_target_indices, vrm_morph_target_indices, sizeof(uint32_t) * BRX_ASSET_IMPORT_VRM_MORPH_TARGET_NAME_COUNT);
-    std::memcpy(this->m_pbr_texture_incides, pbr_texture_incides, sizeof(uint32_t) * BRX_ASSET_IMPORT_PBR_TEXTURE_NAME_COUNT);
+    std::memcpy(this->m_vrm_morph_target_indices, vrm_morph_target_indices, sizeof(uint32_t) * BRX_MOTION_VRM_MORPH_TARGET_NAME_COUNT);
+    std::memcpy(this->m_pbr_texture_incides, pbr_texture_incides, sizeof(uint32_t) * BRX_ANARI_PBR_TEXTURE_NAME_COUNT);
 }
 
 brx_asset_import_model_surface::~brx_asset_import_model_surface()
@@ -62,7 +62,7 @@ brx_asset_import_geometry_vertex_varying const *brx_asset_import_model_surface::
     return this->m_morph_target_vertex_varyings[morph_target_index].data();
 }
 
-uint32_t brx_asset_import_model_surface::get_vrm_morph_target_name_index(BRX_ASSET_IMPORT_VRM_MORPH_TARGET_NAME vrm_morph_target_name) const
+uint32_t brx_asset_import_model_surface::get_vrm_morph_target_name_index(BRX_MOTION_VRM_MORPH_TARGET_NAME vrm_morph_target_name) const
 {
     return this->m_vrm_morph_target_indices[vrm_morph_target_name];
 }
@@ -82,65 +82,65 @@ char const *brx_asset_import_model_surface::get_texture_url(uint32_t texture_ind
     return this->m_texture_urls[texture_index].data();
 }
 
-uint32_t brx_asset_import_model_surface::get_pbr_texture_index(BRX_ASSET_IMPORT_PBR_TEXTURE_NAME pbr_texture_name) const
+uint32_t brx_asset_import_model_surface::get_pbr_texture_index(BRX_ANARI_PBR_TEXTURE_NAME pbr_texture_name) const
 {
     return this->m_pbr_texture_incides[pbr_texture_name];
 }
 
-brx_asset_import_model_group::brx_asset_import_model_group(
+brx_asset_import_model_surface_group::brx_asset_import_model_surface_group(
     mcrt_vector<brx_asset_import_model_surface> &&surfaces,
     mcrt_vector<mcrt_string> &&skeleton_joint_names,
     mcrt_vector<uint32_t> &&skeleton_joint_parent_indices,
-    mcrt_vector<brx_asset_import_skeleton_animation_joint_transform> &&inverse_bind_pose_skeleton_joint_transforms,
+    mcrt_vector<brx_motion_skeleton_joint_transform> &&skeleton_joint_bind_pose_transforms,
     uint32_t const *vrm_skeleton_joint_indices)
     : m_surfaces(surfaces),
       m_skeleton_joint_names(std::move(skeleton_joint_names)),
       m_skeleton_joint_parent_indices(std::move(skeleton_joint_parent_indices)),
-      m_inverse_bind_pose_skeleton_joint_transforms(std::move(inverse_bind_pose_skeleton_joint_transforms))
+      m_skeleton_joint_bind_pose_transforms(std::move(skeleton_joint_bind_pose_transforms))
 {
-    std::memcpy(this->m_vrm_skeleton_joint_indices, vrm_skeleton_joint_indices, sizeof(uint32_t) * BRX_ASSET_IMPORT_VRM_SKELETON_JOINT_NAME_COUNT);
+    std::memcpy(this->m_vrm_skeleton_joint_indices, vrm_skeleton_joint_indices, sizeof(uint32_t) * BRX_MOTION_VRM_SKELETON_JOINT_NAME_COUNT);
 }
 
-brx_asset_import_model_group::~brx_asset_import_model_group()
+brx_asset_import_model_surface_group::~brx_asset_import_model_surface_group()
 {
 }
 
-uint32_t brx_asset_import_model_group::get_surface_count() const
+uint32_t brx_asset_import_model_surface_group::get_surface_count() const
 {
     return this->m_surfaces.size();
 }
 
-brx_asset_import_surface const *brx_asset_import_model_group::get_surface(uint32_t surface_index) const
+brx_asset_import_surface const *brx_asset_import_model_surface_group::get_surface(uint32_t surface_index) const
 {
     return &this->m_surfaces[surface_index];
 }
 
-uint32_t const brx_asset_import_model_group::get_skeleton_joint_count() const
+uint32_t const brx_asset_import_model_surface_group::get_skeleton_joint_count() const
 {
     return this->m_skeleton_joint_names.size();
 }
 
-char const *brx_asset_import_model_group::get_skeleton_joint_names(uint32_t skeleton_joint_index) const
+char const *brx_asset_import_model_surface_group::get_skeleton_joint_name(uint32_t skeleton_joint_index) const
 {
     return this->m_skeleton_joint_names[skeleton_joint_index].c_str();
 }
 
-uint32_t const *brx_asset_import_model_group::get_skeleton_joint_parent_indices() const
+uint32_t brx_asset_import_model_surface_group::get_skeleton_joint_parent_index(uint32_t skeleton_joint_index) const
 {
-    return this->m_skeleton_joint_parent_indices.data();
+    return this->m_skeleton_joint_parent_indices[skeleton_joint_index];
 }
 
-brx_asset_import_skeleton_animation_joint_transform const *brx_asset_import_model_group::get_inverse_bind_pose_skeleton_joint_transforms() const
+brx_motion_skeleton_joint_transform const *brx_asset_import_model_surface_group::get_skeleton_joint_bind_pose_transform(uint32_t skeleton_joint_index) const
 {
-    return this->m_inverse_bind_pose_skeleton_joint_transforms.data();
+    return &this->m_skeleton_joint_bind_pose_transforms[skeleton_joint_index];
 }
 
-uint32_t brx_asset_import_model_group::get_vrm_skeleton_joint_index(BRX_ASSET_IMPORT_VRM_SKELETON_JOINT_NAME vrm_skeleton_joint_name) const
+uint32_t brx_asset_import_model_surface_group::get_vrm_skeleton_joint_index(BRX_MOTION_VRM_SKELETON_JOINT_NAME vrm_skeleton_joint_name) const
 {
     return this->m_vrm_skeleton_joint_indices[vrm_skeleton_joint_name];
 }
 
-brx_asset_import_model_scene::brx_asset_import_model_scene(mcrt_vector<brx_asset_import_model_group> &&groups) : m_groups(std::move(groups))
+brx_asset_import_model_scene::brx_asset_import_model_scene(mcrt_vector<brx_asset_import_model_surface_group> &&surface_groups) : m_surface_groups(std::move(surface_groups))
 {
 }
 
@@ -148,12 +148,22 @@ brx_asset_import_model_scene::~brx_asset_import_model_scene()
 {
 }
 
-uint32_t brx_asset_import_model_scene::get_group_count() const
+uint32_t brx_asset_import_model_scene::get_surface_group_count() const
 {
-    return this->m_groups.size();
+    return this->m_surface_groups.size();
 }
 
-brx_asset_import_group const *brx_asset_import_model_scene::get_group(uint32_t group_index) const
+brx_asset_import_surface_group const *brx_asset_import_model_scene::get_surface_group(uint32_t group_index) const
 {
-    return &this->m_groups[group_index];
+    return &this->m_surface_groups[group_index];
+}
+
+uint32_t brx_asset_import_model_scene::get_skeleton_animation_count() const
+{
+    return 0U;
+}
+
+brx_asset_import_skeleton_animation *brx_asset_import_model_scene::get_skeleton_animation(uint32_t skeleton_animation_index) const
+{
+    return NULL;
 }

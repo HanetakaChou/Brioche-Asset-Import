@@ -28,9 +28,6 @@
     <Filter Include="thirdparty\mmd">
       <UniqueIdentifier>{85622f8d-1d5b-418e-965d-5237794fbf91}</UniqueIdentifier>
     </Filter>
-    <Filter Include="thirdparty\mmd\kaitai">
-      <UniqueIdentifier>{ddcd010d-23f1-4de0-be68-ac8dfb94f4e7}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\brx_asset_import_input_stream.h">
@@ -72,21 +69,6 @@
     <ClInclude Include="..\include\brx_asset_import_scene.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\thirdparty\mmd\mmd_pmx.h">
-      <Filter>thirdparty\mmd</Filter>
-    </ClInclude>
-    <ClInclude Include="..\thirdparty\mmd\mmd_vmd.h">
-      <Filter>thirdparty\mmd</Filter>
-    </ClInclude>
-    <ClInclude Include="..\thirdparty\mmd\kaitai\exceptions.h">
-      <Filter>thirdparty\mmd\kaitai</Filter>
-    </ClInclude>
-    <ClInclude Include="..\thirdparty\mmd\kaitai\kaitaistream.h">
-      <Filter>thirdparty\mmd\kaitai</Filter>
-    </ClInclude>
-    <ClInclude Include="..\thirdparty\mmd\kaitai\kaitaistruct.h">
-      <Filter>thirdparty\mmd\kaitai</Filter>
-    </ClInclude>
     <ClInclude Include="..\source\brx_asset_import_rgb_image.h">
       <Filter>source</Filter>
     </ClInclude>
@@ -97,6 +79,12 @@
       <Filter>source</Filter>
     </ClInclude>
     <ClInclude Include="..\source\internal_import_scene.h">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\internal_import_mmd_scene.h">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\internal_mmd_pmx.h">
       <Filter>source</Filter>
     </ClInclude>
   </ItemGroup>
@@ -113,7 +101,7 @@
     <ClCompile Include="..\source\internal_import_gltf_scene_old.cpp">
       <Filter>source</Filter>
     </ClCompile>
-    <ClCompile Include="..\source\import_gltf_scene_asset_cgltf.cpp">
+    <ClCompile Include="..\source\internal_import_gltf_scene_cgltf.cpp">
       <Filter>source</Filter>
     </ClCompile>
     <ClCompile Include="..\source\import_pvr_image_asset.cpp">
@@ -137,15 +125,6 @@
     <ClCompile Include="..\source\internal_import_webp_image.cpp">
       <Filter>source</Filter>
     </ClCompile>
-    <ClCompile Include="..\thirdparty\mmd\mmd_pmx.cpp">
-      <Filter>thirdparty\mmd</Filter>
-    </ClCompile>
-    <ClCompile Include="..\thirdparty\mmd\mmd_vmd.cpp">
-      <Filter>thirdparty\mmd</Filter>
-    </ClCompile>
-    <ClCompile Include="..\thirdparty\mmd\kaitai\kaitaistream.cpp">
-      <Filter>thirdparty\mmd\kaitai</Filter>
-    </ClCompile>
     <ClCompile Include="..\source\brx_asset_import_rgb_image.cpp">
       <Filter>source</Filter>
     </ClCompile>
@@ -158,6 +137,15 @@
     <ClCompile Include="..\source\internal_import_scene.cpp">
       <Filter>source</Filter>
     </ClCompile>
+    <ClCompile Include="..\source\internal_import_mmd_scene.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\test_old.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\internal_mmd_pmx.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="..\..\OpenCV\build\x64\vc15\bin\opencv_world3410.dll">
@@ -166,5 +154,13 @@
     <CopyFileToFolders Include="..\..\OpenCV\build\x64\vc15\bin\opencv_ffmpeg3410_64.dll">
       <Filter>thirdparty\OpenCV\bin\x64</Filter>
     </CopyFileToFolders>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\thirdparty\mmd\mmd_pmx.ksy">
+      <Filter>thirdparty\mmd</Filter>
+    </None>
+    <None Include="..\thirdparty\mmd\mmd_vmd.ksy">
+      <Filter>thirdparty\mmd</Filter>
+    </None>
   </ItemGroup>
 </Project>

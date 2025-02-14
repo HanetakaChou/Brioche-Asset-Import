@@ -36,6 +36,7 @@
 #include <iostream>
 #include "../../McRT-Malloc/include/mcrt_deque.h"
 #include "internal_import_gltf_scene.h"
+#include "../../Brioche-Motion/include/brx_motion.h"
 
 extern cgltf_result cgltf_custom_read_file(const struct cgltf_memory_options *memory_options, const struct cgltf_file_options *, const char *path, cgltf_size *size, void **data);
 
@@ -49,189 +50,202 @@ static inline uint32_t sqrt_ceil(uint32_t x);
 
 static inline void decode_morton2(uint32_t const v, uint32_t &x, uint32_t &y);
 
-static inline void import_gltf_scene_mesh_asset(scene_mesh_data *out_mesh_data, int32_t *out_max_joint_index, cgltf_data const *data, cgltf_mesh const *mesh);
+static inline void import_gltf_scene_mesh_asset(scene_mesh_data *out_mesh_data, mcrt_vector<uint32_t> const &internal_node_index_to_skeleton_joint_index, cgltf_data const *data, cgltf_mesh const *mesh, cgltf_skin const *skin);
 
 static inline void import_gltf_scene_mesh_instance_asset(mcrt_vector<cgltf_node const *> &out_mesh_instance_nodes, mcrt_vector<DirectX::XMFLOAT4X4> &out_mesh_instance_node_world_transforms, cgltf_data const *data, cgltf_mesh const *mesh);
 
-static inline void import_gltf_scene_animation_asset(scene_animation_skeleton *out_animated_skeleton, float frame_rate, cgltf_data const *data, cgltf_skin const *skin, cgltf_animation const *animation);
+// Interleaved
+// Frame 0
+//  Joint 0
+//  Joint 1
+//  Joint 2
+// Frame 1
+//  Joint 0
+//  Joint 1
+//  Joint 2
 
 static inline void internal_scene_depth_first_search_traverse(cgltf_data const *data, void (*pfn_user_callback)(cgltf_data const *data, cgltf_node const *current_node, cgltf_node const *parent_node, void *user_data_x, void *user_data_y, void *user_data_z, void *user_data_u, void *user_data_v, void *user_data_w, void *user_data_l, void *user_data_m, void *user_data_n), void *user_data_x, void *user_data_y, void *user_data_z, void *user_data_u, void *user_data_v, void *user_data_w, void *user_data_l, void *user_data_m, void *user_data_n);
 
-static inline void internal_scene_breadth_first_search_traverse(cgltf_data const *data, void (*pfn_user_callback)(cgltf_data const *data, cgltf_node const *current_node, cgltf_node const *parent_node, void *user_data_x, void *user_data_y, void *user_data_z, void *user_data_u, void *user_data_v, void *user_data_w, void *user_data_l, void *user_data_m, void *user_data_n), void *user_data_x, void *user_data_y, void *user_data_z, void *user_data_u, void *user_data_v, void *user_data_w, void *user_data_l, void *user_data_m, void *user_data_n);
+extern void internal_import_skeleton(cgltf_data const *data, mcrt_vector<DirectX::XMFLOAT4X4> &out_internal_node_world_transforms, mcrt_vector<mcrt_vector<cgltf_node const *>> &out_internal_mesh_instance_nodes, mcrt_vector<uint32_t> &out_internal_node_index_to_skeleton_joint_index, mcrt_vector<mcrt_string> &out_skeleton_joint_names, mcrt_vector<uint32_t> &out_skeleton_joint_parent_indices, mcrt_vector<brx_motion_skeleton_joint_transform> &out_skeleton_bind_pose_joint_transforms, uint32_t *out_vrm_skeleton_joint_names);
 
-extern void internal_import_skeleton(cgltf_data const *data, mcrt_vector<DirectX::XMFLOAT4X4> &out_internal_node_world_transforms, mcrt_vector<mcrt_vector<cgltf_node const *>> &out_internal_mesh_instance_nodes, mcrt_vector<uint32_t> &out_internal_node_index_to_skeleton_joint_index, mcrt_vector<mcrt_string> &out_skeleton_joint_names, mcrt_vector<uint32_t> &out_skeleton_joint_parent_indices, mcrt_vector<brx_asset_import_skeleton_animation_joint_transform> &out_inverse_bind_pose_skeleton_joint_transforms, uint32_t *out_vrm_skeleton_joint_names);
+extern void internal_import_skeleton_animation(cgltf_data const *data, cgltf_animation const *animation, uint32_t animation_frame_rate, mcrt_vector<mcrt_string> &out_skeleton_joint_names, mcrt_vector<brx_motion_skeleton_joint_transform> &out_skeleton_animation_joint_transforms);
 
-mcrt_vector<uint32_t> internal_node_index_to_skeleton_joint_index;
+// FLT_EPSILON
+static inline constexpr float const INTERNAL_SCALE_EPSILON = 7E-5F;
 
-extern bool import_gltf_scene_asset(mcrt_vector<scene_mesh_data> &out_total_mesh_data, float frame_rate, brx_asset_import_input_stream_factory *input_stream_factory, char const *path)
+extern bool import_gltf_scene_asset_old(mcrt_vector<scene_mesh_data> &out_total_mesh_data, float frame_rate, brx_asset_import_input_stream_factory *input_stream_factory, char const *path)
 {
     // TODO: merge primitives with the same material from different meshes (consider multiple instances)
 
-    cgltf_data *data = NULL;
+    brx_motion_skeleton_animation *test_skeleton_animation;
+    size_t animation_frame_count;
     {
-        cgltf_options options = {};
-        options.memory.alloc_func = cgltf_custom_alloc;
-        options.memory.free_func = cgltf_custom_free;
-        options.file.read = cgltf_custom_read_file;
-        options.file.release = cgltf_custom_file_release;
-        options.file.user_data = input_stream_factory;
+        char const* animation_path = "C:\\Users\\HanetakaChou\\Documents\\GitHub\\glTF-Assets\\sparkle-fictitious-game-test.gltf";
 
-        cgltf_result result_parse_file = cgltf_parse_file(&options, path, &data);
-        if (cgltf_result_success != result_parse_file)
+        cgltf_data *data = NULL;
         {
-            return false;
+            cgltf_options options = {};
+            options.memory.alloc_func = cgltf_custom_alloc;
+            options.memory.free_func = cgltf_custom_free;
+            options.file.read = cgltf_custom_read_file;
+            options.file.release = cgltf_custom_file_release;
+            options.file.user_data = input_stream_factory;
+
+            cgltf_result result_parse_file = cgltf_parse_file(&options, animation_path, &data);
+            if (cgltf_result_success != result_parse_file)
+            {
+                return false;
+            }
+
+            cgltf_result result_load_buffers = cgltf_load_buffers(&options, data, animation_path);
+            if (cgltf_result_success != result_load_buffers)
+            {
+                cgltf_free(data);
+                return false;
+            }
         }
 
-        cgltf_result result_load_buffers = cgltf_load_buffers(&options, data, path);
-        if (cgltf_result_success != result_load_buffers)
+        cgltf_animation const *animation = ((data->animations_count > 0) ? (&data->animations[0]) : NULL);
+
+        test_skeleton_animation = NULL;
         {
-            cgltf_free(data);
-            return false;
+            // TODO: remove internal_node_index_to_skeleton_joint_index and use animation retargeting
+            mcrt_vector<mcrt_string> skeleton_joint_names;
+            mcrt_vector<brx_motion_skeleton_joint_transform> skeleton_animation_joint_transforms;
+            internal_import_skeleton_animation(data, animation, frame_rate, skeleton_joint_names, skeleton_animation_joint_transforms);
+
+            size_t const skeleton_joint_count = skeleton_joint_names.size();
+            assert(0U == (skeleton_animation_joint_transforms.size() % skeleton_joint_names.size()));
+            animation_frame_count = skeleton_animation_joint_transforms.size() / skeleton_joint_names.size();
+
+            mcrt_vector<char const *> _internal_skeleton_joint_names(static_cast<size_t>(skeleton_joint_count));
+            for (size_t skeleton_joint_index = 0; skeleton_joint_index < skeleton_joint_count; ++skeleton_joint_index)
+            {
+                _internal_skeleton_joint_names[skeleton_joint_index] = skeleton_joint_names[skeleton_joint_index].c_str();
+            }
+            test_skeleton_animation = brx_motion_create_skeleton_animation(skeleton_joint_count, _internal_skeleton_joint_names.data(), frame_rate, animation_frame_count, skeleton_animation_joint_transforms.data());
         }
+
+        cgltf_free(data);
     }
 
-    mcrt_vector<DirectX::XMFLOAT4X4> internal_node_world_transforms;
-    mcrt_vector<mcrt_vector<cgltf_node const *>> internal_mesh_instance_nodes;
-    mcrt_vector<mcrt_string> skeleton_joint_names;
-    mcrt_vector<uint32_t> skeleton_joint_parent_indices;
-    mcrt_vector<brx_asset_import_skeleton_animation_joint_transform> inverse_bind_pose_skeleton_joint_transforms;
-    uint32_t vrm_skeleton_joint_indices[BRX_ASSET_IMPORT_VRM_SKELETON_JOINT_NAME_COUNT];
-    mcrt_vector<uint32_t> internal_node_index_to_skeleton_joint_index;
-    internal_import_skeleton(data, internal_node_world_transforms, internal_mesh_instance_nodes, internal_node_index_to_skeleton_joint_index, skeleton_joint_names, skeleton_joint_parent_indices, inverse_bind_pose_skeleton_joint_transforms, &vrm_skeleton_joint_indices[0]);
-
-    out_total_mesh_data.resize(1);
+    brx_motion_skeleton *test_skeleton;
     size_t mesh_index = 0;
-
-    int32_t max_joint_index;
-    import_gltf_scene_mesh_asset(&out_total_mesh_data[mesh_index], &max_joint_index, data, &data->meshes[mesh_index]);
-
-    mcrt_vector<cgltf_node const *> mesh_instance_nodes;
-    mcrt_vector<DirectX::XMFLOAT4X4> mesh_instance_node_world_transforms;
-    import_gltf_scene_mesh_instance_asset(mesh_instance_nodes, mesh_instance_node_world_transforms, data, &data->meshes[mesh_index]);
-
-    out_total_mesh_data[mesh_index].m_instances.resize(1U);
     size_t mesh_instance_index = 0;
-
-    cgltf_animation const *animation = ((data->animations_count > 0) ? (&data->animations[0]) : NULL);
-
-#ifndef NDEBUG
-    // glTF Validator
-    // NODE_SKINNED_MESH_NON_ROOT
-    // NODE_SKINNED_MESH_LOCAL_TRANSFORMS
-    DirectX::XMVECTOR out_instance_node_world_scale;
-    DirectX::XMVECTOR out_instance_node_world_rotation;
-    DirectX::XMVECTOR out_instance_node_world_translation;
-    DirectX::XMMatrixDecompose(&out_instance_node_world_scale, &out_instance_node_world_rotation, &out_instance_node_world_translation, DirectX::XMLoadFloat4x4(&mesh_instance_node_world_transforms[mesh_instance_index]));
-
-    // FLT_EPSILON
-    constexpr float const scale_epsilon = 1E-5F;
-    assert(DirectX::XMVector3EqualInt(DirectX::XMVectorTrueInt(), DirectX::XMVectorLess(DirectX::XMVectorAbs(DirectX::XMVectorSubtract(out_instance_node_world_scale, DirectX::XMVectorSplatOne())), DirectX::XMVectorReplicate(scale_epsilon))));
-    constexpr float const rotation_epsilon = 1E-5F;
-    assert(DirectX::XMVector3EqualInt(DirectX::XMVectorTrueInt(), DirectX::XMVectorLess(DirectX::XMVectorAbs(DirectX::XMVectorSubtract(out_instance_node_world_rotation, DirectX::XMQuaternionIdentity())), DirectX::XMVectorReplicate(rotation_epsilon))));
-    constexpr float const translation_epsilon = 1E-5F;
-    assert(DirectX::XMVector3EqualInt(DirectX::XMVectorTrueInt(), DirectX::XMVectorLess(DirectX::XMVectorAbs(DirectX::XMVectorSubtract(out_instance_node_world_translation, DirectX::XMVectorZero())), DirectX::XMVectorReplicate(translation_epsilon))));
-#endif
-    DirectX::XMStoreFloat4x4(&out_total_mesh_data[mesh_index].m_instances[mesh_instance_index].m_model_transform, DirectX::XMMatrixIdentity());
-
-    import_gltf_scene_animation_asset(&out_total_mesh_data[mesh_index].m_instances[mesh_instance_index].m_animation_skeleton, frame_rate, data, mesh_instance_nodes[0]->skin, animation);
-
-#if 0
-    out_total_mesh_data.resize(data->meshes_count);
-
-    for (size_t mesh_index = 0; mesh_index < data->meshes_count; ++mesh_index)
     {
-        scene_mesh_data &out_mesh_data = out_total_mesh_data[mesh_index];
-        int32_t max_joint_index;
-        import_gltf_scene_mesh_asset(&out_mesh_data, &max_joint_index, data, &data->meshes[mesh_index]);
-
-        mcrt_vector<cgltf_node const *> mesh_instance_nodes;
-        mcrt_vector<DirectX::XMFLOAT4X4> mesh_instance_node_world_transforms;
-        import_gltf_scene_mesh_instance_asset(mesh_instance_nodes, mesh_instance_node_world_transforms, data, &data->meshes[mesh_index]);
-
-        size_t const mesh_instance_count = mesh_instance_nodes.size();
-        assert(mesh_instance_node_world_transforms.size() == mesh_instance_count);
-
-        mcrt_vector<scene_mesh_instance_data> &out_mesh_instance_data = out_mesh_data.m_instances;
-        if (!out_mesh_data.m_skinned)
+        cgltf_data *data = NULL;
         {
-            assert(max_joint_index < 0);
+            cgltf_options options = {};
+            options.memory.alloc_func = cgltf_custom_alloc;
+            options.memory.free_func = cgltf_custom_free;
+            options.file.read = cgltf_custom_read_file;
+            options.file.release = cgltf_custom_file_release;
+            options.file.user_data = input_stream_factory;
 
-            out_mesh_instance_data.resize(mesh_instance_count);
-
-            for (size_t mesh_instance_index = 0; mesh_instance_index < mesh_instance_count; ++mesh_instance_index)
+            cgltf_result result_parse_file = cgltf_parse_file(&options, path, &data);
+            if (cgltf_result_success != result_parse_file)
             {
-                assert(NULL == mesh_instance_nodes[mesh_instance_index]->skin);
-                out_mesh_instance_data[mesh_instance_index].m_model_transform = mesh_instance_node_world_transforms[mesh_instance_index];
+                return false;
+            }
+
+            cgltf_result result_load_buffers = cgltf_load_buffers(&options, data, path);
+            if (cgltf_result_success != result_load_buffers)
+            {
+                cgltf_free(data);
+                return false;
             }
         }
-        else
+
+        mcrt_vector<uint32_t> internal_node_index_to_skeleton_joint_index;
+        mcrt_vector<mcrt_vector<cgltf_node const *>> internal_mesh_instances;
+        test_skeleton = NULL;
         {
-            assert(max_joint_index >= 0);
+            mcrt_vector<DirectX::XMFLOAT4X4> internal_node_world_transforms;
+            mcrt_vector<mcrt_string> _skeleton_joint_names;
+            mcrt_vector<uint32_t> skeleton_joint_parent_indices;
+            mcrt_vector<brx_motion_skeleton_joint_transform> _skeleton_bind_pose_joint_transforms;
+            uint32_t vrm_skeleton_joint_indices[BRX_MOTION_VRM_SKELETON_JOINT_NAME_COUNT];
+            internal_import_skeleton(data, internal_node_world_transforms, internal_mesh_instances, internal_node_index_to_skeleton_joint_index, _skeleton_joint_names, skeleton_joint_parent_indices, _skeleton_bind_pose_joint_transforms, &vrm_skeleton_joint_indices[0]);
 
-            out_mesh_instance_data.resize(mesh_instance_count);
+            int huhu = _skeleton_bind_pose_joint_transforms.size();
 
-            for (size_t mesh_instance_index = 0; mesh_instance_index < mesh_instance_count; ++mesh_instance_index)
+            size_t const _skeleton_joint_count = _skeleton_joint_names.size();
+
+            mcrt_vector<char const *> _internal_skeleton_joint_names(static_cast<size_t>(_skeleton_joint_count));
+            for (size_t skeleton_joint_index = 0; skeleton_joint_index < _skeleton_joint_count; ++skeleton_joint_index)
             {
-                cgltf_skin const *skin = mesh_instance_nodes[mesh_instance_index]->skin;
-                if (NULL != skin)
-                {
-                    // TODO: support multiple animations
-                    cgltf_animation const *animation = ((data->animations_count > 0) ? (&data->animations[0]) : NULL);
-
-#ifndef NDEBUG
-                    // glTF Validator
-                    // NODE_SKINNED_MESH_NON_ROOT
-                    // NODE_SKINNED_MESH_LOCAL_TRANSFORMS
-                    DirectX::XMVECTOR out_instance_node_world_scale;
-                    DirectX::XMVECTOR out_instance_node_world_rotation;
-                    DirectX::XMVECTOR out_instance_node_world_translation;
-                    DirectX::XMMatrixDecompose(&out_instance_node_world_scale, &out_instance_node_world_rotation, &out_instance_node_world_translation, DirectX::XMLoadFloat4x4(&mesh_instance_node_world_transforms[mesh_instance_index]));
-
-                    // FLT_EPSILON
-                    constexpr float const scale_epsilon = 1E-5F;
-                    assert(DirectX::XMVector3EqualInt(DirectX::XMVectorTrueInt(), DirectX::XMVectorLess(DirectX::XMVectorAbs(DirectX::XMVectorSubtract(out_instance_node_world_scale, DirectX::XMVectorSplatOne())), DirectX::XMVectorReplicate(scale_epsilon))));
-                    constexpr float const rotation_epsilon = 1E-5F;
-                    assert(DirectX::XMVector3EqualInt(DirectX::XMVectorTrueInt(), DirectX::XMVectorLess(DirectX::XMVectorAbs(DirectX::XMVectorSubtract(out_instance_node_world_rotation, DirectX::XMQuaternionIdentity())), DirectX::XMVectorReplicate(rotation_epsilon))));
-                    constexpr float const translation_epsilon = 1E-5F;
-                    assert(DirectX::XMVector3EqualInt(DirectX::XMVectorTrueInt(), DirectX::XMVectorLess(DirectX::XMVectorAbs(DirectX::XMVectorSubtract(out_instance_node_world_translation, DirectX::XMVectorZero())), DirectX::XMVectorReplicate(translation_epsilon))));
-#endif
-                    DirectX::XMStoreFloat4x4(&out_mesh_instance_data[mesh_instance_index].m_model_transform, DirectX::XMMatrixIdentity());
-
-                    import_gltf_scene_animation_asset(&out_mesh_instance_data[mesh_instance_index].m_animation_skeleton, frame_rate, data, skin, animation);
-                }
-                else
-                {
-                    // TODO: This should NOT happen
-                    assert(0);
-
-                    out_mesh_instance_data[mesh_instance_index].m_model_transform = mesh_instance_node_world_transforms[mesh_instance_index];
-
-                    out_mesh_instance_data[mesh_instance_index].m_animation_skeleton.init(1, (max_joint_index + 1));
-
-                    DirectX::XMFLOAT4 quaternion;
-                    DirectX::XMFLOAT3 translation;
-                    DirectX::XMStoreFloat4(&quaternion, DirectX::XMQuaternionIdentity());
-                    DirectX::XMStoreFloat3(&translation, DirectX::XMVectorZero());
-
-                    for (int32_t joint_index = 0; joint_index < (max_joint_index + 1); ++joint_index)
-                    {
-                        out_mesh_instance_data[mesh_instance_index].m_animation_skeleton.set_transform(0, joint_index, quaternion, translation);
-                    }
-                }
+                _internal_skeleton_joint_names[skeleton_joint_index] = _skeleton_joint_names[skeleton_joint_index].c_str();
             }
+            test_skeleton = brx_motion_create_skeleton(_skeleton_joint_count, _internal_skeleton_joint_names.data(), skeleton_joint_parent_indices.data(), _skeleton_bind_pose_joint_transforms.data(), &vrm_skeleton_joint_indices[0]);
+        }
+
+        out_total_mesh_data.resize(1);
+
+        out_total_mesh_data[mesh_index].m_instances.resize(1U);
+
+        import_gltf_scene_mesh_asset(&out_total_mesh_data[mesh_index], internal_node_index_to_skeleton_joint_index, data, &data->meshes[mesh_index], internal_mesh_instances[mesh_index][mesh_instance_index]->skin);
+
+        out_total_mesh_data[mesh_index].m_skinned = true;
+
+        DirectX::XMStoreFloat4x4(&out_total_mesh_data[mesh_index].m_instances[mesh_instance_index].m_model_transform, DirectX::XMMatrixIdentity());
+
+        cgltf_free(data);
+    }
+
+    brx_motion_skeleton_animation_instance *test_skeleton_animation_instance = brx_motion_create_skeleton_animation_instance(test_skeleton_animation, test_skeleton);
+
+    uint32_t const skeleton_joint_count = test_skeleton->get_skeleton_joint_count();
+
+    brx_motion_skeleton_joint_transform const *const skeleton_bind_pose_joint_transforms = test_skeleton->get_skeleton_bind_pose_joint_transforms();
+
+    brx_motion_skeleton_joint_transform const *const skeleton_animation_joint_transforms = test_skeleton_animation_instance->get_skeleton_animation_joint_transforms();
+
+    brx_motion_destory_skeleton_animation(test_skeleton_animation);
+
+    out_total_mesh_data[mesh_index].m_instances[mesh_instance_index].m_animation_skeleton.init(animation_frame_count, skeleton_joint_count);
+
+    for (size_t animation_frame_index = 0U; animation_frame_index < animation_frame_count; ++animation_frame_index)
+    {
+        for (size_t skeleton_joint_index = 0; skeleton_joint_index < skeleton_joint_count; ++skeleton_joint_index)
+        {
+            DirectX::XMMATRIX inverse_bind_pose_transform = DirectX::XMMatrixInverse(
+                NULL,
+                DirectX::XMMatrixMultiply(
+                    DirectX::XMMatrixRotationQuaternion(DirectX::XMLoadFloat4(reinterpret_cast<DirectX::XMFLOAT4 const *>(&skeleton_bind_pose_joint_transforms[skeleton_joint_index].m_rotation[0]))),
+                    DirectX::XMMatrixTranslationFromVector(DirectX::XMLoadFloat3(reinterpret_cast<DirectX::XMFLOAT3 const *>(&skeleton_bind_pose_joint_transforms[skeleton_joint_index].m_translation[0])))));
+
+            DirectX::XMMATRIX animation_transform = DirectX::XMMatrixMultiply(
+                DirectX::XMMatrixRotationQuaternion(DirectX::XMLoadFloat4(reinterpret_cast<DirectX::XMFLOAT4 const *>(&skeleton_animation_joint_transforms[skeleton_joint_count * animation_frame_index + skeleton_joint_index].m_rotation[0]))),
+                DirectX::XMMatrixTranslationFromVector(DirectX::XMLoadFloat3(reinterpret_cast<DirectX::XMFLOAT3 const *>(&skeleton_animation_joint_transforms[skeleton_joint_count * animation_frame_index + skeleton_joint_index].m_translation[0]))));
+
+            DirectX::XMMATRIX skin_transform = DirectX::XMMatrixMultiply(inverse_bind_pose_transform, animation_transform);
+
+            DirectX::XMVECTOR skin_scale;
+            DirectX::XMVECTOR skin_rotation;
+            DirectX::XMVECTOR skin_translation;
+            DirectX::XMMatrixDecompose(&skin_scale, &skin_rotation, &skin_translation, skin_transform);
+
+            // FLT_EPSILON
+            assert(DirectX::XMVector3EqualInt(DirectX::XMVectorTrueInt(), DirectX::XMVectorLess(DirectX::XMVectorAbs(DirectX::XMVectorSubtract(skin_scale, DirectX::XMVectorSplatOne())), DirectX::XMVectorReplicate(INTERNAL_SCALE_EPSILON))));
+
+            DirectX::XMFLOAT4 float_skin_rotation;
+            DirectX::XMFLOAT3 float_skin_translation;
+            DirectX::XMStoreFloat4(&float_skin_rotation, skin_rotation);
+            DirectX::XMStoreFloat3(&float_skin_translation, skin_translation);
+
+            out_total_mesh_data[mesh_index].m_instances[mesh_instance_index].m_animation_skeleton.set_transform(animation_frame_index, skeleton_joint_index, float_skin_rotation, float_skin_translation);
         }
     }
-#endif
 
-    cgltf_free(data);
+    brx_motion_destory_skeleton(test_skeleton);
+
+    brx_motion_destory_skeleton_animation_instance(test_skeleton_animation_instance);
 
     return true;
 }
 
-static void import_gltf_scene_mesh_asset(scene_mesh_data *out_mesh_data, int32_t *out_max_joint_index, cgltf_data const *data, cgltf_mesh const *mesh)
+static inline void import_gltf_scene_mesh_asset(scene_mesh_data *out_mesh_data, mcrt_vector<uint32_t> const &internal_node_index_to_skeleton_joint_index, cgltf_data const *data, cgltf_mesh const *mesh, cgltf_skin const *skin)
 {
-    (*out_max_joint_index) = -1;
-
     assert(1U == data->skins_count);
 
     mcrt_unordered_map<size_t, size_t> subset_material_indices;
@@ -595,7 +609,6 @@ static void import_gltf_scene_mesh_asset(scene_mesh_data *out_mesh_data, int32_t
                     }
                 }
 
-                uint16_t raw_max_joint_index = 0U;
                 mcrt_vector<DirectX::PackedVector::XMUSHORT4> raw_joint_indices((NULL != joints_accessor && NULL != weights_accessor) ? vertex_count : static_cast<size_t>(0U));
                 mcrt_vector<DirectX::XMFLOAT4> raw_joint_weights((NULL != joints_accessor && NULL != weights_accessor) ? vertex_count : static_cast<size_t>(0U));
                 {
@@ -630,12 +643,16 @@ static void import_gltf_scene_mesh_asset(scene_mesh_data *out_mesh_data, int32_t
                                     uint16_t raw_joint_index_z = static_cast<uint16_t>(joint_indices_ubyte4[2]);
                                     uint16_t raw_joint_index_w = static_cast<uint16_t>(joint_indices_ubyte4[3]);
 
-                                    raw_max_joint_index = std::max(raw_max_joint_index, raw_joint_index_x);
-                                    raw_max_joint_index = std::max(raw_max_joint_index, raw_joint_index_y);
-                                    raw_max_joint_index = std::max(raw_max_joint_index, raw_joint_index_z);
-                                    raw_max_joint_index = std::max(raw_max_joint_index, raw_joint_index_w);
+                                    uint32_t const skeleton_joint_index_x = internal_node_index_to_skeleton_joint_index[cgltf_node_index(data, skin->joints[raw_joint_index_x])];
+                                    uint32_t const skeleton_joint_index_y = internal_node_index_to_skeleton_joint_index[cgltf_node_index(data, skin->joints[raw_joint_index_y])];
+                                    uint32_t const skeleton_joint_index_z = internal_node_index_to_skeleton_joint_index[cgltf_node_index(data, skin->joints[raw_joint_index_z])];
+                                    uint32_t const skeleton_joint_index_w = internal_node_index_to_skeleton_joint_index[cgltf_node_index(data, skin->joints[raw_joint_index_w])];
+                                    assert(skeleton_joint_index_x <= static_cast<uint32_t>(UINT16_MAX));
+                                    assert(skeleton_joint_index_y <= static_cast<uint32_t>(UINT16_MAX));
+                                    assert(skeleton_joint_index_z <= static_cast<uint32_t>(UINT16_MAX));
+                                    assert(skeleton_joint_index_w <= static_cast<uint32_t>(UINT16_MAX));
 
-                                    raw_joint_indices[vertex_index] = DirectX::PackedVector::XMUSHORT4(raw_joint_index_x, raw_joint_index_y, raw_joint_index_z, raw_joint_index_w);
+                                    raw_joint_indices[vertex_index] = DirectX::PackedVector::XMUSHORT4(static_cast<uint16_t>(skeleton_joint_index_x), static_cast<uint16_t>(skeleton_joint_index_y), static_cast<uint16_t>(skeleton_joint_index_z), static_cast<uint16_t>(skeleton_joint_index_w));
                                 }
                             }
                             break;
@@ -652,12 +669,16 @@ static void import_gltf_scene_mesh_asset(scene_mesh_data *out_mesh_data, int32_t
                                     uint16_t raw_joint_index_z = joint_indices_ushort4[2];
                                     uint16_t raw_joint_index_w = joint_indices_ushort4[3];
 
-                                    raw_max_joint_index = std::max(raw_max_joint_index, raw_joint_index_x);
-                                    raw_max_joint_index = std::max(raw_max_joint_index, raw_joint_index_y);
-                                    raw_max_joint_index = std::max(raw_max_joint_index, raw_joint_index_z);
-                                    raw_max_joint_index = std::max(raw_max_joint_index, raw_joint_index_w);
+                                    uint32_t const skeleton_joint_index_x = internal_node_index_to_skeleton_joint_index[cgltf_node_index(data, skin->joints[raw_joint_index_x])];
+                                    uint32_t const skeleton_joint_index_y = internal_node_index_to_skeleton_joint_index[cgltf_node_index(data, skin->joints[raw_joint_index_y])];
+                                    uint32_t const skeleton_joint_index_z = internal_node_index_to_skeleton_joint_index[cgltf_node_index(data, skin->joints[raw_joint_index_z])];
+                                    uint32_t const skeleton_joint_index_w = internal_node_index_to_skeleton_joint_index[cgltf_node_index(data, skin->joints[raw_joint_index_w])];
+                                    assert(skeleton_joint_index_x <= static_cast<uint32_t>(UINT16_MAX));
+                                    assert(skeleton_joint_index_y <= static_cast<uint32_t>(UINT16_MAX));
+                                    assert(skeleton_joint_index_z <= static_cast<uint32_t>(UINT16_MAX));
+                                    assert(skeleton_joint_index_w <= static_cast<uint32_t>(UINT16_MAX));
 
-                                    raw_joint_indices[vertex_index] = DirectX::PackedVector::XMUSHORT4(raw_joint_index_x, raw_joint_index_y, raw_joint_index_z, raw_joint_index_w);
+                                    raw_joint_indices[vertex_index] = DirectX::PackedVector::XMUSHORT4(static_cast<uint16_t>(skeleton_joint_index_x), static_cast<uint16_t>(skeleton_joint_index_y), static_cast<uint16_t>(skeleton_joint_index_z), static_cast<uint16_t>(skeleton_joint_index_w));
                                 }
                             }
                             break;
@@ -911,7 +932,7 @@ static void import_gltf_scene_mesh_asset(scene_mesh_data *out_mesh_data, int32_t
                 // Vertex Joint Binding
                 if ((!raw_joint_indices.empty()) && (!raw_joint_weights.empty()))
                 {
-                    (*out_max_joint_index) = std::max((*out_max_joint_index), static_cast<int32_t>(raw_max_joint_index));
+                    // (*out_max_joint_index) = std::max((*out_max_joint_index), static_cast<int32_t>(raw_max_joint_index));
 
                     assert(out_subset_vertex_index_offset == out_subset_data->m_vertex_joint_binding.size());
                     out_subset_data->m_vertex_joint_binding.resize(out_subset_vertex_index_offset + vertex_count);
@@ -935,7 +956,7 @@ static void import_gltf_scene_mesh_asset(scene_mesh_data *out_mesh_data, int32_t
         }
     }
 
-    if ((*out_max_joint_index) < 0)
+    if (false) // ((*out_max_joint_index) < 0)
     {
         out_mesh_data->m_skinned = false;
 
@@ -1039,381 +1060,6 @@ static void import_gltf_scene_mesh_instance_asset(mcrt_vector<cgltf_node const *
         NULL);
 }
 
-static void import_gltf_scene_animation_asset(scene_animation_skeleton *out_animated_skeleton, float frame_rate, cgltf_data const *data, cgltf_skin const *skin, cgltf_animation const *animation)
-{
-    // Skin
-    // https://github.com/KhronosGroup/glTF-Sample-Renderer/blob/main/source/Renderer/shaders/animation.glsl
-    // defined(HAS_WEIGHTS_0_VEC4) && defined(HAS_JOINTS_0_VEC4)
-    // defined(HAS_WEIGHTS_1_VEC4) && defined(HAS_JOINTS_1_VEC4)
-    size_t const joint_count = skin->joints_count;
-
-    // Due to the hierarchy, we can NOT know which nodes are really influencing the skeleton joints. We have to consider all nodes.
-    mcrt_vector<DirectX::XMFLOAT3> node_local_scales(static_cast<size_t>(data->nodes_count));
-    mcrt_vector<DirectX::XMFLOAT4> node_local_rotations(static_cast<size_t>(data->nodes_count));
-    mcrt_vector<DirectX::XMFLOAT3> node_local_translations(static_cast<size_t>(data->nodes_count));
-
-    for (size_t node_index = 0; node_index < data->nodes_count; ++node_index)
-    {
-        cgltf_node const *node = &data->nodes[node_index];
-
-        if (node->has_matrix)
-        {
-            DirectX::XMVECTOR out_node_local_scale;
-            DirectX::XMVECTOR out_node_local_rotation;
-            DirectX::XMVECTOR out_node_local_translation;
-            DirectX::XMMatrixDecompose(&out_node_local_scale, &out_node_local_rotation, &out_node_local_translation, DirectX::XMLoadFloat4x4(reinterpret_cast<DirectX::XMFLOAT4X4 const *>(&node->matrix)));
-
-            DirectX::XMStoreFloat3(&node_local_scales[node_index], out_node_local_scale);
-            DirectX::XMStoreFloat4(&node_local_rotations[node_index], out_node_local_rotation);
-            DirectX::XMStoreFloat3(&node_local_translations[node_index], out_node_local_translation);
-        }
-        else
-        {
-            if (node->has_scale)
-            {
-                node_local_scales[node_index].x = node->scale[0];
-                node_local_scales[node_index].y = node->scale[1];
-                node_local_scales[node_index].z = node->scale[2];
-            }
-            else
-            {
-                DirectX::XMStoreFloat3(&node_local_scales[node_index], DirectX::XMVectorSplatOne());
-            }
-
-            if (node->has_rotation)
-            {
-                node_local_rotations[node_index].x = node->rotation[0];
-                node_local_rotations[node_index].y = node->rotation[1];
-                node_local_rotations[node_index].z = node->rotation[2];
-                node_local_rotations[node_index].w = node->rotation[3];
-            }
-            else
-            {
-                DirectX::XMStoreFloat4(&node_local_rotations[node_index], DirectX::XMQuaternionIdentity());
-            }
-
-            if (node->has_translation)
-            {
-                node_local_translations[node_index].x = node->translation[0];
-                node_local_translations[node_index].y = node->translation[1];
-                node_local_translations[node_index].z = node->translation[2];
-            }
-            else
-            {
-                DirectX::XMStoreFloat3(&node_local_translations[node_index], DirectX::XMVectorZero());
-            }
-        }
-    }
-
-    // Animation
-    // https://github.com/KhronosGroup/glTF-Sample-Renderer/blob/main/source/gltf/animation.js
-    // gltfAnimation.advance
-    // https://github.com/KhronosGroup/glTF-Sample-Renderer/blob/main/source/gltf/scene.js
-    // applyTransformHierarchy
-    // https://github.com/KhronosGroup/glTF-Sample-Renderer/blob/main/source/gltf/skin.js
-    // gltfSkin.computeJoints
-    size_t const channel_count = (NULL != animation) ? animation->channels_count : 0;
-
-    float animation_max_time = -1.0;
-    mcrt_vector<float> channel_min_key_times(channel_count, -1.0F);
-    mcrt_vector<float> channel_max_key_times(channel_count, -1.0F);
-    for (size_t channel_index = 0; channel_index < channel_count; ++channel_index)
-    {
-        float channel_min_key_time = -1.0;
-        float channel_max_key_time = -1.0;
-        {
-            cgltf_accessor const *channel_time_accessor = animation->channels[channel_index].sampler->input;
-
-            assert(cgltf_type_scalar == channel_time_accessor->type);
-            assert(cgltf_component_type_r_32f == channel_time_accessor->component_type);
-            assert(sizeof(float) == channel_time_accessor->stride);
-
-            cgltf_bool result_accessor_read_float_min = cgltf_accessor_read_float(channel_time_accessor, 0, &channel_min_key_time, 1);
-            assert(result_accessor_read_float_min);
-
-            cgltf_bool result_accessor_read_float_max = cgltf_accessor_read_float(channel_time_accessor, channel_time_accessor->count - 1, &channel_max_key_time, 1);
-            assert(result_accessor_read_float_max);
-        }
-
-        channel_min_key_times[channel_index] = channel_min_key_time;
-        channel_max_key_times[channel_index] = channel_max_key_time;
-        animation_max_time = std::max(channel_max_key_time, animation_max_time);
-    }
-
-    size_t const frame_count = (NULL != animation) ? static_cast<size_t>(frame_rate * animation_max_time) : 1;
-
-    out_animated_skeleton->init(frame_count, joint_count);
-
-    mcrt_vector<float> channel_previous_sample_times(channel_count, 0.0F);
-    mcrt_vector<size_t> channel_previous_key_indices(channel_count, 0);
-    for (size_t frame_index = 0; frame_index < frame_count; ++frame_index)
-    {
-        if (NULL != animation)
-        {
-            float const frame_sample_time = static_cast<float>((0.5 / static_cast<double>(frame_rate)) + (1.0 / static_cast<double>(frame_rate)) * static_cast<double>(frame_index));
-            assert(frame_sample_time < animation_max_time);
-
-            for (size_t channel_index = 0; channel_index < channel_count; ++channel_index)
-            {
-                cgltf_animation_channel const *channel = &animation->channels[channel_index];
-
-                cgltf_accessor const *channel_time_accessor = channel->sampler->input;
-
-                assert(cgltf_type_scalar == channel_time_accessor->type);
-                assert(cgltf_component_type_r_32f == channel_time_accessor->component_type);
-                assert(sizeof(float) == channel_time_accessor->stride);
-
-                size_t const channel_key_count = channel_time_accessor->count;
-                assert(channel_key_count >= 1);
-
-                float const channel_sample_time = std::min(std::max(frame_sample_time, channel_min_key_times[channel_index]), channel_max_key_times[channel_index]);
-
-                if (channel_previous_sample_times[channel_index] > channel_sample_time)
-                {
-                    assert(0);
-                    channel_previous_key_indices[channel_index] = 0;
-                }
-
-                channel_previous_sample_times[channel_index] = channel_sample_time;
-
-                float channel_previous_key_time = -1.0;
-                float channel_next_key_time = channel_max_key_times[channel_index];
-                size_t next_key_index = -1;
-                for (size_t channel_key_index = channel_previous_key_indices[channel_index]; channel_key_index < channel_key_count; ++channel_key_index)
-                {
-                    float channel_key_time = -1.0;
-                    {
-                        cgltf_bool result_accessor_read_float = cgltf_accessor_read_float(channel_time_accessor, channel_key_index, &channel_key_time, 1);
-                        assert(result_accessor_read_float);
-                    }
-
-                    if (channel_sample_time <= channel_key_time)
-                    {
-                        assert(channel_previous_key_time >= 0.0);
-                        assert(channel_max_key_times[channel_index] == channel_next_key_time);
-                        assert(-1 == next_key_index);
-                        channel_next_key_time = channel_key_time;
-                        next_key_index = std::min(std::max(static_cast<size_t>(1), channel_key_index), channel_key_count - 1);
-                        channel_previous_key_indices[channel_index] = (next_key_index > 1) ? (next_key_index - 1) : 0;
-                        break;
-                    }
-
-                    channel_previous_key_time = channel_key_time;
-                }
-                assert(channel_previous_key_time <= channel_sample_time);
-                assert(channel_sample_time <= channel_next_key_time);
-
-                float const channel_delta_key_time = channel_next_key_time - channel_previous_key_time;
-                assert(channel_delta_key_time >= 0.0);
-
-                float const channel_time_normalized = (channel_next_key_time > channel_previous_key_time && channel_delta_key_time > 0.0) ? ((channel_sample_time - channel_previous_key_time) / channel_delta_key_time) : static_cast<float>(0.0);
-
-                cgltf_accessor const *channel_animated_property_accessor = channel->sampler->output;
-
-                if (NULL != channel->target_node)
-                {
-                    size_t const target_node_index = cgltf_node_index(data, channel->target_node);
-
-                    switch (channel->target_path)
-                    {
-                    case cgltf_animation_path_type_scale:
-                    {
-                        assert(cgltf_animation_path_type_scale == channel->target_path);
-
-                        assert(cgltf_type_vec3 == channel_animated_property_accessor->type);
-                        assert(cgltf_component_type_r_32f == channel_animated_property_accessor->component_type);
-                        assert((sizeof(float) * 3) == channel_animated_property_accessor->stride);
-
-                        switch (channel->sampler->interpolation)
-                        {
-                        case cgltf_interpolation_type_step:
-                        case cgltf_interpolation_type_linear:
-                        {
-                            // NOTE: We promote STEP to LINEAR.
-                            assert(cgltf_interpolation_type_step == channel->sampler->interpolation || cgltf_interpolation_type_linear == channel->sampler->interpolation);
-
-                            DirectX::XMFLOAT3 channel_previous_key_scale;
-                            DirectX::XMFLOAT3 channel_next_key_scale;
-                            {
-                                cgltf_bool result_accessor_read_float_previous_key = cgltf_accessor_read_float(channel_animated_property_accessor, channel_previous_key_indices[channel_index], reinterpret_cast<float *>(&channel_previous_key_scale), 3);
-                                assert(result_accessor_read_float_previous_key);
-
-                                cgltf_bool result_accessor_read_float_next_key = cgltf_accessor_read_float(channel_animated_property_accessor, next_key_index, reinterpret_cast<float *>(&channel_next_key_scale), 3);
-                                assert(result_accessor_read_float_next_key);
-                            }
-
-                            DirectX::XMStoreFloat3(&node_local_scales[target_node_index], DirectX::XMVectorLerp(DirectX::XMLoadFloat3(&channel_previous_key_scale), DirectX::XMLoadFloat3(&channel_next_key_scale), channel_time_normalized));
-                        }
-                        break;
-                        case cgltf_interpolation_type_cubic_spline:
-                        default:
-                        {
-                            assert(0);
-                        }
-                        }
-                    }
-                    break;
-                    case cgltf_animation_path_type_rotation:
-                    {
-                        assert(cgltf_animation_path_type_rotation == channel->target_path);
-
-                        assert(cgltf_type_vec4 == channel_animated_property_accessor->type);
-                        assert(cgltf_component_type_r_32f == channel_animated_property_accessor->component_type);
-                        assert((sizeof(float) * 4) == channel_animated_property_accessor->stride);
-
-                        switch (channel->sampler->interpolation)
-                        {
-                        case cgltf_interpolation_type_step:
-                        case cgltf_interpolation_type_linear:
-                        {
-                            // NOTE: We promote STEP to LINEAR.
-                            assert(cgltf_interpolation_type_step == channel->sampler->interpolation || cgltf_interpolation_type_linear == channel->sampler->interpolation);
-
-                            DirectX::XMFLOAT4 channel_previous_key_rotation;
-                            DirectX::XMFLOAT4 channel_next_key_rotation;
-                            {
-                                cgltf_bool result_accessor_read_float_previous_key = cgltf_accessor_read_float(channel_animated_property_accessor, channel_previous_key_indices[channel_index], reinterpret_cast<float *>(&channel_previous_key_rotation), 4);
-                                assert(result_accessor_read_float_previous_key);
-
-                                cgltf_bool result_accessor_read_float_next_key = cgltf_accessor_read_float(channel_animated_property_accessor, next_key_index, reinterpret_cast<float *>(&channel_next_key_rotation), 4);
-                                assert(result_accessor_read_float_next_key);
-                            }
-
-                            DirectX::XMStoreFloat4(&node_local_rotations[target_node_index], DirectX::XMQuaternionSlerp(DirectX::XMLoadFloat4(&channel_previous_key_rotation), DirectX::XMLoadFloat4(&channel_next_key_rotation), channel_time_normalized));
-                        }
-                        break;
-                        case cgltf_interpolation_type_cubic_spline:
-                        default:
-                        {
-                            assert(0);
-                        }
-                        }
-                    }
-                    break;
-                    case cgltf_animation_path_type_translation:
-                    {
-                        assert(cgltf_animation_path_type_translation == channel->target_path);
-
-                        assert(cgltf_type_vec3 == channel_animated_property_accessor->type);
-                        assert(cgltf_component_type_r_32f == channel_animated_property_accessor->component_type);
-                        assert((sizeof(float) * 3) == channel_animated_property_accessor->stride);
-
-                        switch (channel->sampler->interpolation)
-                        {
-                        case cgltf_interpolation_type_step:
-                        case cgltf_interpolation_type_linear:
-                        {
-                            // NOTE: We promote STEP to LINEAR.
-                            assert(cgltf_interpolation_type_step == channel->sampler->interpolation || cgltf_interpolation_type_linear == channel->sampler->interpolation);
-
-                            DirectX::XMFLOAT3 channel_previous_key_translation;
-                            DirectX::XMFLOAT3 channel_next_key_translation;
-                            {
-                                cgltf_bool result_accessor_read_float_previous_key = cgltf_accessor_read_float(channel_animated_property_accessor, channel_previous_key_indices[channel_index], reinterpret_cast<float *>(&channel_previous_key_translation), 3);
-                                assert(result_accessor_read_float_previous_key);
-
-                                cgltf_bool result_accessor_read_float_next_key = cgltf_accessor_read_float(channel_animated_property_accessor, next_key_index, reinterpret_cast<float *>(&channel_next_key_translation), 3);
-                                assert(result_accessor_read_float_next_key);
-                            }
-
-                            DirectX::XMStoreFloat3(&node_local_translations[target_node_index], DirectX::XMVectorLerp(DirectX::XMLoadFloat3(&channel_previous_key_translation), DirectX::XMLoadFloat3(&channel_next_key_translation), channel_time_normalized));
-                        }
-                        break;
-                        case cgltf_interpolation_type_cubic_spline:
-                        default:
-                        {
-                            assert(0);
-                        }
-                        }
-                    }
-                    break;
-                    case cgltf_animation_path_type_weights:
-                    default:
-                    {
-                        assert(0);
-                    }
-                    }
-                }
-                else
-                {
-                    // https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#animations
-                    // When **node** is NOT defined, channel **SHOULD** be ignored.
-                    assert(0);
-                }
-            }
-        }
-
-        mcrt_vector<DirectX::XMFLOAT4X4> node_world_transforms(static_cast<size_t>(data->nodes_count));
-
-        internal_scene_depth_first_search_traverse(
-            data,
-            [](cgltf_data const *data, cgltf_node const *current_node, cgltf_node const *parent_node, void *user_data_x, void *user_data_y, void *user_data_z, void *user_data_u, void *user_data_v, void *user_data_w, void *user_data_l, void *user_data_m, void *user_data_n) -> void
-            {
-                mcrt_vector<DirectX::XMFLOAT3> &node_local_scales = *static_cast<mcrt_vector<DirectX::XMFLOAT3> *>(user_data_x);
-                mcrt_vector<DirectX::XMFLOAT4> &node_local_rotations = *static_cast<mcrt_vector<DirectX::XMFLOAT4> *>(user_data_y);
-                mcrt_vector<DirectX::XMFLOAT3> &node_local_translations = *static_cast<mcrt_vector<DirectX::XMFLOAT3> *>(user_data_z);
-                mcrt_vector<DirectX::XMFLOAT4X4> &node_world_transforms = *static_cast<mcrt_vector<DirectX::XMFLOAT4X4> *>(user_data_u);
-                assert(NULL == user_data_v);
-                assert(NULL == user_data_w);
-                assert(NULL == user_data_l);
-                assert(NULL == user_data_m);
-                assert(NULL == user_data_n);
-
-                DirectX::XMMATRIX local_transform = DirectX::XMMatrixMultiply(DirectX::XMMatrixScalingFromVector(DirectX::XMLoadFloat3(&node_local_scales[cgltf_node_index(data, current_node)])), DirectX::XMMatrixMultiply(DirectX::XMMatrixRotationQuaternion(DirectX::XMLoadFloat4(&node_local_rotations[cgltf_node_index(data, current_node)])), DirectX::XMMatrixTranslationFromVector(DirectX::XMLoadFloat3(&node_local_translations[cgltf_node_index(data, current_node)]))));
-
-                DirectX::XMMATRIX parent_world_transform = (NULL != parent_node) ? DirectX::XMLoadFloat4x4(&node_world_transforms[cgltf_node_index(data, parent_node)]) : DirectX::XMMatrixIdentity();
-
-                DirectX::XMMATRIX world_transform = DirectX::XMMatrixMultiply(local_transform, parent_world_transform);
-
-                DirectX::XMStoreFloat4x4(&node_world_transforms[cgltf_node_index(data, current_node)], world_transform);
-            },
-            &node_local_scales,
-            &node_local_rotations,
-            &node_local_translations,
-            &node_world_transforms,
-            NULL,
-            NULL,
-            NULL,
-            NULL,
-            NULL);
-
-        cgltf_accessor const *skin_inverse_bind_matrix_accessor = skin->inverse_bind_matrices;
-
-        assert(cgltf_type_mat4 == skin_inverse_bind_matrix_accessor->type);
-        assert(cgltf_component_type_r_32f == skin_inverse_bind_matrix_accessor->component_type);
-        assert((sizeof(float) * 16) == skin_inverse_bind_matrix_accessor->stride);
-
-        for (size_t joint_index = 0; joint_index < joint_count; ++joint_index)
-        {
-            size_t const joint_node_index = cgltf_node_index(data, skin->joints[joint_index]);
-
-            DirectX::XMFLOAT4X4 inverse_bind_matrix;
-            {
-                cgltf_bool result_accessor_read_float_inverse_bind_matrix = cgltf_accessor_read_float(skin_inverse_bind_matrix_accessor, joint_index, reinterpret_cast<float *>(&inverse_bind_matrix), 16);
-                assert(result_accessor_read_float_inverse_bind_matrix);
-            }
-
-            DirectX::XMMATRIX joint_transform = DirectX::XMMatrixMultiply(DirectX::XMLoadFloat4x4(&inverse_bind_matrix), DirectX::XMLoadFloat4x4(&node_world_transforms[joint_node_index]));
-
-            DirectX::XMVECTOR out_joint_scale;
-            DirectX::XMVECTOR out_joint_rotation;
-            DirectX::XMVECTOR out_joint_translation;
-            DirectX::XMMatrixDecompose(&out_joint_scale, &out_joint_rotation, &out_joint_translation, joint_transform);
-
-            // FLT_EPSILON
-            constexpr float const scale_epsilon = 7E-5F;
-            assert(DirectX::XMVector3EqualInt(DirectX::XMVectorTrueInt(), DirectX::XMVectorLess(DirectX::XMVectorAbs(DirectX::XMVectorSubtract(out_joint_scale, DirectX::XMVectorSplatOne())), DirectX::XMVectorReplicate(scale_epsilon))));
-
-            DirectX::XMFLOAT4 joint_rotation;
-            DirectX::XMFLOAT3 joint_translation;
-            DirectX::XMStoreFloat4(&joint_rotation, out_joint_rotation);
-            DirectX::XMStoreFloat3(&joint_translation, out_joint_translation);
-
-            out_animated_skeleton->set_transform(frame_index, joint_index, joint_rotation, joint_translation);
-        }
-    }
-}
-
 static inline void internal_scene_depth_first_search_traverse(cgltf_data const *data, void (*pfn_user_callback)(cgltf_data const *data, cgltf_node const *current_node, cgltf_node const *parent_node, void *user_data_x, void *user_data_y, void *user_data_z, void *user_data_u, void *user_data_v, void *user_data_w, void *user_data_l, void *user_data_m, void *user_data_n), void *user_data_x, void *user_data_y, void *user_data_z, void *user_data_u, void *user_data_v, void *user_data_w, void *user_data_l, void *user_data_m, void *user_data_n)
 {
     static constexpr size_t INTERNAL_NODE_INDEX_INVALID = static_cast<size_t>(~static_cast<size_t>(0U));
@@ -1474,160 +1120,6 @@ static inline void internal_scene_depth_first_search_traverse(cgltf_data const *
             }
         }
     }
-}
-
-static inline void internal_scene_breadth_first_search_traverse(cgltf_data const *data, void (*pfn_user_callback)(cgltf_data const *data, cgltf_node const *current_node, cgltf_node const *parent_node, void *user_data_x, void *user_data_y, void *user_data_z, void *user_data_u, void *user_data_v, void *user_data_w, void *user_data_l, void *user_data_m, void *user_data_n), void *user_data_x, void *user_data_y, void *user_data_z, void *user_data_u, void *user_data_v, void *user_data_w, void *user_data_l, void *user_data_m, void *user_data_n)
-{
-    static constexpr size_t INTERNAL_NODE_INDEX_INVALID = static_cast<size_t>(~static_cast<size_t>(0U));
-
-    struct breadth_first_search_queue_element_type
-    {
-        size_t parent_node_index;
-        size_t current_node_index;
-    };
-
-    mcrt_deque<breadth_first_search_queue_element_type> breadth_first_search_queue;
-
-    mcrt_vector<bool> node_visited_flags(static_cast<size_t>(data->nodes_count), false);
-    mcrt_vector<bool> node_pushed_flags(static_cast<size_t>(data->nodes_count), false);
-
-    for (size_t scene_node_index_index = 0; scene_node_index_index < data->scene->nodes_count; ++scene_node_index_index)
-    {
-        size_t const scene_node_index = cgltf_node_index(data, data->scene->nodes[scene_node_index_index]);
-        assert(!node_pushed_flags[scene_node_index]);
-        node_pushed_flags[scene_node_index] = true;
-        breadth_first_search_queue.push_back({INTERNAL_NODE_INDEX_INVALID, scene_node_index});
-    }
-
-    while (!breadth_first_search_queue.empty())
-    {
-        breadth_first_search_queue_element_type current_queue_element = breadth_first_search_queue.front();
-        breadth_first_search_queue.pop_front();
-
-        assert(!node_visited_flags[current_queue_element.current_node_index]);
-        node_visited_flags[current_queue_element.current_node_index] = true;
-
-        pfn_user_callback(
-            data,
-            &data->nodes[current_queue_element.current_node_index],
-            (INTERNAL_NODE_INDEX_INVALID != current_queue_element.parent_node_index) ? &data->nodes[current_queue_element.parent_node_index] : NULL,
-            user_data_x,
-            user_data_y,
-            user_data_z,
-            user_data_u,
-            user_data_v,
-            user_data_w,
-            user_data_l,
-            user_data_m,
-            user_data_n);
-
-        for (size_t child_node_index_index = 0U; child_node_index_index < data->nodes[current_queue_element.current_node_index].children_count; ++child_node_index_index)
-        {
-            size_t const child_node_index = cgltf_node_index(data, data->nodes[current_queue_element.current_node_index].children[child_node_index_index]);
-            if ((!node_visited_flags[child_node_index]) && (!node_pushed_flags[child_node_index]))
-            {
-                node_pushed_flags[child_node_index] = true;
-                breadth_first_search_queue.push_back({current_queue_element.current_node_index, child_node_index});
-            }
-            else
-            {
-                assert(false);
-                std::cout << "Multiple Parents Exist for Node: " << static_cast<int>(current_queue_element.current_node_index) << std::endl;
-            }
-        }
-    }
-
-#ifndef NDEBUG
-    for (bool node_visited_flag : node_visited_flags)
-    {
-        assert(node_visited_flag);
-    }
-
-    for (bool node_pushed_flag : node_pushed_flags)
-    {
-        assert(node_pushed_flag);
-    }
-#endif
-}
-
-#include "../include/brx_asset_import_input_stream.h"
-
-extern cgltf_result cgltf_custom_read_file(const struct cgltf_memory_options *memory_options, const struct cgltf_file_options *file_options, const char *path, cgltf_size *size, void **data)
-{
-    void *(*const memory_alloc)(void *, cgltf_size) = memory_options->alloc_func;
-    assert(NULL != memory_alloc);
-
-    void (*const memory_free)(void *, void *) = memory_options->free_func;
-    assert(NULL != memory_free);
-
-    brx_asset_import_input_stream_factory *const input_stream_factory = static_cast<brx_asset_import_input_stream_factory *>(file_options->user_data);
-
-    brx_asset_import_input_stream *file;
-    if (NULL == (file = input_stream_factory->create_instance(path)))
-    {
-        return cgltf_result_file_not_found;
-    }
-
-    cgltf_size file_size = (NULL != size) ? (*size) : 0;
-    if (file_size == 0)
-    {
-        int64_t length;
-        if (-1 == file->stat_size(&length))
-        {
-            input_stream_factory->destory_instance(file);
-            return cgltf_result_io_error;
-        }
-
-        file_size = length;
-    }
-
-    void *file_data = memory_alloc(memory_options->user_data, file_size);
-    if (NULL == file_data)
-    {
-        input_stream_factory->destory_instance(file);
-        return cgltf_result_out_of_memory;
-    }
-
-    intptr_t read_size = file->read(file_data, file_size);
-
-    input_stream_factory->destory_instance(file);
-
-    if (-1 == read_size || read_size != file_size)
-    {
-        memory_free(memory_options->user_data, file_data);
-        return cgltf_result_io_error;
-    }
-
-    if (NULL != size)
-    {
-        *size = file_size;
-    }
-    if (NULL != data)
-    {
-        *data = file_data;
-    }
-
-    return cgltf_result_success;
-}
-
-extern void cgltf_custom_file_release(const struct cgltf_memory_options *memory_options, const struct cgltf_file_options *, void *data)
-{
-    void (*const memory_free)(void *, void *) = memory_options->free_func;
-    assert(NULL != memory_free);
-
-    memory_free(memory_options->user_data, data);
-}
-
-#include "../../McRT-Malloc/include/mcrt_malloc.h"
-
-extern void *cgltf_custom_alloc(void *, cgltf_size size)
-{
-    return mcrt_malloc(size, alignof(size_t));
-}
-
-extern void cgltf_custom_free(void *, void *ptr)
-{
-    mcrt_free(ptr);
 }
 
 #if defined(__GNUC__)

@@ -19,7 +19,7 @@
 #include "internal_import_gltf_scene.h"
 
 // the unified facade
-extern bool internal_import_scene(brx_asset_import_input_stream_factory* input_stream_factory, char const* file_name, mcrt_vector<brx_asset_import_model_group>& out_groups)
+extern bool internal_import_scene(brx_asset_import_input_stream_factory *input_stream_factory, char const *file_name, mcrt_vector<brx_asset_import_model_surface_group> &out_surface_groups)
 {
-	return internal_import_gltf_scene(input_stream_factory, file_name, out_groups);
+	return internal_import_gltf_scene(input_stream_factory, file_name, out_surface_groups);
 }

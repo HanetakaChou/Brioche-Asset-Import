@@ -31,16 +31,13 @@
     <ClInclude Include="..\source\internal_import_gltf_scene.h" />
     <ClInclude Include="..\source\internal_import_image.h" />
     <ClInclude Include="..\source\internal_import_jpeg_image.h" />
+    <ClInclude Include="..\source\internal_import_mmd_scene.h" />
     <ClInclude Include="..\source\internal_import_png_image.h" />
     <ClInclude Include="..\source\internal_import_scene.h" />
     <ClInclude Include="..\source\internal_import_webp_image.h" />
+    <ClInclude Include="..\source\internal_mmd_pmx.h" />
     <ClInclude Include="..\thirdparty\DirectXMesh\DirectXMesh\DirectXMesh.h" />
     <ClInclude Include="..\thirdparty\DirectXMesh\DirectXMesh\scoped.h" />
-    <ClInclude Include="..\thirdparty\mmd\kaitai\exceptions.h" />
-    <ClInclude Include="..\thirdparty\mmd\kaitai\kaitaistream.h" />
-    <ClInclude Include="..\thirdparty\mmd\kaitai\kaitaistruct.h" />
-    <ClInclude Include="..\thirdparty\mmd\mmd_pmx.h" />
-    <ClInclude Include="..\thirdparty\mmd\mmd_vmd.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\source\brx_asset_import_model_scene.cpp" />
@@ -48,6 +45,7 @@
     <ClCompile Include="..\source\internal_import_gltf_scene.cpp" />
     <ClCompile Include="..\source\internal_import_image.cpp" />
     <ClCompile Include="..\source\internal_import_jpeg_image.cpp" />
+    <ClCompile Include="..\source\internal_import_mmd_scene.cpp" />
     <ClCompile Include="..\source\internal_import_png_image.cpp" />
     <ClCompile Include="..\source\brx_asset_import_file_input_stream.cpp" />
     <ClCompile Include="..\source\brx_asset_import_memory_input_stream.cpp" />
@@ -58,15 +56,14 @@
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">-mbmi2 %(AdditionalOptions)</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">-mbmi2 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <ClCompile Include="..\source\import_gltf_scene_asset_cgltf.cpp" />
+    <ClCompile Include="..\source\internal_import_gltf_scene_cgltf.cpp" />
     <ClCompile Include="..\source\import_pvr_image_asset.cpp" />
     <ClCompile Include="..\source\internal_import_scene.cpp" />
     <ClCompile Include="..\source\internal_import_webp_image.cpp" />
+    <ClCompile Include="..\source\internal_mmd_pmx.cpp" />
+    <ClCompile Include="..\source\test_old.cpp" />
     <ClCompile Include="..\thirdparty\DirectXMesh\DirectXMesh\DirectXMeshNormals.cpp" />
     <ClCompile Include="..\thirdparty\DirectXMesh\DirectXMesh\DirectXMeshTangentFrame.cpp" />
-    <ClCompile Include="..\thirdparty\mmd\kaitai\kaitaistream.cpp" />
-    <ClCompile Include="..\thirdparty\mmd\mmd_pmx.cpp" />
-    <ClCompile Include="..\thirdparty\mmd\mmd_vmd.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\thirdparty\libjpeg\build-windows\libjpeg.vcxproj">
@@ -91,6 +88,10 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
       <FileType>Document</FileType>
     </CopyFileToFolders>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\thirdparty\mmd\mmd_pmx.ksy" />
+    <None Include="..\thirdparty\mmd\mmd_vmd.ksy" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

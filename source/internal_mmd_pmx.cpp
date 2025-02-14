@@ -1,0 +1,1012 @@
+//
+// Copyright (C) YuqiaoZhang(HanetakaChou)
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published
+// by the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+//
+
+#include "internal_mmd_pmx.h"
+#include "../../libiconv/include/iconv.h"
+#include <cstring>
+#include <cassert>
+
+// [PMX (Polygon Model eXtended) 2.1](https://gist.github.com/felixjones/f8a06bd48f9da9a4539f)  
+// [Blender MMD Tools](https://github.com/UuuNyaa/blender_mmd_tools/blob/main/mmd_tools/core/pmx/__init__.py)  
+
+// debug in blender
+//
+// %USERPROFILE%\AppData\Roaming\Blender Foundation\Blender\4.2\extensions\user_default\mmd_tools  
+//
+// copy pydebug to "C:\Program Files\Blender Foundation\Blender 4.2\4.2\python\lib\site-packages"
+//
+// delete "pathMappings" from vscode
+//
+// in blender // execute before first import MMD
+// import debugpy
+// debugpy.listen(("localhost", 5678))
+// debugpy.wait_for_client() // use vscode to connect 
+// 
+
+// Bone constraint Additional Transform (Append)
+//
+// | - shadow bone (sibling)
+// |
+// | - source bone
+//         |
+//         - dummy bone (child) // identity transform local space 
+ 
+// dummy bone transform model space = source bone transform model space 
+// 
+// copy transfrom bone constraint: shadow bone transform model space = dummy bone transform model space = source bone transfrom model space
+
+// transformation bone constraint: destination bone local transform additive (mix: add) =  shadow bone transform local space * weight += source bone transfrom local space * weight
+
+// why we need shadow bone?
+// the shadow bone is to ensure the order of the calculation (related to transform order) ?   
+
+// the append will also inherit the "model space" append from the parent of source node
+
+// IK solver can influence append // and this is related to the transform order  
+
+// Foot IK
+// https://github.com/guillaumeblanc/ozz-animation/blob/master/samples/foot_ik/README.md  
+
+// QuadRuped IK  
+// We can use the idea of linear regression  
+// 
+// A p_x + B p_y + C p_z + D = 0
+// A p_x + B p_y + D = -C p_z 
+// (A/C) p_x + (B/C) p_y + D/C = -p_z  
+//
+//  y (target)   X (features)    β (coeffiects)  
+// | -p0.z | = | p0.x p0.y 1 |  | (A/C) (B/C) (D/C) |
+// | -p1.z |   | p1.x p1.y 1 |  
+// | -p2.z |   | p2.x p2.y 1 |   
+// | -p3.z |   | p3.x p3.y 1 | 
+ 
+#if defined(__GNUC__)
+// GCC or CLANG
+#define internal_likely(x) __builtin_expect(!!(x), 1)
+#define internal_unlikely(x) __builtin_expect(!!(x), 0)
+#if defined(__BYTE_ORDER__) && defined(__ORDER_LITTLE_ENDIAN_) && __ORDER_LITTLE_ENDIAN_ == __BYTE_ORDER__
+static inline uint16_t internal_bswap_16(uint16_t x) { return x; }
+static inline uint32_t internal_bswap_32(uint32_t x) { return x; }
+#elif defined(__BYTE_ORDER__) && defined(__ORDER_BIG_ENDIAN__) && __ORDER_BIG_ENDIAN__ == __BYTE_ORDER__
+static inline uint16_t internal_bswap_16(uint16_t x) { return __builtin_bswap16(x); }
+static inline uint32_t internal_bswap_32(uint32_t x) { return __builtin_bswap32(x); }
+#else
+#error Unknown Byte Order
+#endif
+#elif defined(_MSC_VER)
+static inline uint16_t internal_bswap_16(uint16_t x) { return x; }
+static inline uint32_t internal_bswap_32(uint32_t x) { return x; }
+#if defined(__clang__)
+// CLANG-CL
+#define internal_likely(x) __builtin_expect(!!(x), 1)
+#define internal_unlikely(x) __builtin_expect(!!(x), 0)
+#else
+// MSVC
+#define internal_likely(x) (!!(x))
+#define internal_unlikely(x) (!!(x))
+#endif
+#else
+#error Unknown Compiler
+#endif
+
+static inline bool internal_data_read_mmd_pmx_header(void const *data_base, size_t data_size, size_t &inout_data_offset, uint8_t *out_text_encoding, uint8_t *out_vertex_index_size, uint8_t *out_texture_index_size, uint8_t *out_material_index_size, uint8_t *out_bone_index_size, uint8_t *out_morph_index_size, uint8_t *out_rigid_body_index_size, mmd_pmx_header_t *out_header);
+
+static inline bool internal_data_read_mmd_pmx_vertices(void const *data_base, size_t data_size, size_t &inout_data_offset, uint8_t additional_vec4_count, uint8_t bone_index_size, mcrt_vector<mmd_pmx_vertex_t> &out_vertices);
+
+static inline bool internal_data_read_mmd_pmx_faces(void const *data_base, size_t data_size, size_t &inout_data_offset, uint8_t vertex_index_size, mcrt_vector<mmd_pmx_face_t> &out_faces);
+
+static inline bool internal_data_read_mmd_pmx_textures(void const *data_base, size_t data_size, size_t &inout_data_offset, uint8_t text_encoding, mcrt_vector<mmd_pmx_texture_t> &out_textures);
+
+static inline bool internal_data_read_mmd_pmx_materials(void const *data_base, size_t data_size, size_t &inout_data_offset, uint8_t text_encoding, uint8_t texture_index_size, mcrt_vector<mmd_pmx_material_t> &out_materials);
+
+static inline bool internal_data_read_mmd_pmx_vec2(void const *data_base, size_t data_size, size_t &inout_data_offset, mmd_pmx_vec2_t *out_vec3);
+
+static inline bool internal_data_read_mmd_pmx_vec3(void const *data_base, size_t data_size, size_t &inout_data_offset, mmd_pmx_vec3_t *out_vec3);
+
+static inline bool internal_data_read_mmd_pmx_vec4(void const *data_base, size_t data_size, size_t &inout_data_offset, mmd_pmx_vec4_t *out_vec3);
+
+static inline bool internal_data_read_mmd_pmx_text(void const *data_base, size_t data_size, size_t &inout_data_offset, uint8_t text_encoding, mcrt_string &out_text);
+
+static inline bool internal_data_read_mmd_pmx_index(void const *data_base, size_t data_size, size_t &inout_data_offset, uint8_t index_size, uint32_t *out_index);
+
+static inline bool internal_data_read_uint8(void const *data_base, size_t data_size, size_t &inout_data_offset, uint8_t *out_uint8);
+
+static inline bool internal_data_read_uint16(void const *data_base, size_t data_size, size_t &inout_data_offset, uint16_t *out_uint16);
+
+static inline bool internal_data_read_uint32(void const *data_base, size_t data_size, size_t &inout_data_offset, uint32_t *out_uint32);
+
+static inline bool internal_data_read_float(void const *data_base, size_t data_size, size_t &inout_data_offset, float *out_float);
+
+static inline bool internal_data_read_bytes(void const *data_base, size_t data_size, size_t &inout_data_offset, uint32_t length, void *out_bytes);
+
+extern bool internal_data_read_mmd_pmx(void const *data_base, size_t data_size, mmd_pmx_t *out_mmd_pmx)
+{
+    size_t data_offset = 0U;
+
+    uint8_t text_encoding;
+    uint8_t vertex_index_size;
+    uint8_t texture_index_size;
+    uint8_t material_index_size;
+    uint8_t bone_index_size;
+    uint8_t morph_index_size;
+    uint8_t rigid_body_index_size;
+
+    if (internal_unlikely(!internal_data_read_mmd_pmx_header(data_base, data_size, data_offset, &text_encoding, &vertex_index_size, &texture_index_size, &material_index_size, &bone_index_size, &morph_index_size, &rigid_body_index_size, &out_mmd_pmx->m_header)))
+    {
+        return false;
+    }
+
+    if (internal_unlikely(!internal_data_read_mmd_pmx_vertices(data_base, data_size, data_offset, out_mmd_pmx->m_header.m_additional_vec4_count, bone_index_size, out_mmd_pmx->m_vertices)))
+    {
+        return false;
+    }
+
+    if (internal_unlikely(!internal_data_read_mmd_pmx_faces(data_base, data_size, data_offset, vertex_index_size, out_mmd_pmx->m_faces)))
+    {
+        return false;
+    }
+
+    if (internal_unlikely(!internal_data_read_mmd_pmx_textures(data_base, data_size, data_offset, text_encoding, out_mmd_pmx->m_textures)))
+    {
+        return false;
+    }
+
+    if (internal_unlikely(!internal_data_read_mmd_pmx_materials(data_base, data_size, data_offset, text_encoding, texture_index_size, out_mmd_pmx->m_materials)))
+    {
+        return false;
+    }
+
+    // create dummy bone for append bone  
+
+    return true;
+}
+
+static inline bool internal_data_read_mmd_pmx_header(void const *data_base, size_t data_size, size_t &inout_data_offset, uint8_t *out_text_encoding, uint8_t *out_vertex_index_size, uint8_t *out_texture_index_size, uint8_t *out_material_index_size, uint8_t *out_bone_index_size, uint8_t *out_morph_index_size, uint8_t *out_rigid_body_index_size, mmd_pmx_header_t *out_header)
+{
+    // [Header.load](https://github.com/UuuNyaa/blender_mmd_tools/blob/main/mmd_tools/core/pmx/__init__.py#L255)
+
+    uint8_t sign[4];
+    if (internal_unlikely(!internal_data_read_bytes(data_base, data_size, inout_data_offset, sizeof(uint8_t) * 4U, &sign[0])))
+    {
+        return false;
+    }
+
+    // "PMX "
+    if (internal_unlikely(!((80U == sign[0]) && (77U == sign[1]) && (88U == sign[2]) && (32U == sign[3]))))
+    {
+        return false;
+    }
+
+    uint8_t version[4];
+    if (internal_unlikely(!internal_data_read_bytes(data_base, data_size, inout_data_offset, sizeof(uint8_t) * 4U, &version[0])))
+    {
+        return false;
+    }
+
+    //   0   0 0 64: float 2.0
+    // 102 102 6 64: float 2.1
+    if (internal_unlikely(!(((0U == version[0]) && (0U == version[1]) && (0U == version[2]) && (64U == version[3])) || ((102U == version[0]) && (102U == version[1]) && (6U == version[2]) && (64U == version[3])))))
+    {
+        return false;
+    }
+
+    uint8_t global_count;
+    if (internal_unlikely(!internal_data_read_uint8(data_base, data_size, inout_data_offset, &global_count)))
+    {
+        return false;
+    }
+
+    if (internal_unlikely(!(global_count >= 8U)))
+    {
+        return false;
+    }
+
+    if (internal_unlikely(!internal_data_read_uint8(data_base, data_size, inout_data_offset, out_text_encoding)))
+    {
+        return false;
+    }
+
+    if (internal_unlikely(!((0U == (*out_text_encoding)) || (1U == (*out_text_encoding)))))
+    {
+        return false;
+    }
+
+    if (internal_unlikely(!internal_data_read_uint8(data_base, data_size, inout_data_offset, &out_header->m_additional_vec4_count)))
+    {
+        return false;
+    }
+
+    if (internal_unlikely(!(out_header->m_additional_vec4_count <= MMD_PMX_MAX_ADDITIONAL_VEC4_COUNT)))
+    {
+        return false;
+    }
+
+    if (internal_unlikely(!internal_data_read_uint8(data_base, data_size, inout_data_offset, out_vertex_index_size)))
+    {
+        return false;
+    }
+
+    if (internal_unlikely(!((1U == (*out_vertex_index_size)) || (2U == (*out_vertex_index_size)) || (4U == (*out_vertex_index_size)))))
+    {
+        return false;
+    }
+
+    if (internal_unlikely(!internal_data_read_uint8(data_base, data_size, inout_data_offset, out_texture_index_size)))
+    {
+        return false;
+    }
+
+    if (internal_unlikely(!internal_data_read_uint8(data_base, data_size, inout_data_offset, out_material_index_size)))
+    {
+        return false;
+    }
+
+    if (internal_unlikely(!internal_data_read_uint8(data_base, data_size, inout_data_offset, out_bone_index_size)))
+    {
+        return false;
+    }
+
+    if (internal_unlikely(!((1U == (*out_bone_index_size)) || (2U == (*out_bone_index_size)) || (4U == (*out_bone_index_size)))))
+    {
+        return false;
+    }
+
+    if (internal_unlikely(!internal_data_read_uint8(data_base, data_size, inout_data_offset, out_morph_index_size)))
+    {
+        return false;
+    }
+
+    if (internal_unlikely(!internal_data_read_uint8(data_base, data_size, inout_data_offset, out_rigid_body_index_size)))
+    {
+        return false;
+    }
+
+    for (uint8_t global_index = 8U; global_index < global_count; ++global_count)
+    {
+        // Tolerance
+        uint8_t unused_global;
+        if (internal_unlikely(!internal_data_read_uint8(data_base, data_size, inout_data_offset, &unused_global)))
+        {
+            return false;
+        }
+    }
+
+    if (internal_unlikely(!internal_data_read_mmd_pmx_text(data_base, data_size, inout_data_offset, (*out_text_encoding), out_header->m_name)))
+    {
+        return false;
+    }
+
+    mcrt_string unused_name_e;
+    if (internal_unlikely(!internal_data_read_mmd_pmx_text(data_base, data_size, inout_data_offset, (*out_text_encoding), unused_name_e)))
+    {
+        return false;
+    }
+
+    if (internal_unlikely(!internal_data_read_mmd_pmx_text(data_base, data_size, inout_data_offset, (*out_text_encoding), out_header->m_comment)))
+    {
+        return false;
+    }
+
+    mcrt_string unused_comment_e;
+    if (internal_unlikely(!internal_data_read_mmd_pmx_text(data_base, data_size, inout_data_offset, (*out_text_encoding), unused_comment_e)))
+    {
+        return false;
+    }
+
+    return true;
+}
+
+static inline bool internal_data_read_mmd_pmx_vertices(void const *data_base, size_t data_size, size_t &inout_data_offset, uint8_t additional_vec4_count, uint8_t bone_index_size, mcrt_vector<mmd_pmx_vertex_t> &out_vertices)
+{
+    // [Vertex.load](https://github.com/UuuNyaa/blender_mmd_tools/blob/main/mmd_tools/core/pmx/__init__.py#L665)
+
+    assert(out_vertices.empty());
+    out_vertices = {};
+
+    uint32_t vertex_count;
+    if (internal_unlikely(!internal_data_read_uint32(data_base, data_size, inout_data_offset, &vertex_count)))
+    {
+        return false;
+    }
+
+    if (internal_unlikely(0U == vertex_count || (vertex_count > static_cast<uint32_t>(INT32_MAX))))
+    {
+        // Tolerance
+        return true;
+    }
+
+    out_vertices.resize(vertex_count);
+
+    for (uint32_t vertex_index = 0U; vertex_index < vertex_count; ++vertex_index)
+    {
+        if (internal_unlikely(!internal_data_read_mmd_pmx_vec3(data_base, data_size, inout_data_offset, &out_vertices[vertex_index].m_position)))
+        {
+            return false;
+        }
+
+        if (internal_unlikely(!internal_data_read_mmd_pmx_vec3(data_base, data_size, inout_data_offset, &out_vertices[vertex_index].m_normal)))
+        {
+            return false;
+        }
+
+        if (internal_unlikely(!internal_data_read_mmd_pmx_vec2(data_base, data_size, inout_data_offset, &out_vertices[vertex_index].m_uv)))
+        {
+            return false;
+        }
+
+        for (uint8_t additional_vec4_index = 0U; additional_vec4_index < additional_vec4_count && additional_vec4_index < MMD_PMX_MAX_ADDITIONAL_VEC4_COUNT; ++additional_vec4_index)
+        {
+            if (internal_unlikely(!internal_data_read_mmd_pmx_vec4(data_base, data_size, inout_data_offset, &out_vertices[vertex_index].m_additional_vec4s[additional_vec4_index])))
+            {
+                return false;
+            }
+        }
+
+        uint8_t bone_weight_type;
+        if (internal_unlikely(!internal_data_read_uint8(data_base, data_size, inout_data_offset, &bone_weight_type)))
+        {
+            return false;
+        }
+
+        if (0U == bone_weight_type)
+        {
+            // BDEF1
+            if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, bone_index_size, &out_vertices[vertex_index].m_bone_indices[0])))
+            {
+                return false;
+            }
+
+            out_vertices[vertex_index].m_bone_indices[1] = out_vertices[vertex_index].m_bone_indices[0];
+            out_vertices[vertex_index].m_bone_indices[2] = out_vertices[vertex_index].m_bone_indices[0];
+            out_vertices[vertex_index].m_bone_indices[3] = out_vertices[vertex_index].m_bone_indices[0];
+            out_vertices[vertex_index].m_bone_weights[0] = 1.0F;
+            out_vertices[vertex_index].m_bone_weights[1] = 0.0F;
+            out_vertices[vertex_index].m_bone_weights[2] = 0.0F;
+            out_vertices[vertex_index].m_bone_weights[3] = 0.0F;
+        }
+        else if (1U == bone_weight_type)
+        {
+            // BDEF2
+
+            if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, bone_index_size, &out_vertices[vertex_index].m_bone_indices[0])))
+            {
+                return false;
+            }
+
+            if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, bone_index_size, &out_vertices[vertex_index].m_bone_indices[1])))
+            {
+                return false;
+            }
+
+            if (internal_unlikely(!internal_data_read_float(data_base, data_size, inout_data_offset, &out_vertices[vertex_index].m_bone_weights[0])))
+            {
+                return false;
+            }
+
+            out_vertices[vertex_index].m_bone_indices[2] = out_vertices[vertex_index].m_bone_indices[0];
+            out_vertices[vertex_index].m_bone_indices[3] = out_vertices[vertex_index].m_bone_indices[1];
+            out_vertices[vertex_index].m_bone_weights[1] = 1.0F - out_vertices[vertex_index].m_bone_weights[0];
+            out_vertices[vertex_index].m_bone_weights[2] = 0.0F;
+            out_vertices[vertex_index].m_bone_weights[3] = 0.0F;
+        }
+        else if ((2U == bone_weight_type) || (4U == bone_weight_type))
+        {
+            // BDEF4
+            // QDEF
+
+            if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, bone_index_size, &out_vertices[vertex_index].m_bone_indices[0])))
+            {
+                return false;
+            }
+
+            if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, bone_index_size, &out_vertices[vertex_index].m_bone_indices[1])))
+            {
+                return false;
+            }
+
+            if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, bone_index_size, &out_vertices[vertex_index].m_bone_indices[2])))
+            {
+                return false;
+            }
+
+            if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, bone_index_size, &out_vertices[vertex_index].m_bone_indices[3])))
+            {
+                return false;
+            }
+
+            if (internal_unlikely(!internal_data_read_float(data_base, data_size, inout_data_offset, &out_vertices[vertex_index].m_bone_weights[0])))
+            {
+                return false;
+            }
+
+            if (internal_unlikely(!internal_data_read_float(data_base, data_size, inout_data_offset, &out_vertices[vertex_index].m_bone_weights[1])))
+            {
+                return false;
+            }
+
+            if (internal_unlikely(!internal_data_read_float(data_base, data_size, inout_data_offset, &out_vertices[vertex_index].m_bone_weights[2])))
+            {
+                return false;
+            }
+
+            if (internal_unlikely(!internal_data_read_float(data_base, data_size, inout_data_offset, &out_vertices[vertex_index].m_bone_weights[3])))
+            {
+                return false;
+            }
+        }
+        else if (3U == bone_weight_type)
+        {
+            assert(false);
+
+            // SDEF
+
+            if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, bone_index_size, &out_vertices[vertex_index].m_bone_indices[0])))
+            {
+                return false;
+            }
+
+            if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, bone_index_size, &out_vertices[vertex_index].m_bone_indices[1])))
+            {
+                return false;
+            }
+
+            if (internal_unlikely(!internal_data_read_float(data_base, data_size, inout_data_offset, &out_vertices[vertex_index].m_bone_weights[0])))
+            {
+                return false;
+            }
+
+            mmd_pmx_vec3_t unused_C;
+            if (internal_unlikely(!internal_data_read_mmd_pmx_vec3(data_base, data_size, inout_data_offset, &unused_C)))
+            {
+                return false;
+            }
+
+            mmd_pmx_vec3_t unused_R0;
+            if (internal_unlikely(!internal_data_read_mmd_pmx_vec3(data_base, data_size, inout_data_offset, &unused_R0)))
+            {
+                return false;
+            }
+
+            mmd_pmx_vec3_t unused_R1;
+            if (internal_unlikely(!internal_data_read_mmd_pmx_vec3(data_base, data_size, inout_data_offset, &unused_R1)))
+            {
+                return false;
+            }
+
+            out_vertices[vertex_index].m_bone_indices[2] = out_vertices[vertex_index].m_bone_indices[0];
+            out_vertices[vertex_index].m_bone_indices[3] = out_vertices[vertex_index].m_bone_indices[1];
+            out_vertices[vertex_index].m_bone_weights[1] = 1.0F - out_vertices[vertex_index].m_bone_weights[0];
+            out_vertices[vertex_index].m_bone_weights[2] = 0.0F;
+            out_vertices[vertex_index].m_bone_weights[3] = 0.0F;
+        }
+        else
+        {
+            return false;
+        }
+
+        float unused_edge_scale;
+        if (internal_unlikely(!internal_data_read_float(data_base, data_size, inout_data_offset, &unused_edge_scale)))
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+static inline bool internal_data_read_mmd_pmx_faces(void const *data_base, size_t data_size, size_t &inout_data_offset, uint8_t vertex_index_size, mcrt_vector<mmd_pmx_face_t> &out_faces)
+{
+    assert(out_faces.empty());
+    out_faces = {};
+
+    uint32_t vertex_index_count;
+    if (internal_unlikely(!internal_data_read_uint32(data_base, data_size, inout_data_offset, &vertex_index_count)))
+    {
+        return false;
+    }
+
+    if (internal_unlikely(0U == vertex_index_count || (vertex_index_count > static_cast<uint32_t>(INT32_MAX))))
+    {
+        // Tolerance
+        return true;
+    }
+
+    // Tolerance
+    assert(0U == (vertex_index_count % 3U));
+
+    uint32_t const face_count = vertex_index_count / 3U;
+
+    out_faces.resize(face_count);
+
+    uint32_t vertex_index_index = 0;
+    for (uint32_t face_index = 0U; face_index < face_count; ++face_index)
+    {
+        assert(vertex_index_index < vertex_index_count);
+
+        if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, vertex_index_size, &out_faces[face_index].m_vertex_indices[0])))
+        {
+            return false;
+        }
+        ++vertex_index_index;
+
+        if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, vertex_index_size, &out_faces[face_index].m_vertex_indices[1])))
+        {
+            return false;
+        }
+        ++vertex_index_index;
+
+        if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, vertex_index_size, &out_faces[face_index].m_vertex_indices[2])))
+        {
+            return false;
+        }
+        ++vertex_index_index;
+    }
+
+    assert(vertex_index_count == vertex_index_index);
+
+    // Tolerance
+    while (vertex_index_index < vertex_index_count)
+    {
+        uint32_t unused_vertex_index;
+        if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, vertex_index_size, &unused_vertex_index)))
+        {
+            return false;
+        }
+        ++vertex_index_index;
+    }
+
+    return true;
+}
+
+static inline bool internal_data_read_mmd_pmx_textures(void const *data_base, size_t data_size, size_t &inout_data_offset, uint8_t text_encoding, mcrt_vector<mmd_pmx_texture_t> &out_textures)
+{
+    // [Texture.load](https://github.com/UuuNyaa/blender_mmd_tools/blob/main/mmd_tools/core/pmx/__init__.py#L787)
+
+    assert(out_textures.empty());
+    out_textures = {};
+
+    uint32_t texture_count;
+    if (internal_unlikely(!internal_data_read_uint32(data_base, data_size, inout_data_offset, &texture_count)))
+    {
+        return false;
+    }
+
+    if (internal_unlikely(0U == texture_count || (texture_count > static_cast<uint32_t>(INT32_MAX))))
+    {
+        // Tolerance
+        return true;
+    }
+
+    out_textures.resize(texture_count);
+
+    for (uint32_t texture_index = 0U; texture_index < texture_count; ++texture_index)
+    {
+        if (internal_unlikely(!internal_data_read_mmd_pmx_text(data_base, data_size, inout_data_offset, text_encoding, out_textures[texture_index].m_path)))
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+static inline bool internal_data_read_mmd_pmx_materials(void const *data_base, size_t data_size, size_t &inout_data_offset, uint8_t text_encoding, uint8_t texture_index_size, mcrt_vector<mmd_pmx_material_t> &out_materials)
+{
+    // [Material.load](https://github.com/UuuNyaa/blender_mmd_tools/blob/main/mmd_tools/core/pmx/__init__.py#L860)
+
+    assert(out_materials.empty());
+    out_materials = {};
+
+    uint32_t material_count;
+    if (internal_unlikely(!internal_data_read_uint32(data_base, data_size, inout_data_offset, &material_count)))
+    {
+        return false;
+    }
+
+    if (internal_unlikely(0U == material_count || (material_count > static_cast<uint32_t>(INT32_MAX))))
+    {
+        // Tolerance
+        return true;
+    }
+
+    out_materials.resize(material_count);
+
+    for (uint32_t material_index = 0U; material_index < material_count; ++material_index)
+    {
+        if (internal_unlikely(!internal_data_read_mmd_pmx_text(data_base, data_size, inout_data_offset, text_encoding, out_materials[material_index].m_name)))
+        {
+            return false;
+        }
+
+        mcrt_string unused_name_e;
+        if (internal_unlikely(!internal_data_read_mmd_pmx_text(data_base, data_size, inout_data_offset, text_encoding, unused_name_e)))
+        {
+            return false;
+        }
+
+        if (internal_unlikely(!internal_data_read_mmd_pmx_vec4(data_base, data_size, inout_data_offset, &out_materials[material_index].m_diffuse)))
+        {
+            return false;
+        }
+
+        mmd_pmx_vec3_t unused_specular;
+        if (internal_unlikely(!internal_data_read_mmd_pmx_vec3(data_base, data_size, inout_data_offset, &unused_specular)))
+        {
+            return false;
+        }
+
+        float unused_shininess;
+        if (internal_unlikely(!internal_data_read_float(data_base, data_size, inout_data_offset, &unused_shininess)))
+        {
+            return false;
+        }
+
+        mmd_pmx_vec3_t unused_ambient;
+        if (internal_unlikely(!internal_data_read_mmd_pmx_vec3(data_base, data_size, inout_data_offset, &unused_ambient)))
+        {
+            return false;
+        }
+
+        uint8_t drawing_flags;
+        if (internal_unlikely(!internal_data_read_uint8(data_base, data_size, inout_data_offset, &drawing_flags)))
+        {
+            return false;
+        }
+
+        out_materials[material_index].m_is_double_sided = (0U != (drawing_flags & 1U));
+
+        mmd_pmx_vec4_t unused_edge_color;
+        if (internal_unlikely(!internal_data_read_mmd_pmx_vec4(data_base, data_size, inout_data_offset, &unused_edge_color)))
+        {
+            return false;
+        }
+
+        float unused_edge_size;
+        if (internal_unlikely(!internal_data_read_float(data_base, data_size, inout_data_offset, &unused_edge_size)))
+        {
+            return false;
+        }
+
+        if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, texture_index_size, &out_materials[material_index].m_texture_index)))
+        {
+            return false;
+        }
+
+        uint32_t unused_sphere_texture;
+        if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, texture_index_size, &unused_sphere_texture)))
+        {
+            return false;
+        }
+
+        uint8_t unused_sphere_texture_mode;
+        if (internal_unlikely(!internal_data_read_uint8(data_base, data_size, inout_data_offset, &unused_sphere_texture_mode)))
+        {
+            return false;
+        }
+
+        uint8_t is_shared_toon_texture;
+        if (internal_unlikely(!internal_data_read_uint8(data_base, data_size, inout_data_offset, &is_shared_toon_texture)))
+        {
+            return false;
+        }
+
+        if (0 == is_shared_toon_texture)
+        {
+            uint32_t unused_toon_texture;
+            if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, texture_index_size, &unused_toon_texture)))
+            {
+                return false;
+            }
+        }
+        else if (1 == is_shared_toon_texture)
+        {
+            uint8_t unused_toon_texture;
+            if (internal_unlikely(!internal_data_read_uint8(data_base, data_size, inout_data_offset, &unused_toon_texture)))
+            {
+                return false;
+            }
+        }
+        else
+        {
+            return false;
+        }
+
+        mcrt_string unused_meta_data;
+        if (internal_unlikely(!internal_data_read_mmd_pmx_text(data_base, data_size, inout_data_offset, text_encoding, unused_meta_data)))
+        {
+            return false;
+        }
+
+        uint32_t vertex_count;
+        if (internal_unlikely(!internal_data_read_uint32(data_base, data_size, inout_data_offset, &vertex_count)))
+        {
+            return false;
+        }
+
+        // Tolerance
+        assert(0U == (vertex_count % 3U));
+
+        out_materials[material_index].m_face_count = ((vertex_count <= static_cast<uint32_t>(INT32_MAX)) ? (vertex_count / 3U) : 0U);
+    }
+
+    return true;
+}
+
+static inline bool internal_data_read_mmd_pmx_vec2(void const *data_base, size_t data_size, size_t &inout_data_offset, mmd_pmx_vec2_t *out_vec3)
+{
+    if (internal_unlikely(!internal_data_read_float(data_base, data_size, inout_data_offset, &out_vec3->m_x)))
+    {
+        return false;
+    }
+
+    if (internal_unlikely(!internal_data_read_float(data_base, data_size, inout_data_offset, &out_vec3->m_y)))
+    {
+        return false;
+    }
+
+    return true;
+}
+
+static inline bool internal_data_read_mmd_pmx_vec3(void const *data_base, size_t data_size, size_t &inout_data_offset, mmd_pmx_vec3_t *out_vec3)
+{
+    if (internal_unlikely(!internal_data_read_float(data_base, data_size, inout_data_offset, &out_vec3->m_x)))
+    {
+        return false;
+    }
+
+    if (internal_unlikely(!internal_data_read_float(data_base, data_size, inout_data_offset, &out_vec3->m_y)))
+    {
+        return false;
+    }
+
+    if (internal_unlikely(!internal_data_read_float(data_base, data_size, inout_data_offset, &out_vec3->m_z)))
+    {
+        return false;
+    }
+
+    return true;
+}
+
+static inline bool internal_data_read_mmd_pmx_vec4(void const *data_base, size_t data_size, size_t &inout_data_offset, mmd_pmx_vec4_t *out_vec3)
+{
+    if (internal_unlikely(!internal_data_read_float(data_base, data_size, inout_data_offset, &out_vec3->m_x)))
+    {
+        return false;
+    }
+
+    if (internal_unlikely(!internal_data_read_float(data_base, data_size, inout_data_offset, &out_vec3->m_y)))
+    {
+        return false;
+    }
+
+    if (internal_unlikely(!internal_data_read_float(data_base, data_size, inout_data_offset, &out_vec3->m_z)))
+    {
+        return false;
+    }
+
+    if (internal_unlikely(!internal_data_read_float(data_base, data_size, inout_data_offset, &out_vec3->m_w)))
+    {
+        return false;
+    }
+
+    return true;
+}
+
+static inline bool internal_data_read_mmd_pmx_text(void const *data_base, size_t data_size, size_t &inout_data_offset, uint8_t text_encoding, mcrt_string &out_text)
+{
+    // use "out_text, s8" to display the UTF-8 string
+    // https://learn.microsoft.com/en-us/visualstudio/debugger/format-specifiers-in-cpp
+
+    assert(out_text.empty());
+    out_text = {};
+
+    uint32_t length;
+    if (internal_unlikely(!internal_data_read_uint32(data_base, data_size, inout_data_offset, &length)))
+    {
+        return false;
+    }
+
+    if (internal_unlikely(0U == length))
+    {
+        return true;
+    }
+
+    if (0U == text_encoding)
+    {
+        static_assert(sizeof(uint16_t) == 2U, "");
+
+        // Tolerence
+        assert(0U == (length & (2U - 1U)));
+
+        mcrt_vector<uint16_t> value;
+        value.resize(static_cast<size_t>((length + 1U) >> 1U), 0U);
+        if (internal_unlikely(!internal_data_read_bytes(data_base, data_size, inout_data_offset, length, value.data())))
+        {
+            return false;
+        }
+
+        mcrt_vector<uint16_t> &src_utf16 = value;
+        mcrt_vector<uint8_t> dst_utf8;
+
+        constexpr size_t const UNI_MAX_UTF8_BYTES_PER_CODE_POINT = 4U;
+        dst_utf8.resize(src_utf16.size() * UNI_MAX_UTF8_BYTES_PER_CODE_POINT + 1U);
+
+        char *in_buf = reinterpret_cast<char *>(src_utf16.data());
+        size_t in_bytes_left = sizeof(uint16_t) * src_utf16.size();
+
+        char *out_buf = reinterpret_cast<char *>(dst_utf8.data());
+        size_t out_bytes_left = sizeof(uint8_t) * dst_utf8.size();
+
+        iconv_t conversion_descriptor = iconv_open("UTF-8", "UTF-16LE");
+        if (internal_unlikely(reinterpret_cast<iconv_t>(-1) == conversion_descriptor))
+        {
+            // Tolerance
+            assert(false);
+            return true;
+        }
+
+        size_t conversion_result = iconv(conversion_descriptor, &in_buf, &in_bytes_left, &out_buf, &out_bytes_left);
+
+        int result = iconv_close(conversion_descriptor);
+        assert(-1 != result);
+
+        if (internal_unlikely(static_cast<size_t>(-1) == conversion_result))
+        {
+            // Tolerance
+            assert(false);
+            return true;
+        }
+
+        size_t convertion_size = reinterpret_cast<decltype(&dst_utf8[0])>(out_buf) - &dst_utf8[0];
+        dst_utf8.resize(convertion_size + 1U);
+
+        dst_utf8[convertion_size] = '\0';
+
+        // do not use "std::move"
+        // the "memory" of "dst_utf8" is greater than the "size" of "dst_utf8"
+        out_text = reinterpret_cast<char *>(&dst_utf8[0]);
+
+        return true;
+    }
+    else if (1U == text_encoding)
+    {
+        mcrt_vector<uint8_t> value;
+        value.resize(length + 1U);
+        if (internal_unlikely(!internal_data_read_bytes(data_base, data_size, inout_data_offset, length, value.data())))
+        {
+            return false;
+        }
+        value[length] = '\0';
+
+        out_text = reinterpret_cast<char *>(&value[0]);
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+static inline bool internal_data_read_mmd_pmx_index(void const *data_base, size_t data_size, size_t &inout_data_offset, uint8_t index_size, uint32_t *out_index)
+{
+    if (2U == index_size)
+    {
+        uint16_t index;
+        if (internal_data_read_uint16(data_base, data_size, inout_data_offset, &index))
+        {
+            (*out_index) = index;
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else if (1U == index_size)
+    {
+        uint8_t index;
+        if (internal_data_read_uint8(data_base, data_size, inout_data_offset, &index))
+        {
+            (*out_index) = index;
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else if (4U == index_size)
+    {
+        return internal_data_read_uint32(data_base, data_size, inout_data_offset, out_index);
+    }
+    else
+    {
+        return false;
+    }
+}
+
+static inline bool internal_data_read_uint8(void const *data_base, size_t data_size, size_t &inout_data_offset, uint8_t *out_uint8)
+{
+    if (data_size >= (inout_data_offset + sizeof(uint8_t)))
+    {
+        (*out_uint8) = (*reinterpret_cast<uint8_t const *>(reinterpret_cast<uintptr_t>(data_base) + inout_data_offset));
+        inout_data_offset += sizeof(uint8_t);
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+static inline bool internal_data_read_uint16(void const *data_base, size_t data_size, size_t &inout_data_offset, uint16_t *out_uint16)
+{
+    if (data_size >= (inout_data_offset + sizeof(uint16_t)))
+    {
+        (*out_uint16) = internal_bswap_16(*reinterpret_cast<uint16_t const *>(reinterpret_cast<uintptr_t>(data_base) + inout_data_offset));
+        inout_data_offset += sizeof(uint16_t);
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+static inline bool internal_data_read_uint32(void const *data_base, size_t data_size, size_t &inout_data_offset, uint32_t *out_uint32)
+{
+    if (data_size >= (inout_data_offset + sizeof(uint32_t)))
+    {
+        (*out_uint32) = internal_bswap_32(*reinterpret_cast<uint32_t const *>(reinterpret_cast<uintptr_t>(data_base) + inout_data_offset));
+        inout_data_offset += sizeof(uint32_t);
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+static inline bool internal_data_read_float(void const *data_base, size_t data_size, size_t &inout_data_offset, float *out_float)
+{
+    if (data_size >= (inout_data_offset + sizeof(uint32_t)))
+    {
+        uint32_t float_as_uint = internal_bswap_32(*reinterpret_cast<uint32_t const *>(reinterpret_cast<uintptr_t>(data_base) + inout_data_offset));
+        (*out_float) = (*reinterpret_cast<float *>(&float_as_uint));
+        inout_data_offset += sizeof(uint32_t);
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+static inline bool internal_data_read_bytes(void const *data_base, size_t data_size, size_t &inout_data_offset, uint32_t length, void *out_bytes)
+{
+    if (data_size >= (inout_data_offset + (sizeof(uint8_t) * length)))
+    {
+        std::memcpy(out_bytes, reinterpret_cast<void const *>(reinterpret_cast<uintptr_t>(data_base) + inout_data_offset), length);
+        inout_data_offset += (sizeof(uint8_t) * length);
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
