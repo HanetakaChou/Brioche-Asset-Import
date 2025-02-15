@@ -29,7 +29,7 @@ public:
     virtual void draw(float interval_time, ui_model_t const *ui_model, user_camera_model_t const *user_camera_model, void const *ui_draw_data) = 0;
 };
 
-extern renderer *renderer_init(void *wsi_connection, ui_model_t *out_ui_model, user_camera_model_t *out_user_camera_model);
+extern renderer *renderer_create(void *wsi_connection, ui_model_t *out_ui_model, user_camera_model_t *out_user_camera_model);
 extern void renderer_destroy(renderer *renderer);
 
 #endif

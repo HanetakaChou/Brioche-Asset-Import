@@ -18,7 +18,7 @@
 #ifndef _FORWARD_SHADING_PIPELINE_RESOURCE_BINDING_SLI_
 #define _FORWARD_SHADING_PIPELINE_RESOURCE_BINDING_SLI_ 1
 
-#include "../thirdparty/Brioche/shaders/brx_define.sli"
+#include "../thirdparty/Brioche-Shader-Language/shaders/brx_shader_language.bsli"
 #include "common_forward_shading_pipeline_post_process_pipeline_resource_binding.sli"
 
 brx_sampler_state(g_sampler, 0, 1);

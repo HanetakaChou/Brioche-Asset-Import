@@ -80,7 +80,7 @@ public:
 	void uninit();
 };
 
-extern renderer *renderer_init(void *wsi_connection, ui_model_t *out_ui_model, user_camera_model_t *out_user_camera_model)
+extern renderer *renderer_create(void *wsi_connection, ui_model_t *out_ui_model, user_camera_model_t *out_user_camera_model)
 {
 	void *new_unwrapped_renderer_base = malloc(sizeof(facade_renderer));
 	assert(NULL != new_unwrapped_renderer_base);
@@ -146,7 +146,7 @@ facade_renderer::~facade_renderer()
 void facade_renderer::init(void *wsi_connection, ui_model_t *out_ui_model, user_camera_model_t *out_user_camera_model)
 {
 	assert(NULL == this->m_device);
-	this->m_device = brx_init_device(wsi_connection, false);
+	this->m_device = brx_create_device(wsi_connection, false);
 
 	// Scene Renderer Init
 	this->m_scene_renderer.init(this->m_device, FRAME_THROTTLING_COUNT, out_ui_model, out_user_camera_model);

@@ -26,26 +26,14 @@
 	path = thirdparty/McRT-Malloc
 	url = git@github.com:HanetakaChou/McRT-Malloc.git
 	branch = master
-[submodule "thirdparty/DirectXShaderCompiler"]
-	path = thirdparty/DirectXShaderCompiler
-	url = git@github.com:HanetakaChou/Brioche.git
-	branch = DirectXShaderCompiler
 [submodule "thirdparty/D3D12-Agility-SDK"]
 	path = thirdparty/D3D12-Agility-SDK
 	url = git@github.com:HanetakaChou/Brioche.git
 	branch = D3D12-Agility-SDK
-[submodule "thirdparty/shaderc"]
-	path = thirdparty/shaderc
-	url = git@github.com:HanetakaChou/Brioche.git
-	branch = shaderc
 [submodule "thirdparty/Vulkan-ValidationLayers"]
 	path = thirdparty/Vulkan-ValidationLayers
 	url = git@github.com:HanetakaChou/Brioche.git
 	branch = Vulkan-ValidationLayers
-[submodule "thirdparty/make"]
-	path = thirdparty/make
-	url = git@github.com:HanetakaChou/Brioche.git
-	branch = make
 [submodule "thirdparty/libiconv"]
 	path = thirdparty/libiconv
 	url = git@github.com:HanetakaChou/libiconv.git
@@ -62,3 +50,36 @@
 	path = thirdparty/Reversed-Z
 	url = git@github.com:HanetakaChou/Brioche-Asset-Import.git
 	branch = Reversed-Z
+[submodule "thirdparty/Environment-Lighting"]
+	path = thirdparty/Environment-Lighting
+	url = git@github.com:HanetakaChou/Environment-Lighting.git
+	branch = master
+[submodule "thirdparty/Brioche-Shader-Language"]
+	path = thirdparty/Brioche-Shader-Language
+	url = git@github.com:HanetakaChou/Brioche-Shader-Language.git
+	branch = master
+[submodule "thirdparty/DirectXShaderCompiler"]
+	path = thirdparty/DirectXShaderCompiler
+	url = git@github.com:HanetakaChou/Brioche-Shader-Language.git
+	branch = DirectXShaderCompiler
+[submodule "thirdparty/shaderc"]
+	path = thirdparty/shaderc
+	url = git@github.com:HanetakaChou/Brioche-Shader-Language.git
+	branch = shaderc
+[submodule "thirdparty/make"]
+	path = thirdparty/make
+	url = git@github.com:HanetakaChou/Brioche-Shader-Language.git
+	branch = make
+
+[submodule "thirdparty/Brioche-Motion"]
+	path = thirdparty/Brioche-Motion
+	url = git@github.com:HanetakaChou/Brioche-Motion.git
+	branch = master
+[submodule "thirdparty/OpenCV"]
+	path = thirdparty/OpenCV
+	url = git@github.com:HanetakaChou/OpenCV.git
+	branch = master
+[submodule "thirdparty/Brioche-Analytic-Rendering-Interface"]
+	path = thirdparty/Brioche-Analytic-Rendering-Interface
+	url = git@github.com:HanetakaChou/Brioche-Analytic-Rendering-Interface.git
+	branch = master

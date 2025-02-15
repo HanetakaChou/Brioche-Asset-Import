@@ -17,13 +17,18 @@
 
 #include "scene_renderer.h"
 #if defined(__GNUC__)
+// GCC or CLANG
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunknown-pragmas"
-#endif
 #include <DirectXMath.h>
 #include <DirectXCollision.h>
-#if defined(__GNUC__)
 #pragma GCC diagnostic pop
+#elif defined(_MSC_VER)
+// MSVC or CLANG-CL
+#include <DirectXMath.h>
+#include <DirectXCollision.h>
+#else
+#error Unknown Compiler
 #endif
 #include <cmath>
 #include <cstring>
@@ -32,9 +37,9 @@
 #include "../thirdparty/McRT-Malloc/include/mcrt_unordered_map.h"
 #include "../thirdparty/Reversed-Z/include/reversed_z.h"
 #include "../thirdparty/DLB/DLB.h"
-#include "../thirdparty/Brioche-Asset-Import/include/import_image_asset.h"
-#include "../thirdparty/Brioche-Asset-Import/include/import_asset_input_stream.h"
-#include "../thirdparty/Packed-Vector/shaders/octahedron_mapping.sli"
+#include "../thirdparty/Brioche-Asset-Import/include/brx_asset_import_input_stream.h"
+#include "../thirdparty/Brioche-Asset-Import/include/brx_asset_import_image.h"
+#include "../thirdparty/Brioche-Asset-Import/include/brx_asset_import_scene.h"
 #include "../shaders/common_asset_constant.sli"
 #include "../shaders/skin_pipeline_resource_binding.sli"
 #include "../shaders/common_forward_shading_pipeline_post_process_pipeline_resource_binding.sli"
@@ -259,13 +264,15 @@ void scene_renderer::init(brx_device *device, uint32_t frame_throttling_count, u
 
             // Asset
             {
-                import_asset_input_stream_factory *input_stream_factory = import_asset_init_file_input_stream_factory();
+                brx_asset_import_input_stream_factory *input_stream_factory = brx_asset_import_create_file_input_stream_factory();
 
                 mcrt_unordered_map<mcrt_string, brx_sampled_asset_image *> mapped_textures;
 
                 for (auto const &file_name_time_stamp : out_ui_model->m_asset_file_names)
                 {
                     mcrt_string const &file_name = file_name_time_stamp.first;
+
+                    // brx_asset_import_create_scene(input_stream_factory, file_name.c_str());
 
                     mcrt_vector<scene_mesh_data> total_mesh_data;
                     if (import_gltf_scene_asset(total_mesh_data, animation_frame_rate, input_stream_factory, file_name.c_str()))
@@ -428,6 +435,13 @@ void scene_renderer::init(brx_device *device, uint32_t frame_throttling_count, u
                                         &out_subset.m_base_color_texture,
                                         &out_subset.m_metallic_roughness_texture};
 
+                                    bool const force_srgbs[DEMO_MESH_SUBSET_ASSET_TEXTURE_COUNT] = {
+                                        false,
+                                        true,
+                                        true,
+                                        false,
+                                    };
+
                                     for (uint32_t mesh_subset_asset_texture_index = 0U; mesh_subset_asset_texture_index < DEMO_MESH_SUBSET_ASSET_TEXTURE_COUNT; ++mesh_subset_asset_texture_index)
                                     {
                                         mcrt_string const &asset_texture_image_uri = (*asset_texture_image_uris[mesh_subset_asset_texture_index]);
@@ -436,10 +450,8 @@ void scene_renderer::init(brx_device *device, uint32_t frame_throttling_count, u
 
                                         if (!asset_texture_image_uri.empty())
                                         {
-                                            mcrt_string image_asset_file_name_dds;
-                                            mcrt_string image_asset_file_name_pvr;
+                                            mcrt_string image_asset_file_name;
                                             {
-                                                mcrt_string image_asset_file_name;
 
                                                 size_t dir_name_pos = file_name.find_last_of("/\\");
                                                 if (mcrt_string::npos != dir_name_pos)
@@ -451,88 +463,61 @@ void scene_renderer::init(brx_device *device, uint32_t frame_throttling_count, u
                                                     image_asset_file_name += "./";
                                                 }
 
-                                                size_t ext_name_pos = asset_texture_image_uri.find_last_of(".");
-                                                if (mcrt_string::npos != ext_name_pos)
-                                                {
-                                                    image_asset_file_name += asset_texture_image_uri.substr(0U, ext_name_pos + 1U);
-                                                }
-                                                else
-                                                {
-                                                    image_asset_file_name += asset_texture_image_uri;
-                                                }
-
-                                                image_asset_file_name_dds = (image_asset_file_name + "dds");
-                                                image_asset_file_name_pvr = (image_asset_file_name + "pvr");
+                                                image_asset_file_name += asset_texture_image_uri;
                                             }
 
                                             mcrt_unordered_map<mcrt_string, brx_sampled_asset_image *>::const_iterator found;
-                                            if (mapped_textures.end() != (found = mapped_textures.find(image_asset_file_name_dds)) || mapped_textures.end() != (found = mapped_textures.find(image_asset_file_name_pvr)))
+                                            if (mapped_textures.end() != (found = mapped_textures.find(image_asset_file_name)))
                                             {
                                                 assert(NULL != found->second);
                                                 destination_asset_texture = found->second;
                                             }
                                             else
                                             {
-                                                mcrt_string import_image_asset_file_name;
-                                                import_asset_input_stream *import_image_asset_input_stream;
-                                                bool (*pfn_import_image_asset_header_from_input_stream)(import_asset_input_stream *, IMPORT_ASSET_IMAGE_HEADER *, size_t *);
-                                                bool (*pfn_import_image_asset_data_from_input_stream)(import_asset_input_stream *, IMPORT_ASSET_IMAGE_HEADER const *, size_t, void *, size_t, BRX_SAMPLED_ASSET_IMAGE_IMPORT_SUBRESOURCE_MEMCPY_DEST const *);
-                                                if (device->is_sampled_asset_image_compression_bc_supported() && (NULL != (import_image_asset_input_stream = input_stream_factory->create_instance(image_asset_file_name_dds.c_str()))))
-                                                {
-                                                    import_image_asset_file_name = image_asset_file_name_dds;
-                                                    pfn_import_image_asset_header_from_input_stream = import_dds_image_asset_header_from_input_stream;
-                                                    pfn_import_image_asset_data_from_input_stream = import_dds_image_asset_data_from_input_stream;
-                                                }
-                                                else if (device->is_sampled_asset_image_compression_astc_supported() && (NULL != (import_image_asset_input_stream = input_stream_factory->create_instance(image_asset_file_name_pvr.c_str()))))
-                                                {
-                                                    import_image_asset_file_name = image_asset_file_name_pvr;
-                                                    pfn_import_image_asset_header_from_input_stream = import_pvr_image_asset_header_from_input_stream;
-                                                    pfn_import_image_asset_data_from_input_stream = import_pvr_image_asset_data_from_input_stream;
-                                                }
-                                                else
-                                                {
-                                                    // TODO: jpeg
-                                                    // TODO: png
-                                                    import_image_asset_input_stream = NULL;
-                                                    pfn_import_image_asset_header_from_input_stream = NULL;
-                                                    pfn_import_image_asset_data_from_input_stream = NULL;
-                                                }
+                                                // TODO: compress on-the-fly
+                                                // device->is_sampled_asset_image_compression_bc_supported
+                                                // device->is_sampled_asset_image_compression_astc_supported
 
-                                                if (NULL != import_image_asset_input_stream && NULL != pfn_import_image_asset_header_from_input_stream && NULL != pfn_import_image_asset_data_from_input_stream)
+                                                brx_asset_import_image *imported_image_asset = brx_asset_import_create_image_from_input_stream(input_stream_factory, image_asset_file_name.c_str());
+                                                if (NULL != imported_image_asset)
                                                 {
-                                                    IMPORT_ASSET_IMAGE_HEADER image_asset_header;
+                                                    BRX_SAMPLED_ASSET_IMAGE_FORMAT const format = imported_image_asset->get_format(force_srgbs[mesh_subset_asset_texture_index]);
+                                                    uint32_t const mip_level_count = imported_image_asset->get_mip_level_count();
+
                                                     mcrt_vector<BRX_SAMPLED_ASSET_IMAGE_IMPORT_SUBRESOURCE_MEMCPY_DEST> subresource_memcpy_dests;
-                                                    brx_staging_upload_buffer *image_staging_upload_buffer = NULL;
+                                                    uint32_t const subresource_count = mip_level_count;
+                                                    subresource_memcpy_dests.resize(subresource_count);
+
+                                                    uint32_t const total_bytes = brx_sampled_asset_image_import_calculate_subresource_memcpy_dests(format, imported_image_asset->get_width(0U), imported_image_asset->get_height(0U), 1U, mip_level_count, 1U, 0U, staging_upload_buffer_offset_alignment, staging_upload_buffer_row_pitch_alignment, subresource_count, &subresource_memcpy_dests[0]);
+                                                    brx_staging_upload_buffer *image_staging_upload_buffer = device->create_staging_upload_buffer(static_cast<uint32_t>(total_bytes));
+                                                    staging_upload_buffers.push_back(image_staging_upload_buffer);
+
+                                                    for (uint32_t mip_level_index = 0U; mip_level_index < mip_level_count; ++mip_level_index)
                                                     {
-                                                        size_t image_asset_data_offset;
-                                                        bool const res_import_image_asset_header = pfn_import_image_asset_header_from_input_stream(import_image_asset_input_stream, &image_asset_header, &image_asset_data_offset);
-                                                        assert(res_import_image_asset_header);
+                                                        uint32_t const subresource_index = brx_sampled_asset_image_import_calculate_subresource_index(mip_level_index, 0U, 0U, mip_level_count, 1U);
+                                                        assert(1U == subresource_memcpy_dests[mip_level_index].output_slice_count);
 
-                                                        uint32_t const subresource_count = image_asset_header.mip_levels;
-                                                        subresource_memcpy_dests.resize(subresource_count);
+                                                        assert(imported_image_asset->get_row_count(mip_level_index) == subresource_memcpy_dests[mip_level_index].output_row_count);
+                                                        assert(imported_image_asset->get_row_size(mip_level_index) == subresource_memcpy_dests[mip_level_index].output_row_size);
+                                                        size_t const memory_copy_count = std::min(imported_image_asset->get_row_size(mip_level_index), subresource_memcpy_dests[mip_level_index].output_row_size);
 
-                                                        // TODO: support more image paramters
-                                                        assert(!image_asset_header.is_cube_map);
-                                                        assert(IMPORT_ASSET_IMAGE_TYPE_2D == image_asset_header.type);
-                                                        assert(1U == image_asset_header.depth);
-                                                        assert(1U == image_asset_header.array_layers);
-                                                        uint32_t const total_bytes = brx_sampled_asset_image_import_calculate_subresource_memcpy_dests(image_asset_header.format, image_asset_header.width, image_asset_header.height, 1U, image_asset_header.mip_levels, 1U, 0U, staging_upload_buffer_offset_alignment, staging_upload_buffer_row_pitch_alignment, subresource_count, &subresource_memcpy_dests[0]);
-                                                        image_staging_upload_buffer = device->create_staging_upload_buffer(static_cast<uint32_t>(total_bytes));
-                                                        staging_upload_buffers.push_back(image_staging_upload_buffer);
-
-                                                        bool const res_import_image_asset_data = pfn_import_image_asset_data_from_input_stream(import_image_asset_input_stream, &image_asset_header, image_asset_data_offset, image_staging_upload_buffer->get_host_memory_range_base(), subresource_count, &subresource_memcpy_dests[0]);
-                                                        assert(res_import_image_asset_data);
+                                                        for (uint32_t row_index = 0U; (row_index < imported_image_asset->get_row_count(mip_level_index)) && (row_index < subresource_memcpy_dests[mip_level_index].output_row_count); ++row_index)
+                                                        {
+                                                            void *const memory_copy_destination = reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(image_staging_upload_buffer->get_host_memory_range_base()) + (subresource_memcpy_dests[subresource_index].staging_upload_buffer_offset + subresource_memcpy_dests[subresource_index].output_row_pitch * row_index));
+                                                            void *const memory_copy_source = reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(imported_image_asset->get_pixel_data(mip_level_index)) + imported_image_asset->get_row_pitch(mip_level_index) * row_index);
+                                                            std::memcpy(memory_copy_destination, memory_copy_source, memory_copy_count);
+                                                        }
                                                     }
-                                                    input_stream_factory->destory_instance(import_image_asset_input_stream);
 
-                                                    destination_asset_texture = device->create_sampled_asset_image(image_asset_header.format, image_asset_header.width, image_asset_header.height, image_asset_header.mip_levels);
+                                                    destination_asset_texture = device->create_sampled_asset_image(format, imported_image_asset->get_width(0U), imported_image_asset->get_height(0U), mip_level_count);
+                                                    mapped_textures.emplace_hint(found, image_asset_file_name, destination_asset_texture);
 
-                                                    mapped_textures.emplace_hint(found, import_image_asset_file_name, destination_asset_texture);
-
-                                                    for (uint32_t mip_level = 0U; mip_level < image_asset_header.mip_levels; ++mip_level)
+                                                    for (uint32_t mip_level_index = 0U; mip_level_index < mip_level_count; ++mip_level_index)
                                                     {
-                                                        upload_command_buffer->upload_from_staging_upload_buffer_to_sampled_asset_image(destination_asset_texture, image_asset_header.format, image_asset_header.width, image_asset_header.height, mip_level, image_staging_upload_buffer, subresource_memcpy_dests[mip_level].staging_upload_buffer_offset, subresource_memcpy_dests[mip_level].output_row_pitch, subresource_memcpy_dests[mip_level].output_row_count);
+                                                        upload_command_buffer->upload_from_staging_upload_buffer_to_sampled_asset_image(destination_asset_texture, format, imported_image_asset->get_width(0U), imported_image_asset->get_height(0U), mip_level_index, image_staging_upload_buffer, subresource_memcpy_dests[mip_level_index].staging_upload_buffer_offset, subresource_memcpy_dests[mip_level_index].output_row_pitch, subresource_memcpy_dests[mip_level_index].output_row_count);
                                                     }
+
+                                                    brx_asset_import_destory_image(imported_image_asset);
                                                 }
                                                 else
                                                 {
@@ -591,7 +576,7 @@ void scene_renderer::init(brx_device *device, uint32_t frame_throttling_count, u
                     }
                 }
 
-                import_asset_destroy_file_input_stream_factory(input_stream_factory);
+                brx_asset_import_destroy_file_input_stream_factory(input_stream_factory);
                 input_stream_factory = NULL;
 
                 this->m_scene_textures.reserve(mapped_textures.size());
@@ -673,8 +658,7 @@ void scene_renderer::init(brx_device *device, uint32_t frame_throttling_count, u
                     }
                 }
 
-                mcrt_vector<brx_sampled_asset_image const *> uploaded_sampled_asset_images;
-                mcrt_vector<uint32_t> uploaded_destination_mip_levels;
+                mcrt_vector<BRX_SAMPLED_ASSET_IMAGE_SUBRESOURCE> uploaded_sampled_asset_image_subresources;
 
                 // Asset Textures
                 for (mcrt_vector<brx_sampled_asset_image *>::const_iterator material_texture_iterator = this->m_scene_textures.begin(); material_texture_iterator != this->m_scene_textures.end(); ++material_texture_iterator)
@@ -687,24 +671,18 @@ void scene_renderer::init(brx_device *device, uint32_t frame_throttling_count, u
 
                     for (uint32_t mip_level = 0U; mip_level < mip_level_count; ++mip_level)
                     {
-                        uploaded_sampled_asset_images.push_back(material_texture);
-
-                        uploaded_destination_mip_levels.push_back(mip_level);
+                        uploaded_sampled_asset_image_subresources.push_back({material_texture, mip_level});
                     }
                 }
 
                 // Place Holder Texture
                 {
-                    uploaded_sampled_asset_images.push_back(this->m_place_holder_texture);
-
-                    uploaded_destination_mip_levels.push_back(0U);
+                    uploaded_sampled_asset_image_subresources.push_back({this->m_place_holder_texture, 0U});
                 }
 
-                assert(uploaded_sampled_asset_images.size() == uploaded_destination_mip_levels.size());
+                upload_command_buffer->release(static_cast<uint32_t>(uploaded_storage_asset_buffers.size()), uploaded_storage_asset_buffers.data(), static_cast<uint32_t>(uploaded_sampled_asset_image_subresources.size()), &uploaded_sampled_asset_image_subresources[0], 0U, NULL);
 
-                upload_command_buffer->release(static_cast<uint32_t>(uploaded_storage_asset_buffers.size()), uploaded_storage_asset_buffers.data(), static_cast<uint32_t>(uploaded_sampled_asset_images.size()), &uploaded_sampled_asset_images[0], uploaded_destination_mip_levels.data(), 0U, NULL);
-
-                graphics_command_buffer->acquire(static_cast<uint32_t>(uploaded_storage_asset_buffers.size()), uploaded_storage_asset_buffers.data(), static_cast<uint32_t>(uploaded_sampled_asset_images.size()), &uploaded_sampled_asset_images[0], uploaded_destination_mip_levels.data(), 0U, NULL);
+                graphics_command_buffer->acquire(static_cast<uint32_t>(uploaded_storage_asset_buffers.size()), uploaded_storage_asset_buffers.data(), static_cast<uint32_t>(uploaded_sampled_asset_image_subresources.size()), &uploaded_sampled_asset_image_subresources[0], 0U, NULL);
             }
 
             upload_command_buffer->end();

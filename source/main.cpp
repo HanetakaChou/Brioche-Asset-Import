@@ -175,7 +175,7 @@ extern "C" JNIEXPORT void ANativeActivity_onCreate(ANativeActivity *native_activ
             ImGui::GetStyle().ScaleAllSizes(3.0f);
         }
 
-        g_wsi_state.m_renderer = renderer_init(NULL);
+        g_wsi_state.m_renderer = renderer_create(NULL);
 
         user_camera_controller_init(&g_wsi_state.m_user_camera_controller);
 
@@ -659,7 +659,7 @@ int main(int argc, char *argv[])
             connection,
             visual_id};
 
-        wsi_state.m_renderer = renderer_init(&brx_xcb_connection);
+        wsi_state.m_renderer = renderer_create(&brx_xcb_connection);
 
         user_camera_controller_init(&wsi_state.m_user_camera_controller);
 
@@ -1091,8 +1091,17 @@ static bool inline _internal_asset_import_get_open_file_name(void *platform_cont
 
 #include "../thirdparty/libiconv/include/iconv.h"
 
+#ifndef NDEBUG
+extern "C" IMAGE_DOS_HEADER __ImageBase;
+
+int wmain(int argc, wchar_t* argv[], wchar_t* envp[])
+{
+    HINSTANCE hInstance = reinterpret_cast<HINSTANCE>(&__ImageBase);
+#else
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR lpCmdLine, _In_ int nCmdShow)
 {
+#endif
+
     // use high priority on Windows to make the launch faster
     // we do NOT have the access right to do this on Linux
     {
@@ -1110,7 +1119,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR 
     // ImGui_ImplWin32_EnableDpiAwareness();
 
     // Vulkan Validation Layer
-#if !defined(NDEBUG) && (brx_init_unknown_device == brx_init_vk_device) && (brx_destroy_unknown_device == brx_destroy_vk_device)
+#if !defined(NDEBUG) && (brx_init_unknown_device == brx_create_vk_device) && (brx_destroy_unknown_device == brx_destroy_vk_device)
     {
         // We assume that the "VkLayer_khronos_validation.json" is at the same directory of the executable file
         WCHAR file_name[4096];
@@ -1221,7 +1230,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR 
             wsi_state.m_ui_model.m_asset_file_names[file_name] = file_time_stamp;
         }
 
-        wsi_state.m_renderer = renderer_init(NULL, &wsi_state.m_ui_model, &wsi_state.m_user_camera_model);
+        wsi_state.m_renderer = renderer_create(NULL, &wsi_state.m_ui_model, &wsi_state.m_user_camera_model);
 
         user_camera_controller_init(&wsi_state.m_user_camera_model, &wsi_state.m_user_camera_controller);
 

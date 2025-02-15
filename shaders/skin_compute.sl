@@ -16,8 +16,8 @@
 //
 
 #include "skin_pipeline_resource_binding.sli"
-#include "../thirdparty/Packed-Vector/shaders/packed_vector.sli"
-#include "../thirdparty/Packed-Vector/shaders/octahedron_mapping.sli"
+#include "../thirdparty/Packed-Vector/shaders/brx_packed_vector.bsli"
+#include "../thirdparty/Environment-Lighting/shaders/brx_octahedral_mapping.bsli"
 #include "common_asset_constant.sli"
 
 #if defined(GL_SPIRV) || defined(VULKAN)
@@ -65,9 +65,9 @@ brx_pixel_shader_parameter_end(main)
     brx_uint packed_texcoord;
     {
         brx_uint3 packed_vector_vertex_varying_binding = brx_byte_address_buffer_load3(g_mesh_subset_buffers[1], vertex_varying_buffer_offset);
-        vertex_normal_model_space = octahedron_unmap(R16G16_SNORM_to_FLOAT2(packed_vector_vertex_varying_binding.x));
-        brx_float3 vertex_mapped_tangent_model_space = R15G15B2_SNORM_to_FLOAT3(packed_vector_vertex_varying_binding.y);
-        vertex_tangent_model_space = brx_float4(octahedron_unmap(vertex_mapped_tangent_model_space.xy), vertex_mapped_tangent_model_space.z);
+        vertex_normal_model_space = brx_octahedral_unmap(brx_R16G16_SNORM_to_FLOAT2(packed_vector_vertex_varying_binding.x));
+        brx_float3 vertex_mapped_tangent_model_space = brx_R15G15B2_SNORM_to_FLOAT3(packed_vector_vertex_varying_binding.y);
+        vertex_tangent_model_space = brx_float4(brx_octahedral_unmap(vertex_mapped_tangent_model_space.xy), vertex_mapped_tangent_model_space.z);
         packed_texcoord = packed_vector_vertex_varying_binding.z;
     }
 
@@ -76,8 +76,8 @@ brx_pixel_shader_parameter_end(main)
     {
         brx_uint vertex_joint_buffer_offset = g_vertex_joint_buffer_stride * vertex_index;
         brx_uint3 packed_vector_vertex_joint_buffer = brx_byte_address_buffer_load3(g_mesh_subset_buffers[2], vertex_joint_buffer_offset);
-        joint_indices = R16G16B16A16_UINT_to_UINT4(packed_vector_vertex_joint_buffer.xy);
-        joint_weights = R8G8B8A8_UNORM_to_FLOAT4(packed_vector_vertex_joint_buffer.z);
+        joint_indices = brx_R16G16B16A16_UINT_to_UINT4(packed_vector_vertex_joint_buffer.xy);
+        joint_weights = brx_R8G8B8A8_UNORM_to_FLOAT4(packed_vector_vertex_joint_buffer.z);
     }
 
     brx_dual_quaternion blend_dual_quaternion;
@@ -99,7 +99,7 @@ brx_pixel_shader_parameter_end(main)
     brx_float4 skined_vertex_tangent_model_space = brx_float4(unit_quaternion_to_rotation_transform(blend_quaternion, vertex_tangent_model_space.xyz), vertex_tangent_model_space.w);
 
     brx_uint3 packed_vector_skined_vertex_position_binding = brx_float_as_uint(skined_vertex_position_model_space);
-    brx_uint3 packed_vector_skined_vertex_varying_binding = brx_uint3(FLOAT2_to_R16G16_SNORM(octahedron_map(skined_vertex_normal_model_space)), FLOAT3_to_R15G15B2_SNORM(brx_float3(octahedron_map(skined_vertex_tangent_model_space.xyz), skined_vertex_tangent_model_space.w)), packed_texcoord);
+    brx_uint3 packed_vector_skined_vertex_varying_binding = brx_uint3(brx_FLOAT2_to_R16G16_SNORM(brx_octahedral_map(skined_vertex_normal_model_space)), brx_FLOAT3_to_R15G15B2_SNORM(brx_float3(brx_octahedral_map(skined_vertex_tangent_model_space.xyz), skined_vertex_tangent_model_space.w)), packed_texcoord);
     
     brx_byte_address_buffer_store3(g_mesh_skinned_subset_buffers[0], vertex_position_buffer_offset, packed_vector_skined_vertex_position_binding);
     brx_byte_address_buffer_store3(g_mesh_skinned_subset_buffers[1], vertex_varying_buffer_offset, packed_vector_skined_vertex_varying_binding);

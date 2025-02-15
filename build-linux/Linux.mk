@@ -40,7 +40,7 @@ ifeq (true, $(APP_DEBUG))
 else
 	C_FLAGS += -O2 -DNDEBUG
 endif
-C_FLAGS += -Dbrx_init_unknown_device=brx_init_vk_device
+C_FLAGS += -Dbrx_init_unknown_device=brx_create_vk_device
 C_FLAGS += -Dbrx_destroy_unknown_device=brx_destroy_vk_device
 C_FLAGS += -I$(LOCAL_PATH)/../shaders/spirv
 C_FLAGS += -DPAL_STDCPP_COMPAT=1
@@ -153,8 +153,8 @@ $(BIN_DIR)/VkLayer_khronos_validation.json: $(THIRD_PARTY_DIR)/Brioche/thirdpart
 	$(OBJ_DIR)/Demo-support-renderer.d \
 	$(OBJ_DIR)/Demo-support-tick_count.d \
 	$(OBJ_DIR)/Demo-demo.d \
-	$(OBJ_DIR)/Demo-thirdparty-ImportAsset-import_asset_file_input_stream.d \
-	$(OBJ_DIR)/Demo-thirdparty-ImportAsset-import_asset_memory_input_stream.d \
+	$(OBJ_DIR)/Demo-thirdparty-ImportAsset-brx_asset_import_file_input_stream.d \
+	$(OBJ_DIR)/Demo-thirdparty-ImportAsset-brx_asset_import_memory_input_stream.d \
 	$(OBJ_DIR)/Demo-thirdparty-ImportAsset-import_dds_image_asset.d \
 	$(OBJ_DIR)/Demo-thirdparty-ImportAsset-import_pvr_image_asset.d \
 	$(OBJ_DIR)/Demo-thirdparty-ImportAsset-import_gltf_scene_asset_cgltf.d \

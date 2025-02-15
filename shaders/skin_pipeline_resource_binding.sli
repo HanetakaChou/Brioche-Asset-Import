@@ -18,7 +18,7 @@
 #ifndef _SKIN_PIPELINE_RESOURCE_BINDING_SLI_
 #define _SKIN_PIPELINE_RESOURCE_BINDING_SLI_ 1
 
-#include "../thirdparty/Brioche/shaders/brx_define.sli"
+#include "../thirdparty/Brioche-Shader-Language/shaders/brx_shader_language.bsli"
 
 // D3D11_CS_DISPATCH_MAX_THREAD_GROUPS_PER_DIMENSION 65535
 // maxComputeWorkGroupCount 65535

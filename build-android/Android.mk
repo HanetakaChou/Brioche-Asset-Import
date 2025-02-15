@@ -43,7 +43,7 @@ LOCAL_CFLAGS :=
 # LOCAL_CFLAGS += -fvisibility=hidden
 LOCAL_CFLAGS += -Wall
 LOCAL_CFLAGS += -Werror=return-type
-LOCAL_CFLAGS += -Dbrx_init_unknown_device=brx_init_vk_device
+LOCAL_CFLAGS += -Dbrx_init_unknown_device=brx_create_vk_device
 LOCAL_CFLAGS += -Dbrx_destroy_unknown_device=brx_destroy_vk_device
 LOCAL_CFLAGS += -DPAL_STDCPP_COMPAT=1
 

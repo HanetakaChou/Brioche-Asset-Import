@@ -16,9 +16,9 @@
 //
 
 #include "post_process_pipeline_resource_binding.sli"
-#include "../thirdparty/Packed-Vector/shaders/packed_vector.sli"
-#include "../thirdparty/Packed-Vector/shaders/octahedron_mapping.sli"
-#include "math_constant.sli"
+#include "../thirdparty/Packed-Vector/shaders/brx_packed_vector.bsli"
+#include "../thirdparty/Environment-Lighting/shaders/brx_octahedral_mapping.bsli"
+#include "../thirdparty/Brioche-Shader-Language/shaders/brx_math_consts.bsli"
 
 #define INVALID_GBUFFER_DEPTH 0.0
 
@@ -56,20 +56,20 @@ brx_pixel_shader_parameter_end(main)
     else if (g_view_index < 1.5)
     {
         brx_uint4 gbuffer_metarial = brx_load_2d(g_gbuffer_metarial_texture, brx_int3(brx_frag_coord.xy, 0));
-        brx_float3 shading_normal_world_space = octahedron_unmap(R16G16_SNORM_to_FLOAT2(gbuffer_metarial.x));
+        brx_float3 shading_normal_world_space = brx_octahedral_unmap(brx_R16G16_SNORM_to_FLOAT2(gbuffer_metarial.x));
         debug_view_color = brx_float4((shading_normal_world_space + brx_float3(1.0, 1.0, 1.0)) * 0.5, 1.0);
     }
     else if (g_view_index < 2.5)
     {
         brx_uint4 gbuffer_metarial = brx_load_2d(g_gbuffer_metarial_texture, brx_int3(brx_frag_coord.xy, 0));
-        brx_float2 roughness_scaled_linear_depth = R16G16_UNORM_to_FLOAT2(gbuffer_metarial.y);
+        brx_float2 roughness_scaled_linear_depth = brx_R16G16_UNORM_to_FLOAT2(gbuffer_metarial.y);
         brx_float roughness = roughness_scaled_linear_depth.x;
         debug_view_color = brx_float4(roughness, roughness, roughness, 1.0);
     }
     else if (g_view_index < 3.5)
     {
         brx_uint4 gbuffer_metarial = brx_load_2d(g_gbuffer_metarial_texture, brx_int3(brx_frag_coord.xy, 0));
-        brx_float2 roughness_scaled_linear_depth = R16G16_UNORM_to_FLOAT2(gbuffer_metarial.y);
+        brx_float2 roughness_scaled_linear_depth = brx_R16G16_UNORM_to_FLOAT2(gbuffer_metarial.y);
         brx_float scaled_linear_depth = roughness_scaled_linear_depth.y;
         debug_view_color = brx_float4(scaled_linear_depth, scaled_linear_depth, scaled_linear_depth, 1.0);
     }

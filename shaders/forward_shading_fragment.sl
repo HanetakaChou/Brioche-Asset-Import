@@ -16,10 +16,10 @@
 //
 
 #include "forward_shading_pipeline_resource_binding.sli"
-#include "../thirdparty/Packed-Vector/shaders/packed_vector.sli"
-#include "../thirdparty/Packed-Vector/shaders/octahedron_mapping.sli"
+#include "../thirdparty/Packed-Vector/shaders/brx_packed_vector.bsli"
+#include "../thirdparty/Environment-Lighting/shaders/brx_octahedral_mapping.bsli"
 #include "common_asset_constant.sli"
-#include "math_constant.sli"
+#include "../thirdparty/Brioche-Shader-Language/shaders/brx_math_consts.bsli"
 
 brx_root_signature(forward_shading_root_signature_macro, forward_shading_root_signature_name)
 brx_early_depth_stencil
@@ -171,7 +171,7 @@ brx_pixel_shader_parameter_end(main)
 		{
 			// Lambert
 
-			brdf_diffuse = (1.0 / M_PI) * albedo;
+			brdf_diffuse = (1.0 / BRX_M_PI) * albedo;
 		}
 
 		brx_float3 brdf_specular;
@@ -194,7 +194,7 @@ brx_pixel_shader_parameter_end(main)
 			// Equation 8.11 of PBR Book: https://pbr-book.org/3ed-2018/Reflection_Models/Microfacet_Models#MicrofacetDistributionFunctions
 			brx_float alpha2 = alpha * alpha;
 			brx_float denominator = 1.0 + NdotH * (NdotH * alpha2 - NdotH);
-			brx_float D = (1.0 / M_PI) * (alpha2 / (denominator * denominator));
+			brx_float D = (1.0 / BRX_M_PI) * (alpha2 / (denominator * denominator));
 
 			// Lambda:
 			// Equation 8.13 of PBR Book: https://pbr-book.org/3ed-2018/Reflection_Models/Microfacet_Models#MaskingandShadowing
@@ -237,7 +237,7 @@ brx_pixel_shader_parameter_end(main)
 
     brx_float scaled_linear_depth = in_interpolated_linear_depth * g_linear_depth_scale;
 
-    brx_uint packed_shading_normal_world_space = FLOAT2_to_R16G16_SNORM(octahedron_map(shading_normal_world_space));
-    brx_uint packed_roughness_linear_depth = FLOAT2_to_R16G16_UNORM(brx_float2(roughness, scaled_linear_depth));
+    brx_uint packed_shading_normal_world_space = brx_FLOAT2_to_R16G16_SNORM(brx_octahedral_map(shading_normal_world_space));
+    brx_uint packed_roughness_linear_depth = brx_FLOAT2_to_R16G16_UNORM(brx_float2(roughness, scaled_linear_depth));
     out_gbuffer = brx_uint4(packed_shading_normal_world_space, packed_roughness_linear_depth, 0, 0);
 }

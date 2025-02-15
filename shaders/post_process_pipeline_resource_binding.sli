@@ -18,7 +18,7 @@
 #ifndef _POST_PROCESS_PIPELINE_LAYOUT_SLI_
 #define _POST_PROCESS_PIPELINE_LAYOUT_SLI_ 1
 
-#include "../thirdparty/Brioche/shaders/brx_define.sli"
+#include "../thirdparty/Brioche-Shader-Language/shaders/brx_shader_language.bsli"
 #include "common_forward_shading_pipeline_post_process_pipeline_resource_binding.sli"
 
 brx_texture_2d(g_scene_color_texture, 0, 1);

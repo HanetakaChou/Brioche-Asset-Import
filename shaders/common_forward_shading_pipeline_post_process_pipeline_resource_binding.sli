@@ -18,7 +18,7 @@
 #ifndef _COMMON_FORWARD_SHADING_PIPELINE_POST_PROCESS_PIPELINE_RESOURCE_BINDING_SLI_
 #define _COMMON_FORWARD_SHADING_PIPELINE_POST_PROCESS_PIPELINE_RESOURCE_BINDING_SLI_ 1
 
-#include "../thirdparty/Brioche/shaders/brx_define.sli"
+#include "../thirdparty/Brioche-Shader-Language/shaders/brx_shader_language.bsli"
 
 brx_cbuffer(common_forward_shading_pipeline_post_process_pipeline_none_update_set_uniform_buffer_binding, 0, 0)
 {

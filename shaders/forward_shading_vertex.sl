@@ -16,8 +16,8 @@
 //
 
 #include "forward_shading_pipeline_resource_binding.sli"
-#include "../thirdparty/Packed-Vector/shaders/packed_vector.sli"
-#include "../thirdparty/Packed-Vector/shaders/octahedron_mapping.sli"
+#include "../thirdparty/Packed-Vector/shaders/brx_packed_vector.bsli"
+#include "../thirdparty/Environment-Lighting/shaders/brx_octahedral_mapping.bsli"
 #include "common_asset_constant.sli"
 
 brx_root_signature(forward_shading_root_signature_macro, forward_shading_root_signature_name)
@@ -39,7 +39,7 @@ brx_vertex_shader_parameter_end(main)
     {
         brx_uint index_buffer_offset = (0u == ((g_index_uint16_buffer_stride * brx_uint(brx_vertex_index)) & 3u)) ? (g_index_uint16_buffer_stride * brx_uint(brx_vertex_index)) : ((g_index_uint16_buffer_stride * brx_uint(brx_vertex_index)) - 2u);
         brx_uint packed_vector_index_buffer = brx_byte_address_buffer_load(g_mesh_subset_buffers[2], index_buffer_offset);
-        brx_uint2 unpacked_vector_index_buffer = R16G16_UINT_to_UINT2(packed_vector_index_buffer);
+        brx_uint2 unpacked_vector_index_buffer = brx_R16G16_UINT_to_UINT2(packed_vector_index_buffer);
         vertex_index = (0u == ((g_index_uint16_buffer_stride * brx_uint(brx_vertex_index)) & 3u)) ? unpacked_vector_index_buffer.x : unpacked_vector_index_buffer.y;
     }
     else
@@ -61,10 +61,10 @@ brx_vertex_shader_parameter_end(main)
     {
         brx_uint vertex_varying_buffer_offset = g_vertex_varying_buffer_stride * vertex_index;
         brx_uint3 packed_vector_vertex_varying_binding = brx_byte_address_buffer_load3(g_mesh_subset_buffers[1], vertex_varying_buffer_offset);
-        vertex_normal_model_space = octahedron_unmap(R16G16_SNORM_to_FLOAT2(packed_vector_vertex_varying_binding.x));
-        brx_float3 vertex_mapped_tangent_model_space = R15G15B2_SNORM_to_FLOAT3(packed_vector_vertex_varying_binding.y);
-        vertex_tangent_model_space = brx_float4(octahedron_unmap(vertex_mapped_tangent_model_space.xy), vertex_mapped_tangent_model_space.z);
-        vertex_texcoord = R16G16_UNORM_to_FLOAT2(packed_vector_vertex_varying_binding.z);
+        vertex_normal_model_space = brx_octahedral_unmap(brx_R16G16_SNORM_to_FLOAT2(packed_vector_vertex_varying_binding.x));
+        brx_float3 vertex_mapped_tangent_model_space = brx_R15G15B2_SNORM_to_FLOAT3(packed_vector_vertex_varying_binding.y);
+        vertex_tangent_model_space = brx_float4(brx_octahedral_unmap(vertex_mapped_tangent_model_space.xy), vertex_mapped_tangent_model_space.z);
+        vertex_texcoord = brx_R16G16_UNORM_to_FLOAT2(packed_vector_vertex_varying_binding.z);
     }
 
     brx_float3 vertex_position_world_space = brx_mul(g_model_transform, brx_float4(vertex_position_model_space, 1.0)).xyz;

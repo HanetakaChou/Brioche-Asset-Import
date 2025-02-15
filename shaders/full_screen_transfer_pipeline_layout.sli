@@ -18,7 +18,7 @@
 #ifndef _FULL_SCREEN_TRANSFER_PIPELINE_LAYOUT_SLI_
 #define _FULL_SCREEN_TRANSFER_PIPELINE_LAYOUT_SLI_ 1
 
-#include "../thirdparty/Brioche/shaders/brx_define.sli"
+#include "../thirdparty/Brioche-Shader-Language/shaders/brx_shader_language.bsli"
 
 brx_texture_2d(g_output_color_texture, 0, 0);
 
