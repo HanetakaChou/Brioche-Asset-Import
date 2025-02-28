@@ -20,12 +20,12 @@
 #include <cstring>
 #include <cassert>
 
-// [PMX (Polygon Model eXtended) 2.1](https://gist.github.com/felixjones/f8a06bd48f9da9a4539f)  
-// [Blender MMD Tools](https://github.com/UuuNyaa/blender_mmd_tools/blob/main/mmd_tools/core/pmx/__init__.py)  
+// [PMX (Polygon Model eXtended) 2.1](https://gist.github.com/felixjones/f8a06bd48f9da9a4539f)
+// [Blender MMD Tools](https://github.com/UuuNyaa/blender_mmd_tools/blob/main/mmd_tools/core/pmx/__init__.py)
 
 // debug in blender
 //
-// %USERPROFILE%\AppData\Roaming\Blender Foundation\Blender\4.2\extensions\user_default\mmd_tools  
+// %USERPROFILE%\AppData\Roaming\Blender Foundation\Blender\4.2\extensions\user_default\mmd_tools
 //
 // copy pydebug to "C:\Program Files\Blender Foundation\Blender 4.2\4.2\python\lib\site-packages"
 //
@@ -34,8 +34,8 @@
 // in blender // execute before first import MMD
 // import debugpy
 // debugpy.listen(("localhost", 5678))
-// debugpy.wait_for_client() // use vscode to connect 
-// 
+// debugpy.wait_for_client() // use vscode to connect
+//
 
 // Bone constraint Additional Transform (Append)
 //
@@ -43,37 +43,40 @@
 // |
 // | - source bone
 //         |
-//         - dummy bone (child) // identity transform local space 
- 
-// dummy bone transform model space = source bone transform model space 
-// 
+//         - dummy bone (child) // identity transform local space
+
+// dummy bone transform model space = source bone transform model space
+//
 // copy transfrom bone constraint: shadow bone transform model space = dummy bone transform model space = source bone transfrom model space
 
 // transformation bone constraint: destination bone local transform additive (mix: add) =  shadow bone transform local space * weight += source bone transfrom local space * weight
 
 // why we need shadow bone?
-// the shadow bone is to ensure the order of the calculation (related to transform order) ?   
+// the shadow bone is to ensure the order of the calculation (related to transform order) ?
 
 // the append will also inherit the "model space" append from the parent of source node
 
-// IK solver can influence append // and this is related to the transform order  
+// IK solver can influence append // and this is related to the transform order
 
 // Foot IK
-// https://github.com/guillaumeblanc/ozz-animation/blob/master/samples/foot_ik/README.md  
+// https://github.com/guillaumeblanc/ozz-animation/blob/master/samples/foot_ik/README.md
 
-// QuadRuped IK  
-// We can use the idea of linear regression  
-// 
-// A p_x + B p_y + C p_z + D = 0
-// A p_x + B p_y + D = -C p_z 
-// (A/C) p_x + (B/C) p_y + D/C = -p_z  
+// QuadRuped IK
+// We can use the idea of linear regression
 //
-//  y (target)   X (features)    β (coeffiects)  
+// A p_x + B p_y + C p_z + D = 0
+// A p_x + B p_y + D = -C p_z
+// (A/C) p_x + (B/C) p_y + D/C = -p_z
+//
+//  y (target)   X (features)    β (coeffiects)
 // | -p0.z | = | p0.x p0.y 1 |  | (A/C) (B/C) (D/C) |
-// | -p1.z |   | p1.x p1.y 1 |  
-// | -p2.z |   | p2.x p2.y 1 |   
-// | -p3.z |   | p3.x p3.y 1 | 
- 
+// | -p1.z |   | p1.x p1.y 1 |
+// | -p2.z |   | p2.x p2.y 1 |
+// | -p3.z |   | p3.x p3.y 1 |
+//
+// Ordinary Least Squares | Normal Equation
+// | (A/C) (B/C) (D/C) | = (XTX)-1XTy
+
 #if defined(__GNUC__)
 // GCC or CLANG
 #define internal_likely(x) __builtin_expect(!!(x), 1)
@@ -112,6 +115,8 @@ static inline bool internal_data_read_mmd_pmx_faces(void const *data_base, size_
 static inline bool internal_data_read_mmd_pmx_textures(void const *data_base, size_t data_size, size_t &inout_data_offset, uint8_t text_encoding, mcrt_vector<mmd_pmx_texture_t> &out_textures);
 
 static inline bool internal_data_read_mmd_pmx_materials(void const *data_base, size_t data_size, size_t &inout_data_offset, uint8_t text_encoding, uint8_t texture_index_size, mcrt_vector<mmd_pmx_material_t> &out_materials);
+
+static inline bool internal_data_read_mmd_pmx_bones(void const *data_base, size_t data_size, size_t &inout_data_offset, uint8_t text_encoding, uint8_t bone_index_size, mcrt_vector<mmd_pmx_bone_t> &out_bones);
 
 static inline bool internal_data_read_mmd_pmx_vec2(void const *data_base, size_t data_size, size_t &inout_data_offset, mmd_pmx_vec2_t *out_vec3);
 
@@ -170,7 +175,11 @@ extern bool internal_data_read_mmd_pmx(void const *data_base, size_t data_size, 
         return false;
     }
 
-    // create dummy bone for append bone  
+    if (internal_unlikely(!internal_data_read_mmd_pmx_bones(data_base, data_size, data_offset, text_encoding, bone_index_size, out_mmd_pmx->m_bones)))
+    {
+        return false;
+    }
+
 
     return true;
 }
@@ -744,6 +753,22 @@ static inline bool internal_data_read_mmd_pmx_materials(void const *data_base, s
     }
 
     return true;
+}
+
+static inline bool internal_data_read_mmd_pmx_bones(void const *data_base, size_t data_size, size_t &inout_data_offset, uint8_t text_encoding, uint8_t bone_index_size, mcrt_vector<mmd_pmx_bone_t> &out_bones)
+{
+    // [Bone.load](https://github.com/UuuNyaa/blender_mmd_tools/blob/main/mmd_tools/core/pmx/__init__.py#L986)
+    // [PMXImporter.__applyIk](https://github.com/UuuNyaa/blender_mmd_tools/blob/main/mmd_tools/core/pmx/importer.py#L315)
+
+    // https://github.com/Nuthouse01/PMX-VMD-Scripting-Tools/blob/master/mmd_scripting/overall_cleanup/bonedeform_fix.py  
+    
+
+    // additional transform (trees / or chains)  
+    // parent index  
+    // transform order  
+    // transform after physics  // propogate to child ?  
+
+
 }
 
 static inline bool internal_data_read_mmd_pmx_vec2(void const *data_base, size_t data_size, size_t &inout_data_offset, mmd_pmx_vec2_t *out_vec3)

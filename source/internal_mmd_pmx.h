@@ -82,6 +82,18 @@ struct mmd_pmx_material_t
     uint32_t m_face_count;
 };
 
+struct mmd_pmx_bone_t
+{
+    mmd_pmx_vec3_t m_position;
+    uint32_t m_parent_index;
+    uint32_t m_transform_order;
+    bool m_has_ik; // self is the target position
+    bool m_has_additional_rotation;
+    bool m_has_additional_translation;
+    bool m_transform_after_physics;
+    mcrt_vector<uint32_t> m_ik_chain_bone_indices;
+};
+
 struct mmd_pmx_t
 {
     mmd_pmx_header_t m_header;
@@ -89,6 +101,7 @@ struct mmd_pmx_t
     mcrt_vector<mmd_pmx_face_t> m_faces;
     mcrt_vector<mmd_pmx_texture_t> m_textures;
     mcrt_vector<mmd_pmx_material_t> m_materials;
+    mcrt_vector<mmd_pmx_bone_t> m_bones;
 };
 
 extern bool internal_data_read_mmd_pmx(void const *data_base, size_t data_size, mmd_pmx_t *out_mmd_pmx);
