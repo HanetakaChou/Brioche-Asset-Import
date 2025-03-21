@@ -23,11 +23,8 @@
 #include <cstddef>
 #include <cstdint>
 
-static constexpr uint8_t const MMD_PMX_MAX_ADDITIONAL_VEC4_COUNT = 4U;
-
 struct mmd_pmx_header_t
 {
-    uint8_t m_additional_vec4_count;
     mcrt_string m_name;
     mcrt_string m_comment;
 };
@@ -58,7 +55,6 @@ struct mmd_pmx_vertex_t
     mmd_pmx_vec3_t m_position;
     mmd_pmx_vec3_t m_normal;
     mmd_pmx_vec2_t m_uv;
-    mmd_pmx_vec4_t m_additional_vec4s[MMD_PMX_MAX_ADDITIONAL_VEC4_COUNT];
     uint32_t m_bone_indices[4];
     float m_bone_weights[4];
 };
@@ -84,14 +80,65 @@ struct mmd_pmx_material_t
 
 struct mmd_pmx_bone_t
 {
+    mcrt_string m_name;
     mmd_pmx_vec3_t m_position;
     uint32_t m_parent_index;
-    uint32_t m_transform_order;
-    bool m_has_ik; // self is the target position
-    bool m_has_additional_rotation;
-    bool m_has_additional_translation;
-    bool m_transform_after_physics;
-    mcrt_vector<uint32_t> m_ik_chain_bone_indices;
+    uint32_t m_transformation_hierarchy;
+    bool m_meta_physics;
+    bool m_append_rotation;
+    bool m_append_translation;
+    uint32_t m_append_parent_index;
+    float m_append_rate;
+    bool m_ik;
+    uint32_t m_ik_end_effector_index;
+    mcrt_vector<uint32_t> m_ik_link_indices;
+    bool m_ik_two_links_hinge_limit_angle;
+    mmd_pmx_vec3_t m_ik_two_links_hinge_limit_angle_min;
+    mmd_pmx_vec3_t m_ik_two_links_hinge_limit_angle_max;
+};
+
+struct mmd_pmx_morph_t
+{
+    mcrt_string m_name;
+    bool m_group;
+    mcrt_vector<uint32_t> m_morph_indices;
+    mcrt_vector<float> m_morph_weights;
+    bool m_vertex_position;
+    bool m_vertex_uv;
+    mcrt_vector<uint32_t> m_vertex_indices;
+    mcrt_vector<mmd_pmx_vec3_t> m_vertex_position_offsets;
+    mcrt_vector<mmd_pmx_vec2_t> m_vertex_uv_offsets;
+};
+
+struct mmd_pmx_rigid_body_t
+{
+    mcrt_string m_name;
+    uint32_t m_bone_index;
+    uint32_t m_collision_filter_group;
+    uint32_t m_collision_filter_mask;
+    uint32_t m_shape_type;
+    mmd_pmx_vec3_t m_shape_size;
+    mmd_pmx_vec3_t m_translation;
+    mmd_pmx_vec3_t m_rotation;
+    float m_mass;
+    float m_linear_damping;
+    float m_angular_damping;
+    float m_friction;
+    float m_restitution;
+    uint32_t m_motion_type;
+};
+
+struct mmd_pmx_joint_t
+{
+    mcrt_string m_name;
+    uint32_t m_rigid_body_a_index;
+    uint32_t m_rigid_body_b_index;
+    mmd_pmx_vec3_t m_translation;
+    mmd_pmx_vec3_t m_rotation;
+    mmd_pmx_vec3_t m_translation_limit_min;
+    mmd_pmx_vec3_t m_translation_limit_max;
+    mmd_pmx_vec3_t m_rotation_limit_min;
+    mmd_pmx_vec3_t m_rotation_limit_max;
 };
 
 struct mmd_pmx_t
@@ -102,6 +149,9 @@ struct mmd_pmx_t
     mcrt_vector<mmd_pmx_texture_t> m_textures;
     mcrt_vector<mmd_pmx_material_t> m_materials;
     mcrt_vector<mmd_pmx_bone_t> m_bones;
+    mcrt_vector<mmd_pmx_morph_t> m_morphs;
+    mcrt_vector<mmd_pmx_rigid_body_t> m_rigid_bodies;
+    mcrt_vector<mmd_pmx_joint_t> m_joints;
 };
 
 extern bool internal_data_read_mmd_pmx(void const *data_base, size_t data_size, mmd_pmx_t *out_mmd_pmx);
