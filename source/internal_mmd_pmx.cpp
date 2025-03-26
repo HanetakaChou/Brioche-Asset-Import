@@ -58,7 +58,6 @@
 
 // IK solver can influence append // and this is related to the transform order
 
-
 #if defined(__GNUC__)
 // GCC or CLANG
 #define internal_likely(x) __builtin_expect(!!(x), 1)
@@ -2026,7 +2025,15 @@ static inline bool internal_data_read_mmd_pmx_index(void const *data_base, size_
         uint16_t index;
         if (internal_data_read_uint16(data_base, data_size, inout_data_offset, &index))
         {
-            (*out_index) = index;
+            if (index <= INT16_MAX)
+            {
+                (*out_index) = index;
+            }
+            else
+            {
+                assert(UINT16_MAX == index);
+                (*out_index) = static_cast<uint32_t>(~static_cast<uint32_t>(0U));
+            }
             return true;
         }
         else
@@ -2039,7 +2046,15 @@ static inline bool internal_data_read_mmd_pmx_index(void const *data_base, size_
         uint8_t index;
         if (internal_data_read_uint8(data_base, data_size, inout_data_offset, &index))
         {
-            (*out_index) = index;
+            if (index <= INT8_MAX)
+            {
+                (*out_index) = index;
+            }
+            else
+            {
+                assert(UINT8_MAX == index);
+                (*out_index) = static_cast<uint32_t>(~static_cast<uint32_t>(0U));
+            }
             return true;
         }
         else
@@ -2049,7 +2064,24 @@ static inline bool internal_data_read_mmd_pmx_index(void const *data_base, size_
     }
     else if (4U == index_size)
     {
-        return internal_data_read_uint32(data_base, data_size, inout_data_offset, out_index);
+        uint32_t index;
+        if (internal_data_read_uint32(data_base, data_size, inout_data_offset, &index))
+        {
+            if (index <= INT32_MAX)
+            {
+                (*out_index) = index;
+            }
+            else
+            {
+                assert(UINT32_MAX == index);
+                (*out_index) = static_cast<uint32_t>(~static_cast<uint32_t>(0U));
+            }
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
     else
     {
