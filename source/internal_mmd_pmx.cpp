@@ -58,24 +58,6 @@
 
 // IK solver can influence append // and this is related to the transform order
 
-// Foot IK
-// https://github.com/guillaumeblanc/ozz-animation/blob/master/samples/foot_ik/README.md
-
-// QuadRuped IK
-// We can use the idea of linear regression
-//
-// A p_x + B p_y + C p_z + D = 0
-// A p_x + B p_y + D = -C p_z
-// (A/C) p_x + (B/C) p_y + D/C = -p_z
-//
-//  y (target)   X (features)    β (coeffiects)
-// | -p0.z | = | p0.x p0.y 1 |  | (A/C) (B/C) (D/C) |
-// | -p1.z |   | p1.x p1.y 1 |
-// | -p2.z |   | p2.x p2.y 1 |
-// | -p3.z |   | p3.x p3.y 1 |
-//
-// Ordinary Least Squares | Normal Equation
-// | (A/C) (B/C) (D/C) | = (XTX)-1XTy
 
 #if defined(__GNUC__)
 // GCC or CLANG
@@ -124,7 +106,7 @@ static inline bool internal_data_read_mmd_pmx_display_frames(void const *data_ba
 
 static inline bool internal_data_read_mmd_pmx_rigid_bodies(void const *data_base, size_t data_size, size_t &inout_data_offset, uint8_t text_encoding, uint32_t bone_index_size, mcrt_vector<mmd_pmx_rigid_body_t> &out_rigid_bodies);
 
-static inline bool internal_data_read_mmd_pmx_joints(void const *data_base, size_t data_size, size_t &inout_data_offset, uint8_t text_encoding, uint32_t rigid_body_index_size, mcrt_vector<mmd_pmx_joint_t> &out_joints);
+static inline bool internal_data_read_mmd_pmx_constraints(void const *data_base, size_t data_size, size_t &inout_data_offset, uint8_t text_encoding, uint32_t rigid_body_index_size, mcrt_vector<mmd_pmx_constraint_t> &out_joints);
 
 static inline bool internal_data_read_mmd_pmx_vec2(void const *data_base, size_t data_size, size_t &inout_data_offset, mmd_pmx_vec2_t *out_vec3);
 
@@ -204,7 +186,7 @@ extern bool internal_data_read_mmd_pmx(void const *data_base, size_t data_size, 
         return false;
     }
 
-    if (internal_unlikely(!internal_data_read_mmd_pmx_joints(data_base, data_size, data_offset, text_encoding, rigid_body_index_size, out_mmd_pmx->m_joints)))
+    if (internal_unlikely(!internal_data_read_mmd_pmx_constraints(data_base, data_size, data_offset, text_encoding, rigid_body_index_size, out_mmd_pmx->m_constraints)))
     {
         return false;
     }
@@ -1507,13 +1489,13 @@ static inline bool internal_data_read_mmd_pmx_rigid_bodies(void const *data_base
             return false;
         }
 
-        out_rigid_bodies[rigid_body_index].m_motion_type = rigid_body_type_uint8;
+        out_rigid_bodies[rigid_body_index].m_rigid_body_type = rigid_body_type_uint8;
     }
 
     return true;
 }
 
-static inline bool internal_data_read_mmd_pmx_joints(void const *data_base, size_t data_size, size_t &inout_data_offset, uint8_t text_encoding, uint32_t rigid_body_index_size, mcrt_vector<mmd_pmx_joint_t> &out_joints)
+static inline bool internal_data_read_mmd_pmx_constraints(void const *data_base, size_t data_size, size_t &inout_data_offset, uint8_t text_encoding, uint32_t rigid_body_index_size, mcrt_vector<mmd_pmx_constraint_t> &out_joints)
 {
     // [Joint.load](https://github.com/MMD-Blender/blender_mmd_tools/blob/main/mmd_tools/core/pmx/__init__.py#L1528)
 

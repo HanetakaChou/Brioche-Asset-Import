@@ -91,7 +91,7 @@ brx_asset_import_model_surface_group::brx_asset_import_model_surface_group(
     mcrt_vector<brx_asset_import_model_surface> &&surfaces,
     mcrt_vector<mcrt_string> &&skeleton_joint_names,
     mcrt_vector<uint32_t> &&skeleton_joint_parent_indices,
-    mcrt_vector<brx_motion_skeleton_joint_transform> &&skeleton_joint_bind_pose_transforms,
+    mcrt_vector<brx_motion_rigid_transform> &&skeleton_joint_bind_pose_transforms,
     uint32_t const *vrm_skeleton_joint_indices)
     : m_surfaces(surfaces),
       m_skeleton_joint_names(std::move(skeleton_joint_names)),
@@ -130,7 +130,7 @@ uint32_t brx_asset_import_model_surface_group::get_skeleton_joint_parent_index(u
     return this->m_skeleton_joint_parent_indices[skeleton_joint_index];
 }
 
-brx_motion_skeleton_joint_transform const *brx_asset_import_model_surface_group::get_skeleton_joint_bind_pose_transform(uint32_t skeleton_joint_index) const
+brx_motion_rigid_transform const *brx_asset_import_model_surface_group::get_skeleton_joint_bind_pose_transform(uint32_t skeleton_joint_index) const
 {
     return &this->m_skeleton_joint_bind_pose_transforms[skeleton_joint_index];
 }

@@ -6,10 +6,6 @@
 	path = thirdparty/DirectXMesh
 	url = git@github.com:HanetakaChou/Brioche-Asset-Import.git
 	branch = DirectXMath
-[submodule "thirdparty/mmd"]
-	path = thirdparty/mmd
-	url = git@github.com:HanetakaChou/Brioche-Asset-Import.git
-	branch = mmd
 [submodule "thirdparty/libjpeg"]
 	path = thirdparty/libjpeg
 	url = git@github.com:HanetakaChou/Brioche-Asset-Import.git

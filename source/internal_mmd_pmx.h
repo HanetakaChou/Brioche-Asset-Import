@@ -125,10 +125,10 @@ struct mmd_pmx_rigid_body_t
     float m_angular_damping;
     float m_friction;
     float m_restitution;
-    uint32_t m_motion_type;
+    uint32_t m_rigid_body_type;
 };
 
-struct mmd_pmx_joint_t
+struct mmd_pmx_constraint_t
 {
     mcrt_string m_name;
     uint32_t m_rigid_body_a_index;
@@ -151,7 +151,7 @@ struct mmd_pmx_t
     mcrt_vector<mmd_pmx_bone_t> m_bones;
     mcrt_vector<mmd_pmx_morph_t> m_morphs;
     mcrt_vector<mmd_pmx_rigid_body_t> m_rigid_bodies;
-    mcrt_vector<mmd_pmx_joint_t> m_joints;
+    mcrt_vector<mmd_pmx_constraint_t> m_constraints;
 };
 
 extern bool internal_data_read_mmd_pmx(void const *data_base, size_t data_size, mmd_pmx_t *out_mmd_pmx);

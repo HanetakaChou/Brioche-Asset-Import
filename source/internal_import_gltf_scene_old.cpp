@@ -66,9 +66,9 @@ static inline void import_gltf_scene_mesh_instance_asset(mcrt_vector<cgltf_node 
 
 static inline void internal_scene_depth_first_search_traverse(cgltf_data const *data, void (*pfn_user_callback)(cgltf_data const *data, cgltf_node const *current_node, cgltf_node const *parent_node, void *user_data_x, void *user_data_y, void *user_data_z, void *user_data_u, void *user_data_v, void *user_data_w, void *user_data_l, void *user_data_m, void *user_data_n), void *user_data_x, void *user_data_y, void *user_data_z, void *user_data_u, void *user_data_v, void *user_data_w, void *user_data_l, void *user_data_m, void *user_data_n);
 
-extern void internal_import_skeleton(cgltf_data const *data, mcrt_vector<DirectX::XMFLOAT4X4> &out_internal_node_world_transforms, mcrt_vector<mcrt_vector<cgltf_node const *>> &out_internal_mesh_instance_nodes, mcrt_vector<uint32_t> &out_internal_node_index_to_skeleton_joint_index, mcrt_vector<mcrt_string> &out_skeleton_joint_names, mcrt_vector<uint32_t> &out_skeleton_joint_parent_indices, mcrt_vector<brx_motion_skeleton_joint_transform> &out_skeleton_bind_pose_joint_transforms, uint32_t *out_vrm_skeleton_joint_names);
+extern void internal_import_skeleton(cgltf_data const *data, mcrt_vector<DirectX::XMFLOAT4X4> &out_internal_node_world_transforms, mcrt_vector<mcrt_vector<cgltf_node const *>> &out_internal_mesh_instance_nodes, mcrt_vector<uint32_t> &out_internal_node_index_to_skeleton_joint_index, mcrt_vector<mcrt_string> &out_skeleton_joint_names, mcrt_vector<uint32_t> &out_skeleton_joint_parent_indices, mcrt_vector<brx_motion_rigid_transform> &out_skeleton_bind_pose_joint_transforms, uint32_t *out_vrm_skeleton_joint_names);
 
-extern void internal_import_skeleton_animation(cgltf_data const *data, cgltf_animation const *animation, uint32_t animation_frame_rate, mcrt_vector<mcrt_string> &out_skeleton_joint_names, mcrt_vector<brx_motion_skeleton_joint_transform> &out_skeleton_animation_joint_transforms);
+extern void internal_import_skeleton_animation(cgltf_data const *data, cgltf_animation const *animation, uint32_t animation_frame_rate, mcrt_vector<mcrt_string> &out_skeleton_joint_names, mcrt_vector<brx_motion_rigid_transform> &out_skeleton_animation_joint_transforms);
 
 // FLT_EPSILON
 static inline constexpr float const INTERNAL_SCALE_EPSILON = 7E-5F;
@@ -111,7 +111,7 @@ extern bool import_gltf_scene_asset_old(mcrt_vector<scene_mesh_data> &out_total_
         {
             // TODO: remove internal_node_index_to_skeleton_joint_index and use animation retargeting
             mcrt_vector<mcrt_string> skeleton_joint_names;
-            mcrt_vector<brx_motion_skeleton_joint_transform> skeleton_animation_joint_transforms;
+            mcrt_vector<brx_motion_rigid_transform> skeleton_animation_joint_transforms;
             internal_import_skeleton_animation(data, animation, frame_rate, skeleton_joint_names, skeleton_animation_joint_transforms);
 
             size_t const skeleton_joint_count = skeleton_joint_names.size();
@@ -163,7 +163,7 @@ extern bool import_gltf_scene_asset_old(mcrt_vector<scene_mesh_data> &out_total_
             mcrt_vector<DirectX::XMFLOAT4X4> internal_node_world_transforms;
             mcrt_vector<mcrt_string> _skeleton_joint_names;
             mcrt_vector<uint32_t> skeleton_joint_parent_indices;
-            mcrt_vector<brx_motion_skeleton_joint_transform> _skeleton_bind_pose_joint_transforms;
+            mcrt_vector<brx_motion_rigid_transform> _skeleton_bind_pose_joint_transforms;
             uint32_t vrm_skeleton_joint_indices[BRX_MOTION_VRM_SKELETON_JOINT_NAME_COUNT];
             internal_import_skeleton(data, internal_node_world_transforms, internal_mesh_instances, internal_node_index_to_skeleton_joint_index, _skeleton_joint_names, skeleton_joint_parent_indices, _skeleton_bind_pose_joint_transforms, &vrm_skeleton_joint_indices[0]);
 
@@ -196,9 +196,9 @@ extern bool import_gltf_scene_asset_old(mcrt_vector<scene_mesh_data> &out_total_
 
     uint32_t const skeleton_joint_count = test_skeleton->get_skeleton_joint_count();
 
-    brx_motion_skeleton_joint_transform const *const skeleton_bind_pose_joint_transforms = test_skeleton->get_skeleton_bind_pose_joint_transforms();
+    brx_motion_rigid_transform const *const skeleton_bind_pose_joint_transforms = test_skeleton->get_skeleton_bind_pose_joint_transforms();
 
-    brx_motion_skeleton_joint_transform const *const skeleton_animation_joint_transforms = test_skeleton_animation_instance->get_skeleton_animation_joint_transforms();
+    brx_motion_rigid_transform const *const skeleton_animation_joint_transforms = test_skeleton_animation_instance->get_skeleton_animation_joint_transforms();
 
     brx_motion_destory_skeleton_animation(test_skeleton_animation);
 

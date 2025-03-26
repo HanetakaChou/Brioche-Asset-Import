@@ -68,7 +68,7 @@ class brx_asset_import_model_surface_group final : public brx_asset_import_surfa
 
     mcrt_vector<mcrt_string> m_skeleton_joint_names;
     mcrt_vector<uint32_t> m_skeleton_joint_parent_indices;
-    mcrt_vector<brx_motion_skeleton_joint_transform> m_skeleton_joint_bind_pose_transforms;
+    mcrt_vector<brx_motion_rigid_transform> m_skeleton_joint_bind_pose_transforms;
     uint32_t m_vrm_skeleton_joint_indices[BRX_MOTION_VRM_SKELETON_JOINT_NAME_COUNT];
 
 public:
@@ -76,7 +76,7 @@ public:
         mcrt_vector<brx_asset_import_model_surface> &&surfaces,
         mcrt_vector<mcrt_string> &&skeleton_joint_names,
         mcrt_vector<uint32_t> &&skeleton_joint_parent_indices,
-        mcrt_vector<brx_motion_skeleton_joint_transform> &&skeleton_joint_bind_pose_transforms,
+        mcrt_vector<brx_motion_rigid_transform> &&skeleton_joint_bind_pose_transforms,
         uint32_t const *vrm_skeleton_joint_indices);
     ~brx_asset_import_model_surface_group();
 
@@ -87,7 +87,7 @@ private:
     uint32_t const get_skeleton_joint_count() const override;
     char const *get_skeleton_joint_name(uint32_t skeleton_joint_index) const override;
     uint32_t get_skeleton_joint_parent_index(uint32_t skeleton_joint_index) const override;
-    brx_motion_skeleton_joint_transform const *get_skeleton_joint_bind_pose_transform(uint32_t skeleton_joint_index) const override;
+    brx_motion_rigid_transform const *get_skeleton_joint_bind_pose_transform(uint32_t skeleton_joint_index) const override;
     uint32_t get_vrm_skeleton_joint_index(BRX_MOTION_VRM_SKELETON_JOINT_NAME vrm_skeleton_joint_name) const override;
 };
 

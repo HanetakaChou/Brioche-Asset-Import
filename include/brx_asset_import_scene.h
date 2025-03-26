@@ -78,7 +78,7 @@ public:
     virtual uint32_t const get_skeleton_joint_count() const = 0;
     virtual char const *get_skeleton_joint_name(uint32_t skeleton_joint_index) const = 0;
     virtual uint32_t get_skeleton_joint_parent_index(uint32_t skeleton_joint_index) const = 0;
-    virtual brx_motion_skeleton_joint_transform const *get_skeleton_joint_bind_pose_transform(uint32_t skeleton_joint_index) const = 0;
+    virtual brx_motion_rigid_transform const *get_skeleton_joint_bind_pose_transform(uint32_t skeleton_joint_index) const = 0;
     virtual uint32_t get_vrm_skeleton_joint_index(BRX_MOTION_VRM_SKELETON_JOINT_NAME vrm_skeleton_joint_name) const = 0;
 };
 
@@ -115,7 +115,7 @@ class brx_asset_import_skeleton_animation
     virtual uint32_t const get_skeleton_joint_count() const = 0;
     virtual char const *get_skeleton_joint_name(uint32_t skeleton_joint_index) const = 0;
     virtual uint32_t const get_frame_count() const = 0;
-    virtual brx_motion_skeleton_joint_transform const *get_animation_pose_skeleton_joint_transforms(uint32_t frame_index) const = 0;
+    virtual brx_motion_rigid_transform const *get_animation_pose_skeleton_joint_transforms(uint32_t frame_index) const = 0;
 };
 
 extern "C" brx_asset_import_scene *brx_asset_import_create_scene(brx_asset_import_input_stream_factory *input_stream_factory, char const *file_name);
