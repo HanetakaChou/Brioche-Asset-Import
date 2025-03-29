@@ -23,12 +23,6 @@
 #include <cstddef>
 #include <cstdint>
 
-struct mmd_pmx_header_t
-{
-    mcrt_string m_name;
-    mcrt_string m_comment;
-};
-
 struct mmd_pmx_vec2_t
 {
     float m_x;
@@ -48,6 +42,12 @@ struct mmd_pmx_vec4_t
     float m_y;
     float m_z;
     float m_w;
+};
+
+struct mmd_pmx_header_t
+{
+    mcrt_string m_name;
+    mcrt_string m_comment;
 };
 
 struct mmd_pmx_vertex_t
@@ -81,12 +81,13 @@ struct mmd_pmx_material_t
 struct mmd_pmx_bone_t
 {
     mcrt_string m_name;
-    mmd_pmx_vec3_t m_position;
+    mmd_pmx_vec3_t m_translation;
     uint32_t m_parent_index;
     uint32_t m_transformation_hierarchy;
     bool m_meta_physics;
     bool m_append_rotation;
     bool m_append_translation;
+    bool m_append_local;
     uint32_t m_append_parent_index;
     float m_append_rate;
     bool m_ik;

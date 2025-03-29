@@ -21,42 +21,7 @@
 #include <cassert>
 
 // [PMX (Polygon Model eXtended) 2.1](https://gist.github.com/felixjones/f8a06bd48f9da9a4539f)
-// [Blender MMD Tools](https://github.com/UuuNyaa/blender_mmd_tools/blob/main/mmd_tools/core/pmx/__init__.py)
-
-// debug in blender
-//
-// %USERPROFILE%\AppData\Roaming\Blender Foundation\Blender\4.2\extensions\user_default\mmd_tools
-//
-// copy pydebug to "C:\Program Files\Blender Foundation\Blender 4.2\4.2\python\lib\site-packages"
-//
-// delete "pathMappings" from vscode
-//
-// in blender // execute before first import MMD
-// import debugpy
-// debugpy.listen(("localhost", 5678))
-// debugpy.wait_for_client() // use vscode to connect
-//
-
-// Bone constraint Additional Transform (Append)
-//
-// | - shadow bone (sibling)
-// |
-// | - source bone
-//         |
-//         - dummy bone (child) // identity transform local space
-
-// dummy bone transform model space = source bone transform model space
-//
-// copy transfrom bone constraint: shadow bone transform model space = dummy bone transform model space = source bone transfrom model space
-
-// transformation bone constraint: destination bone local transform additive (mix: add) =  shadow bone transform local space * weight += source bone transfrom local space * weight
-
-// why we need shadow bone?
-// the shadow bone is to ensure the order of the calculation (related to transform order) ?
-
-// the append will also inherit the "model space" append from the parent of source node
-
-// IK solver can influence append // and this is related to the transform order
+// [Blender MMD Tools](https://github.com/MMD-Blender/blender_mmd_tools/blob/main/mmd_tools/core/pmx/__init__.py)
 
 #if defined(__GNUC__)
 // GCC or CLANG
@@ -198,16 +163,16 @@ extern bool internal_data_read_mmd_pmx(void const *data_base, size_t data_size, 
 
 static inline bool internal_data_read_mmd_pmx_header(void const *data_base, size_t data_size, size_t &inout_data_offset, uint8_t *out_text_encoding, uint8_t *out_additional_vec4_count, uint8_t *out_vertex_index_size, uint8_t *out_texture_index_size, uint8_t *out_material_index_size, uint8_t *out_bone_index_size, uint8_t *out_morph_index_size, uint8_t *out_rigid_body_index_size, mmd_pmx_header_t *out_header)
 {
-    // [Header.load](https://github.com/UuuNyaa/blender_mmd_tools/blob/main/mmd_tools/core/pmx/__init__.py#L255)
+    // [Header.load](https://github.com/MMD-Blender/blender_mmd_tools/blob/main/mmd_tools/core/pmx/__init__.py#L255)
 
-    uint8_t sign[4];
-    if (internal_unlikely(!internal_data_read_bytes(data_base, data_size, inout_data_offset, sizeof(uint8_t) * 4U, &sign[0])))
+    uint8_t signature[4];
+    if (internal_unlikely(!internal_data_read_bytes(data_base, data_size, inout_data_offset, sizeof(uint8_t) * 4U, &signature[0])))
     {
         return false;
     }
 
     // "PMX "
-    if (internal_unlikely(!((80U == sign[0]) && (77U == sign[1]) && (88U == sign[2]) && (32U == sign[3]))))
+    if (internal_unlikely(!((80U == signature[0]) && (77U == signature[1]) && (88U == signature[2]) && (32U == signature[3]))))
     {
         return false;
     }
@@ -328,7 +293,7 @@ static inline bool internal_data_read_mmd_pmx_header(void const *data_base, size
 
 static inline bool internal_data_read_mmd_pmx_vertices(void const *data_base, size_t data_size, size_t &inout_data_offset, uint8_t additional_vec4_count, uint8_t bone_index_size, mcrt_vector<mmd_pmx_vertex_t> &out_vertices)
 {
-    // [Vertex.load](https://github.com/UuuNyaa/blender_mmd_tools/blob/main/mmd_tools/core/pmx/__init__.py#L665)
+    // [Vertex.load](https://github.com/MMD-Blender/blender_mmd_tools/blob/main/mmd_tools/core/pmx/__init__.py#L665)
 
     assert(out_vertices.empty());
     out_vertices = {};
@@ -591,7 +556,7 @@ static inline bool internal_data_read_mmd_pmx_faces(void const *data_base, size_
 
 static inline bool internal_data_read_mmd_pmx_textures(void const *data_base, size_t data_size, size_t &inout_data_offset, uint8_t text_encoding, mcrt_vector<mmd_pmx_texture_t> &out_textures)
 {
-    // [Texture.load](https://github.com/UuuNyaa/blender_mmd_tools/blob/main/mmd_tools/core/pmx/__init__.py#L787)
+    // [Texture.load](https://github.com/MMD-Blender/blender_mmd_tools/blob/main/mmd_tools/core/pmx/__init__.py#L787)
 
     assert(out_textures.empty());
     out_textures = {};
@@ -623,7 +588,7 @@ static inline bool internal_data_read_mmd_pmx_textures(void const *data_base, si
 
 static inline bool internal_data_read_mmd_pmx_materials(void const *data_base, size_t data_size, size_t &inout_data_offset, uint8_t text_encoding, uint8_t texture_index_size, mcrt_vector<mmd_pmx_material_t> &out_materials)
 {
-    // [Material.load](https://github.com/UuuNyaa/blender_mmd_tools/blob/main/mmd_tools/core/pmx/__init__.py#L860)
+    // [Material.load](https://github.com/MMD-Blender/blender_mmd_tools/blob/main/mmd_tools/core/pmx/__init__.py#L860)
 
     assert(out_materials.empty());
     out_materials = {};
@@ -765,8 +730,8 @@ static inline bool internal_data_read_mmd_pmx_materials(void const *data_base, s
 
 static inline bool internal_data_read_mmd_pmx_bones(void const *data_base, size_t data_size, size_t &inout_data_offset, uint8_t text_encoding, uint8_t bone_index_size, mcrt_vector<mmd_pmx_bone_t> &out_bones)
 {
-    // [Bone.load](https://github.com/UuuNyaa/blender_mmd_tools/blob/main/mmd_tools/core/pmx/__init__.py#L986)
-    // [PMXImporter.__applyIk](https://github.com/UuuNyaa/blender_mmd_tools/blob/main/mmd_tools/core/pmx/importer.py#L315)
+    // [Bone.load](https://github.com/MMD-Blender/blender_mmd_tools/blob/main/mmd_tools/core/pmx/__init__.py#L986)
+    // [PMXImporter.__applyIk](https://github.com/MMD-Blender/blender_mmd_tools/blob/main/mmd_tools/core/pmx/importer.py#L315)
 
     // https://github.com/Nuthouse01/PMX-VMD-Scripting-Tools/blob/master/mmd_scripting/overall_cleanup/bonedeform_fix.py
 
@@ -800,7 +765,7 @@ static inline bool internal_data_read_mmd_pmx_bones(void const *data_base, size_
             return false;
         }
 
-        if (internal_unlikely(!internal_data_read_mmd_pmx_vec3(data_base, data_size, inout_data_offset, &out_bones[bone_index].m_position)))
+        if (internal_unlikely(!internal_data_read_mmd_pmx_vec3(data_base, data_size, inout_data_offset, &out_bones[bone_index].m_translation)))
         {
             return false;
         }
@@ -842,6 +807,7 @@ static inline bool internal_data_read_mmd_pmx_bones(void const *data_base, size_
 
         out_bones[bone_index].m_append_rotation = ((0U != (bone_flags & 0X0100U)));
         out_bones[bone_index].m_append_translation = ((0U != (bone_flags & 0X0200U)));
+        out_bones[bone_index].m_append_local = ((0U != (bone_flags & 0X0080U)));
 
         if (out_bones[bone_index].m_append_rotation || out_bones[bone_index].m_append_translation)
         {
@@ -1945,11 +1911,11 @@ static inline bool internal_data_read_mmd_pmx_text(void const *data_base, size_t
     {
         static_assert(sizeof(uint16_t) == 2U, "");
 
-        // Tolerence
+        // Tolerance
         assert(0U == (length & (2U - 1U)));
 
         mcrt_vector<uint16_t> value;
-        value.resize(static_cast<size_t>((length + 1U) >> 1U), 0U);
+        value.resize(static_cast<size_t>((length + 1U) >> 1U), static_cast<uint8_t>(0U));
         if (internal_unlikely(!internal_data_read_bytes(data_base, data_size, inout_data_offset, length, value.data())))
         {
             return false;
@@ -1962,12 +1928,14 @@ static inline bool internal_data_read_mmd_pmx_text(void const *data_base, size_t
         dst_utf8.resize(src_utf16.size() * UNI_MAX_UTF8_BYTES_PER_CODE_POINT + 1U);
 
         char *in_buf = reinterpret_cast<char *>(src_utf16.data());
+        static_assert(sizeof(uint16_t) == sizeof(decltype(src_utf16[0])), "");
         size_t in_bytes_left = sizeof(uint16_t) * src_utf16.size();
 
         char *out_buf = reinterpret_cast<char *>(dst_utf8.data());
+        static_assert(sizeof(uint8_t) == sizeof(decltype(dst_utf8[0])), "");
         size_t out_bytes_left = sizeof(uint8_t) * dst_utf8.size();
 
-        iconv_t conversion_descriptor = iconv_open("UTF-8", "UTF-16LE");
+        iconv_t conversion_descriptor = iconv_open("UTF-8//IGNORE", "UTF-16LE");
         if (internal_unlikely(reinterpret_cast<iconv_t>(-1) == conversion_descriptor))
         {
             // Tolerance
@@ -1987,10 +1955,10 @@ static inline bool internal_data_read_mmd_pmx_text(void const *data_base, size_t
             return true;
         }
 
-        size_t convertion_size = reinterpret_cast<decltype(&dst_utf8[0])>(out_buf) - &dst_utf8[0];
-        dst_utf8.resize(convertion_size + 1U);
+        size_t conversion_size = reinterpret_cast<decltype(&dst_utf8[0])>(out_buf) - &dst_utf8[0];
+        dst_utf8.resize(conversion_size + 1U);
 
-        dst_utf8[convertion_size] = '\0';
+        dst_utf8[conversion_size] = '\0';
 
         // do not use "std::move"
         // the "memory" of "dst_utf8" is greater than the "size" of "dst_utf8"
