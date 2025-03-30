@@ -99,7 +99,7 @@ static inline constexpr float const INTERNAL_SCALE_EPSILON = 7E-5F;
 extern void internal_import_skeleton(cgltf_data const *data, mcrt_vector<DirectX::XMFLOAT4X4> &out_internal_node_world_transforms, mcrt_vector<mcrt_vector<cgltf_node const *>> &out_internal_mesh_instance_nodes, mcrt_vector<uint32_t> &out_internal_node_index_to_skeleton_joint_index, mcrt_vector<mcrt_string> &out_skeleton_joint_names, mcrt_vector<uint32_t> &out_skeleton_joint_parent_indices, mcrt_vector<brx_motion_rigid_transform> &out_skeleton_bind_pose_joint_transforms, uint32_t *out_vrm_skeleton_joint_names)
 {
     // TODO: support
-    static_assert(-1 == static_cast<int32_t>(BRX_MOTION_UINT32_INDEX_INVALID), "");
+    static_assert(-1 == static_cast<int32_t>(BRX_ASSET_IMPORT_UINT32_INDEX_INVALID), "");
     std::memset(out_vrm_skeleton_joint_names, 0XFF, sizeof(uint32_t) * BRX_MOTION_VRM_SKELETON_JOINT_NAME_COUNT);
 
     assert(out_internal_node_world_transforms.empty());
@@ -116,7 +116,7 @@ extern void internal_import_skeleton(cgltf_data const *data, mcrt_vector<DirectX
     uint32_t root_node_index;
 
     {
-        mcrt_vector<uint32_t> node_parent_indices(static_cast<size_t>(data->nodes_count), BRX_MOTION_UINT32_INDEX_INVALID);
+        mcrt_vector<uint32_t> node_parent_indices(static_cast<size_t>(data->nodes_count), BRX_ASSET_IMPORT_UINT32_INDEX_INVALID);
 
         // some nodes may be NOT included in the scene // we initialize by the identity transform
         {
@@ -198,8 +198,8 @@ extern void internal_import_skeleton(cgltf_data const *data, mcrt_vector<DirectX
 
                     DirectX::XMStoreFloat4x4(&out_internal_node_world_transforms[cgltf_node_index(data, current_node)], world_transform);
 
-                    assert(BRX_MOTION_UINT32_INDEX_INVALID == node_parent_indices[cgltf_node_index(data, current_node)]);
-                    node_parent_indices[cgltf_node_index(data, current_node)] = ((NULL != parent_node) ? cgltf_node_index(data, parent_node) : BRX_MOTION_UINT32_INDEX_INVALID);
+                    assert(BRX_ASSET_IMPORT_UINT32_INDEX_INVALID == node_parent_indices[cgltf_node_index(data, current_node)]);
+                    node_parent_indices[cgltf_node_index(data, current_node)] = ((NULL != parent_node) ? cgltf_node_index(data, parent_node) : BRX_ASSET_IMPORT_UINT32_INDEX_INVALID);
 
                     assert(NULL == current_node->skin || NULL != current_node->mesh);
 
@@ -295,7 +295,7 @@ extern void internal_import_skeleton(cgltf_data const *data, mcrt_vector<DirectX
                         DirectX::XMStoreFloat3(reinterpret_cast<DirectX::XMFLOAT3 *>(&node_bind_pose_transforms[node_index].m_translation[0]), node_bind_pose_translation);
                     }
 
-                    if (BRX_MOTION_UINT32_INDEX_INVALID != node_parent_indices[node_index])
+                    if (BRX_ASSET_IMPORT_UINT32_INDEX_INVALID != node_parent_indices[node_index])
                     {
                         node_index = node_parent_indices[node_index];
                     }
@@ -338,14 +338,14 @@ extern void internal_import_skeleton(cgltf_data const *data, mcrt_vector<DirectX
         {
             assert(root_node_index_in_skeleton.size() > 1U);
 
-            root_node_index = BRX_MOTION_UINT32_INDEX_INVALID;
+            root_node_index = BRX_ASSET_IMPORT_UINT32_INDEX_INVALID;
         }
     }
 
-    out_internal_node_index_to_skeleton_joint_index.assign(static_cast<size_t>(data->nodes_count), BRX_MOTION_UINT32_INDEX_INVALID);
+    out_internal_node_index_to_skeleton_joint_index.assign(static_cast<size_t>(data->nodes_count), BRX_ASSET_IMPORT_UINT32_INDEX_INVALID);
 
     // the zero-th joint is always the root
-    if (BRX_MOTION_UINT32_INDEX_INVALID != root_node_index)
+    if (BRX_ASSET_IMPORT_UINT32_INDEX_INVALID != root_node_index)
     {
         out_skeleton_joint_names.reserve(node_index_in_skeleton.size());
         out_skeleton_joint_parent_indices.reserve(node_index_in_skeleton.size());
@@ -353,7 +353,7 @@ extern void internal_import_skeleton(cgltf_data const *data, mcrt_vector<DirectX
 
         out_skeleton_joint_names.push_back(internal_import_skeleton_joint_name(data, &data->nodes[root_node_index]));
 
-        out_skeleton_joint_parent_indices.push_back(BRX_MOTION_UINT32_INDEX_INVALID);
+        out_skeleton_joint_parent_indices.push_back(BRX_ASSET_IMPORT_UINT32_INDEX_INVALID);
         out_internal_node_index_to_skeleton_joint_index[root_node_index] = 0U;
 
         out_skeleton_bind_pose_joint_transforms.push_back(node_bind_pose_transforms[root_node_index]);
@@ -366,7 +366,7 @@ extern void internal_import_skeleton(cgltf_data const *data, mcrt_vector<DirectX
 
         out_skeleton_joint_names.push_back("GLTF | Internal | Root Node");
 
-        out_skeleton_joint_parent_indices.push_back(BRX_MOTION_UINT32_INDEX_INVALID);
+        out_skeleton_joint_parent_indices.push_back(BRX_ASSET_IMPORT_UINT32_INDEX_INVALID);
 
         out_skeleton_bind_pose_joint_transforms.push_back({{0.0F, 0.0F, 0.0F, 1.0F}, {0.0F, 0.0F, 0.0F}});
     }
@@ -392,13 +392,13 @@ extern void internal_import_skeleton(cgltf_data const *data, mcrt_vector<DirectX
 
                 {
                     uint32_t const parent_joint_index = (NULL != parent_node) ? out_internal_node_index_to_skeleton_joint_index[cgltf_node_index(data, parent_node)] : 0U;
-                    assert(BRX_MOTION_UINT32_INDEX_INVALID != parent_joint_index);
+                    assert(BRX_ASSET_IMPORT_UINT32_INDEX_INVALID != parent_joint_index);
 
                     out_skeleton_joint_parent_indices.push_back(parent_joint_index);
                     uint32_t const current_joint_index = (out_skeleton_joint_parent_indices.size() - 1U);
                     assert(parent_joint_index < current_joint_index);
 
-                    assert(BRX_MOTION_UINT32_INDEX_INVALID == out_internal_node_index_to_skeleton_joint_index[cgltf_node_index(data, current_node)]);
+                    assert(BRX_ASSET_IMPORT_UINT32_INDEX_INVALID == out_internal_node_index_to_skeleton_joint_index[cgltf_node_index(data, current_node)]);
                     out_internal_node_index_to_skeleton_joint_index[cgltf_node_index(data, current_node)] = current_joint_index;
                 }
 
@@ -418,13 +418,13 @@ extern void internal_import_skeleton(cgltf_data const *data, mcrt_vector<DirectX
 #ifndef NDEBUG
     for (uint32_t skeleton_joint_index = 0U; skeleton_joint_index < out_skeleton_joint_parent_indices.size(); ++skeleton_joint_index)
     {
-        assert((BRX_MOTION_UINT32_INDEX_INVALID == out_skeleton_joint_parent_indices[skeleton_joint_index]) || (out_skeleton_joint_parent_indices[skeleton_joint_index] < skeleton_joint_index));
+        assert((BRX_ASSET_IMPORT_UINT32_INDEX_INVALID == out_skeleton_joint_parent_indices[skeleton_joint_index]) || (out_skeleton_joint_parent_indices[skeleton_joint_index] < skeleton_joint_index));
     }
 #endif
 
-    assert(out_skeleton_joint_names.size() == ((BRX_MOTION_UINT32_INDEX_INVALID != root_node_index) ? node_index_in_skeleton.size() : (node_index_in_skeleton.size() + 1U)));
-    assert(out_skeleton_joint_parent_indices.size() == ((BRX_MOTION_UINT32_INDEX_INVALID != root_node_index) ? node_index_in_skeleton.size() : (node_index_in_skeleton.size() + 1U)));
-    assert(out_skeleton_bind_pose_joint_transforms.size() == ((BRX_MOTION_UINT32_INDEX_INVALID != root_node_index) ? node_index_in_skeleton.size() : (node_index_in_skeleton.size() + 1U)));
+    assert(out_skeleton_joint_names.size() == ((BRX_ASSET_IMPORT_UINT32_INDEX_INVALID != root_node_index) ? node_index_in_skeleton.size() : (node_index_in_skeleton.size() + 1U)));
+    assert(out_skeleton_joint_parent_indices.size() == ((BRX_ASSET_IMPORT_UINT32_INDEX_INVALID != root_node_index) ? node_index_in_skeleton.size() : (node_index_in_skeleton.size() + 1U)));
+    assert(out_skeleton_bind_pose_joint_transforms.size() == ((BRX_ASSET_IMPORT_UINT32_INDEX_INVALID != root_node_index) ? node_index_in_skeleton.size() : (node_index_in_skeleton.size() + 1U)));
 }
 
 static inline void internal_import_surface(cgltf_data const *data, mcrt_vector<DirectX::XMFLOAT4X4> const &internal_node_world_transforms, mcrt_vector<mcrt_vector<cgltf_node const *>> const &internal_mesh_instances, mcrt_vector<uint32_t> const &internal_node_index_to_skeleton_joint_index, mcrt_vector<brx_asset_import_model_surface> &out_surfaces)

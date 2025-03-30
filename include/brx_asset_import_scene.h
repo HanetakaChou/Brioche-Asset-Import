@@ -32,6 +32,14 @@ class brx_asset_import_surface;
 class brx_asset_import_morph_animation;
 class brx_asset_import_skeleton_animation;
 
+static constexpr uint32_t const BRX_ASSET_IMPORT_UINT32_INDEX_INVALID = static_cast<uint32_t>(~static_cast<uint32_t>(0U));
+
+enum BRX_ASSET_IMPORT_JOINT_CONSTRAINT_TYPE : uint32_t
+{
+    BRX_ASSET_IMPORT_JOINT_CONSTRAINT_COPY_TRANSFORM = 0,
+    BRX_ASSET_IMPORT_JOINT_CONSTRAINT_INVERSE_KINEMATICS = 1
+};
+
 struct brx_asset_import_geometry_vertex_position
 {
     // R32G32B32_FLOAT
@@ -62,6 +70,35 @@ struct brx_asset_import_rigid_transform
 {
     float m_rotation[4];
     float m_translation[3];
+};
+
+struct brx_asset_import_joint_constraint
+{
+    BRX_ASSET_IMPORT_JOINT_CONSTRAINT_TYPE m_constraint_type;
+
+    union
+    {
+        struct
+        {
+            uint32_t m_source_joint_index;
+            uint32_t m_source_weight_count;
+            float *m_source_weights;
+            uint32_t m_destination_joint_index;
+            bool m_copy_rotation;
+            bool m_copy_translation;
+        } m_copy_transform;
+
+        struct
+        {
+            uint32_t m_ik_end_effector_index;
+            uint32_t m_ik_joint_count;
+            uint32_t *m_ik_joint_indices;
+            uint32_t m_target_joint_index;
+            float m_ik_two_joints_hinge_joint_axis_local_space[3];
+            float m_cosine_max_ik_two_joints_hinge_joint_angle;
+            float m_cosine_min_ik_two_joints_hinge_joint_angle;
+        } m_inverse_kinematics;
+    };
 };
 
 class brx_asset_import_scene

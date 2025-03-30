@@ -1014,19 +1014,18 @@ static inline bool internal_data_read_mmd_pmx_morphs(void const *data_base, size
             if (0U == morph_type)
             {
                 // group morph
-                out_morphs[morph_index].m_group = true;
+                out_morphs[morph_index].m_morph_type = 0U;
 
-                out_morphs[morph_index].m_morph_indices.resize(offset_count);
-                out_morphs[morph_index].m_morph_weights.resize(offset_count);
+                out_morphs[morph_index].m_offsets.resize(offset_count);
 
                 for (uint32_t offset_index = 0U; offset_index < offset_count; ++offset_index)
                 {
-                    if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, morph_index_size, &out_morphs[morph_index].m_morph_indices[offset_index])))
+                    if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, morph_index_size, &out_morphs[morph_index].m_offsets[offset_index].m_group.m_morph_index)))
                     {
                         return false;
                     }
 
-                    if (internal_unlikely(!internal_data_read_float(data_base, data_size, inout_data_offset, &out_morphs[morph_index].m_morph_weights[offset_index])))
+                    if (internal_unlikely(!internal_data_read_float(data_base, data_size, inout_data_offset, &out_morphs[morph_index].m_offsets[offset_index].m_group.m_morph_weight)))
                     {
                         return false;
                     }
@@ -1036,19 +1035,18 @@ static inline bool internal_data_read_mmd_pmx_morphs(void const *data_base, size
             {
                 // vertex position morph
 
-                out_morphs[morph_index].m_vertex_position = true;
+                out_morphs[morph_index].m_morph_type = 1U;
 
-                out_morphs[morph_index].m_vertex_indices.resize(offset_count);
-                out_morphs[morph_index].m_vertex_position_offsets.resize(offset_count);
+                out_morphs[morph_index].m_offsets.resize(offset_count);
 
                 for (uint32_t offset_index = 0U; offset_index < offset_count; ++offset_index)
                 {
-                    if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, vertex_index_size, &out_morphs[morph_index].m_vertex_indices[offset_index])))
+                    if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, vertex_index_size, &out_morphs[morph_index].m_offsets[offset_index].m_vertex_position.m_vertex_index)))
                     {
                         return false;
                     }
 
-                    if (internal_unlikely(!internal_data_read_mmd_pmx_vec3(data_base, data_size, inout_data_offset, &out_morphs[morph_index].m_vertex_position_offsets[offset_index])))
+                    if (internal_unlikely(!internal_data_read_mmd_pmx_vec3(data_base, data_size, inout_data_offset, &out_morphs[morph_index].m_offsets[offset_index].m_vertex_position.m_vertex_position)))
                     {
                         return false;
                     }
@@ -1085,14 +1083,13 @@ static inline bool internal_data_read_mmd_pmx_morphs(void const *data_base, size
                 // vertex uv morph
                 assert(false);
 
-                out_morphs[morph_index].m_vertex_uv = true;
+                out_morphs[morph_index].m_morph_type = 2U;
 
-                out_morphs[morph_index].m_vertex_indices.resize(offset_count);
-                out_morphs[morph_index].m_vertex_uv_offsets.resize(offset_count);
+                out_morphs[morph_index].m_offsets.resize(offset_count);
 
                 for (uint32_t offset_index = 0U; offset_index < offset_count; ++offset_index)
                 {
-                    if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, vertex_index_size, &out_morphs[morph_index].m_vertex_indices[offset_index])))
+                    if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, vertex_index_size, &out_morphs[morph_index].m_offsets[offset_index].m_vertex_uv.m_vertex_index)))
                     {
                         return false;
                     }
@@ -1103,8 +1100,8 @@ static inline bool internal_data_read_mmd_pmx_morphs(void const *data_base, size
                         return false;
                     }
 
-                    out_morphs[morph_index].m_vertex_uv_offsets[offset_index].m_x = uv.m_x;
-                    out_morphs[morph_index].m_vertex_uv_offsets[offset_index].m_y = uv.m_y;
+                    out_morphs[morph_index].m_offsets[offset_index].m_vertex_uv.m_vertex_uv.m_x = uv.m_x;
+                    out_morphs[morph_index].m_offsets[offset_index].m_vertex_uv.m_vertex_uv.m_y = uv.m_y;
                     assert(0.0F == uv.m_z);
                     assert(0.0F == uv.m_w);
                 }
@@ -1208,11 +1205,6 @@ static inline bool internal_data_read_mmd_pmx_morphs(void const *data_base, size
                 // flip morph
                 assert(false);
 
-                out_morphs[morph_index].m_group = true;
-
-                out_morphs[morph_index].m_morph_indices.resize(offset_count);
-                out_morphs[morph_index].m_morph_weights.resize(offset_count);
-
                 for (uint32_t offset_index = 0U; offset_index < offset_count; ++offset_index)
                 {
                     uint32_t unused_morph_index;
@@ -1230,6 +1222,8 @@ static inline bool internal_data_read_mmd_pmx_morphs(void const *data_base, size
             }
             else if (10U == morph_type)
             {
+                // impulse morph
+
                 for (uint32_t offset_index = 0U; offset_index < offset_count; ++offset_index)
                 {
                     uint32_t unused_rigid_body_index;
@@ -1924,7 +1918,7 @@ static inline bool internal_data_read_mmd_pmx_text(void const *data_base, size_t
         assert(0U == (length & (2U - 1U)));
 
         mcrt_vector<uint16_t> value;
-        value.resize(static_cast<size_t>((length + 1U) >> 1U), static_cast<uint8_t>(0U));
+        value.resize(static_cast<size_t>(((length + 1U) >> 1U) + 1U), static_cast<uint8_t>(0U));
         if (internal_unlikely(!internal_data_read_bytes(data_base, data_size, inout_data_offset, length, value.data())))
         {
             return false;

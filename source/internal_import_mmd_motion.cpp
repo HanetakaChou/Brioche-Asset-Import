@@ -362,9 +362,9 @@ extern bool internal_import_mmd_motion(void const *data_base, size_t data_size, 
                 }
             }
         }
-
-        return true;
     }
+
+    return true;
 }
 
 static inline float internal_cubic_bezier(uint8_t const in_packed_k_1_x, uint8_t const in_packed_k_1_y, uint8_t const in_packed_k_2_x, uint8_t const in_packed_k_2_y, float const in_x)

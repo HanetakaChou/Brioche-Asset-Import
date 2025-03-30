@@ -98,17 +98,35 @@ struct mmd_pmx_bone_t
     mmd_pmx_vec3_t m_ik_two_links_hinge_limit_angle_max;
 };
 
+union mmd_pmx_morph_offset_t
+{
+    struct
+    {
+        uint32_t m_morph_index;
+        float m_morph_weight;
+    } m_group;
+
+    struct
+    {
+        uint32_t m_vertex_index;
+        mmd_pmx_vec3_t m_vertex_position;
+    } m_vertex_position;
+
+    struct
+    {
+        uint32_t m_vertex_index;
+        mmd_pmx_vec2_t m_vertex_uv;
+    } m_vertex_uv;
+};
+
 struct mmd_pmx_morph_t
 {
     mcrt_string m_name;
-    bool m_group;
-    mcrt_vector<uint32_t> m_morph_indices;
-    mcrt_vector<float> m_morph_weights;
-    bool m_vertex_position;
-    bool m_vertex_uv;
-    mcrt_vector<uint32_t> m_vertex_indices;
-    mcrt_vector<mmd_pmx_vec3_t> m_vertex_position_offsets;
-    mcrt_vector<mmd_pmx_vec2_t> m_vertex_uv_offsets;
+    // 0: group
+    // 1: vertex position
+    // 2: vertex uv
+    uint32_t m_morph_type;
+    mcrt_vector<mmd_pmx_morph_offset_t> m_offsets;
 };
 
 struct mmd_pmx_rigid_body_t
