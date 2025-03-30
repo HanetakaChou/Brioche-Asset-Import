@@ -18,6 +18,7 @@
 #include "brx_asset_import_model_scene.h"
 #include "internal_import_scene.h"
 #include <cstring>
+#include <cassert>
 
 extern "C" brx_asset_import_scene *brx_asset_import_create_scene(brx_asset_import_input_stream_factory *input_stream_factory, char const *file_name)
 {
@@ -138,6 +139,122 @@ brx_motion_rigid_transform const *brx_asset_import_model_surface_group::get_skel
 uint32_t brx_asset_import_model_surface_group::get_vrm_skeleton_joint_index(BRX_MOTION_VRM_SKELETON_JOINT_NAME vrm_skeleton_joint_name) const
 {
     return this->m_vrm_skeleton_joint_indices[vrm_skeleton_joint_name];
+}
+
+brx_asset_import_model_morph_animation::brx_asset_import_model_morph_animation(
+    mcrt_vector<mcrt_string> &&weight_channel_names,
+    mcrt_vector<float> &&weights)
+    : m_weight_channel_names(std::move(weight_channel_names)),
+      m_weights(std::move(weights))
+
+{
+}
+
+brx_asset_import_model_morph_animation::~brx_asset_import_model_morph_animation()
+{
+}
+
+uint32_t const brx_asset_import_model_morph_animation::get_weight_channel_count() const
+{
+    return this->m_weight_channel_names.size();
+}
+
+char const *brx_asset_import_model_morph_animation::get_weight_channel_name(uint32_t channel_index) const
+{
+    return this->m_weight_channel_names[channel_index].c_str();
+}
+
+uint32_t const brx_asset_import_model_morph_animation::get_frame_count() const
+{
+    if (!this->m_weight_channel_names.empty())
+    {
+        assert(0U == (this->m_weights.size() % this->m_weight_channel_names.size()));
+        return (this->m_weights.size() / this->m_weight_channel_names.size());
+    }
+    else
+    {
+        assert(this->m_weights.empty());
+        return 0U;
+    }
+}
+
+float const brx_asset_import_model_morph_animation::get_weight(uint32_t frame_index, uint32_t channel_index) const
+{
+    return this->m_weights[this->get_frame_count() * frame_index + channel_index];
+}
+
+brx_asset_import_model_skeleton_animation::brx_asset_import_model_skeleton_animation(
+    mcrt_vector<mcrt_string> &&rigid_transform_channel_names,
+    mcrt_vector<mcrt_string> &&ik_switch_channel_names,
+    mcrt_vector<brx_asset_import_rigid_transform> &&rigid_transforms,
+    mcrt_vector<bool> &&ik_switches)
+    : m_rigid_transform_channel_names(std::move(rigid_transform_channel_names)),
+      m_ik_switch_channel_names(std::move(ik_switch_channel_names)),
+      m_rigid_transforms(std::move(rigid_transforms)),
+      m_ik_switches(std::move(ik_switches))
+
+{
+}
+
+brx_asset_import_model_skeleton_animation::~brx_asset_import_model_skeleton_animation()
+{
+}
+
+uint32_t const brx_asset_import_model_skeleton_animation::get_rigid_transform_channel_count() const
+{
+    return this->m_rigid_transform_channel_names.size();
+}
+
+char const *brx_asset_import_model_skeleton_animation::get_rigid_transform_channel_name(uint32_t channel_index) const
+{
+    return this->m_rigid_transform_channel_names[channel_index].c_str();
+}
+
+uint32_t const brx_asset_import_model_skeleton_animation::get_ik_switch_channel_count() const
+{
+    return this->m_ik_switch_channel_names.size();
+}
+
+char const *brx_asset_import_model_skeleton_animation::get_ik_switch_channel_name(uint32_t channel_index) const
+{
+    return this->m_ik_switch_channel_names[channel_index].c_str();
+}
+
+uint32_t const brx_asset_import_model_skeleton_animation::get_frame_count() const
+{
+    if ((!this->m_rigid_transform_channel_names.empty()) && (!this->m_ik_switch_channel_names.empty()))
+    {
+        assert(0U == (this->m_rigid_transforms.size() % this->m_rigid_transform_channel_names.size()));
+        assert(0U == (this->m_ik_switches.size() % this->m_ik_switch_channel_names.size()));
+        assert((this->m_rigid_transforms.size() / this->m_rigid_transform_channel_names.size()) == (this->m_ik_switches.size() / this->m_ik_switch_channel_names.size()));
+        return (this->m_rigid_transforms.size() / this->m_rigid_transform_channel_names.size());
+    }
+    else if (!this->m_rigid_transform_channel_names.empty())
+    {
+        assert(0U == (this->m_rigid_transforms.size() % this->m_rigid_transform_channel_names.size()));
+        return (this->m_rigid_transforms.size() / this->m_rigid_transform_channel_names.size());
+    }
+    else if (!this->m_ik_switch_channel_names.empty())
+    {
+        assert(0U == (this->m_ik_switches.size() % this->m_ik_switch_channel_names.size()));
+        return (this->m_ik_switches.size() / this->m_ik_switch_channel_names.size());
+    }
+    else
+    {
+        assert(this->m_rigid_transforms.empty());
+        assert(this->m_ik_switches.empty());
+        return 0U;
+    }
+}
+
+brx_asset_import_rigid_transform const *brx_asset_import_model_skeleton_animation::get_rigid_transform(uint32_t frame_index, uint32_t channel_index) const
+{
+    return &this->m_rigid_transforms[this->get_frame_count() * frame_index + channel_index];
+}
+
+bool brx_asset_import_model_skeleton_animation::get_ik_switch(uint32_t frame_index, uint32_t channel_index) const
+{
+    return this->m_ik_switches[this->get_frame_count() * frame_index + channel_index];
 }
 
 brx_asset_import_model_scene::brx_asset_import_model_scene(mcrt_vector<brx_asset_import_model_surface_group> &&surface_groups) : m_surface_groups(std::move(surface_groups))

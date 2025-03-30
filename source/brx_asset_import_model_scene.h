@@ -91,6 +91,49 @@ private:
     uint32_t get_vrm_skeleton_joint_index(BRX_MOTION_VRM_SKELETON_JOINT_NAME vrm_skeleton_joint_name) const override;
 };
 
+class brx_asset_import_model_morph_animation final : public brx_asset_import_morph_animation
+{
+    mcrt_vector<mcrt_string> m_weight_channel_names;
+    mcrt_vector<float> m_weights;
+
+public:
+    brx_asset_import_model_morph_animation(
+        mcrt_vector<mcrt_string> &&weight_channel_names,
+        mcrt_vector<float> &&weights);
+    ~brx_asset_import_model_morph_animation();
+
+private:
+    uint32_t const get_weight_channel_count() const override;
+    char const *get_weight_channel_name(uint32_t channel_index) const override;
+    uint32_t const get_frame_count() const override;
+    float const get_weight(uint32_t frame_index, uint32_t channel_index) const override;
+};
+
+class brx_asset_import_model_skeleton_animation final : public brx_asset_import_skeleton_animation
+{
+    mcrt_vector<mcrt_string> m_rigid_transform_channel_names;
+    mcrt_vector<mcrt_string> m_ik_switch_channel_names;
+    mcrt_vector<brx_asset_import_rigid_transform> m_rigid_transforms;
+    mcrt_vector<bool> m_ik_switches;
+
+public:
+    brx_asset_import_model_skeleton_animation(
+        mcrt_vector<mcrt_string> &&rigid_transform_channel_names,
+        mcrt_vector<mcrt_string> &&ik_switch_channel_names,
+        mcrt_vector<brx_asset_import_rigid_transform> &&rigid_transforms,
+    mcrt_vector<bool> &&ik_switches);
+    ~brx_asset_import_model_skeleton_animation();
+
+private:
+    uint32_t const get_rigid_transform_channel_count() const override;
+    char const *get_rigid_transform_channel_name(uint32_t channel_index) const override;
+    uint32_t const get_ik_switch_channel_count() const override;
+    char const *get_ik_switch_channel_name(uint32_t channel_index) const override;
+    uint32_t const get_frame_count() const override;
+    brx_asset_import_rigid_transform const *get_rigid_transform(uint32_t frame_index, uint32_t channel_index) const override;
+    bool get_ik_switch(uint32_t frame_index, uint32_t channel_index) const override;
+};
+
 class brx_asset_import_model_scene final : public brx_asset_import_scene
 {
     mcrt_vector<brx_asset_import_model_surface_group> m_surface_groups;

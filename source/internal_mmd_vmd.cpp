@@ -27,16 +27,13 @@
 #define internal_likely(x) __builtin_expect(!!(x), 1)
 #define internal_unlikely(x) __builtin_expect(!!(x), 0)
 #if defined(__BYTE_ORDER__) && defined(__ORDER_LITTLE_ENDIAN_) && __ORDER_LITTLE_ENDIAN_ == __BYTE_ORDER__
-static inline uint16_t internal_bswap_16(uint16_t x) { return x; }
 static inline uint32_t internal_bswap_32(uint32_t x) { return x; }
 #elif defined(__BYTE_ORDER__) && defined(__ORDER_BIG_ENDIAN__) && __ORDER_BIG_ENDIAN__ == __BYTE_ORDER__
-static inline uint16_t internal_bswap_16(uint16_t x) { return __builtin_bswap16(x); }
 static inline uint32_t internal_bswap_32(uint32_t x) { return __builtin_bswap32(x); }
 #else
 #error Unknown Byte Order
 #endif
 #elif defined(_MSC_VER)
-static inline uint16_t internal_bswap_16(uint16_t x) { return x; }
 static inline uint32_t internal_bswap_32(uint32_t x) { return x; }
 #if defined(__clang__)
 // CLANG-CL
@@ -93,29 +90,64 @@ extern bool internal_data_read_mmd_vmd(void const *data_base, size_t data_size, 
         return false;
     }
 
-    if (internal_unlikely(!internal_data_read_mmd_vmd_morphs(data_base, data_size, data_offset, out_mmd_vmd->m_morphs)))
+    if (data_offset < data_size)
     {
-        return false;
+        if (internal_unlikely(!internal_data_read_mmd_vmd_morphs(data_base, data_size, data_offset, out_mmd_vmd->m_morphs)))
+        {
+            return false;
+        }
+    }
+    else
+    {
+        assert(data_size == data_offset);
     }
 
-    if (internal_unlikely(!internal_data_read_mmd_vmd_cameras(data_base, data_size, data_offset, out_mmd_vmd->m_cameras)))
+    if (data_offset < data_size)
     {
-        return false;
+        if (internal_unlikely(!internal_data_read_mmd_vmd_cameras(data_base, data_size, data_offset, out_mmd_vmd->m_cameras)))
+        {
+            return false;
+        }
+    }
+    else
+    {
+        assert(data_size == data_offset);
     }
 
-    if (internal_unlikely(!internal_data_read_mmd_vmd_lights(data_base, data_size, data_offset)))
+    if (data_offset < data_size)
     {
-        return false;
+        if (internal_unlikely(!internal_data_read_mmd_vmd_lights(data_base, data_size, data_offset)))
+        {
+            return false;
+        }
+    }
+    else
+    {
+        assert(data_size == data_offset);
     }
 
-    if (internal_unlikely(!internal_data_read_mmd_vmd_shadows(data_base, data_size, data_offset)))
+    if (data_offset < data_size)
     {
-        return false;
+        if (internal_unlikely(!internal_data_read_mmd_vmd_shadows(data_base, data_size, data_offset)))
+        {
+            return false;
+        }
+    }
+    else
+    {
+        assert(data_size == data_offset);
     }
 
-    if (internal_unlikely(!internal_data_read_mmd_vmd_iks(data_base, data_size, data_offset, out_mmd_vmd->m_iks)))
+    if (data_offset < data_size)
     {
-        return false;
+        if (internal_unlikely(!internal_data_read_mmd_vmd_iks(data_base, data_size, data_offset, out_mmd_vmd->m_iks)))
+        {
+            return false;
+        }
+    }
+    else
+    {
+        assert(data_size == data_offset);
     }
 
     assert(data_size == data_offset);
@@ -203,165 +235,96 @@ static inline bool internal_data_read_mmd_vmd_motions(void const *data_base, siz
         // assert(interpolation[1][15] == 0U);
         // assert(interpolation[2][14] == 0U);
         // assert(interpolation[3][13] == 0U);
-        out_motions[motion_index].m_translation_x_cubic_bezier_1_x = interpolation[0][0];
+        out_motions[motion_index].m_translation_x_cubic_bezier[0] = interpolation[0][0];
         assert(interpolation[1][3] == interpolation[0][4]);
         assert(interpolation[2][2] == interpolation[0][4]);
         assert(interpolation[3][1] == interpolation[0][4]);
-        out_motions[motion_index].m_translation_x_cubic_bezier_1_y = interpolation[0][4];
+        out_motions[motion_index].m_translation_x_cubic_bezier[1] = interpolation[0][4];
         assert(interpolation[1][7] == interpolation[0][8]);
         assert(interpolation[2][6] == interpolation[0][8]);
         assert(interpolation[3][5] == interpolation[0][8]);
-        out_motions[motion_index].m_translation_x_cubic_bezier_2_x = interpolation[0][8];
+        out_motions[motion_index].m_translation_x_cubic_bezier[2] = interpolation[0][8];
         assert(interpolation[1][11] == interpolation[0][12]);
         assert(interpolation[2][10] == interpolation[0][12]);
         assert(interpolation[3][9] == interpolation[0][12]);
-        out_motions[motion_index].m_translation_x_cubic_bezier_2_y = interpolation[0][12];
+        out_motions[motion_index].m_translation_x_cubic_bezier[3] = interpolation[0][12];
 
         assert(interpolation[0][1] == interpolation[1][0]);
         // assert(interpolation[2][15] == 0U);
         // assert(interpolation[3][14] == 0U);
-        out_motions[motion_index].m_translation_y_cubic_bezier_1_x = interpolation[1][0];
+        out_motions[motion_index].m_translation_y_cubic_bezier[0] = interpolation[1][0];
         assert(interpolation[0][5] == interpolation[1][4]);
         assert(interpolation[2][3] == interpolation[1][4]);
         assert(interpolation[3][2] == interpolation[1][4]);
-        out_motions[motion_index].m_translation_y_cubic_bezier_1_y = interpolation[1][4];
+        out_motions[motion_index].m_translation_y_cubic_bezier[1] = interpolation[1][4];
         assert(interpolation[0][9] == interpolation[1][8]);
         assert(interpolation[2][7] == interpolation[1][8]);
         assert(interpolation[3][6] == interpolation[1][8]);
-        out_motions[motion_index].m_translation_y_cubic_bezier_2_x = interpolation[1][8];
+        out_motions[motion_index].m_translation_y_cubic_bezier[2] = interpolation[1][8];
         assert(interpolation[0][13] == interpolation[1][12]);
         assert(interpolation[2][11] == interpolation[1][12]);
         assert(interpolation[3][10] == interpolation[1][12]);
-        out_motions[motion_index].m_translation_y_cubic_bezier_2_y = interpolation[1][12];
+        out_motions[motion_index].m_translation_y_cubic_bezier[3] = interpolation[1][12];
 
         assert(interpolation[0][2] == 0U);
         assert(interpolation[1][1] == interpolation[2][0]);
         // assert(interpolation[3][15] == 0U);
-        out_motions[motion_index].m_translation_z_cubic_bezier_1_x = interpolation[2][0];
+        out_motions[motion_index].m_translation_z_cubic_bezier[0] = interpolation[2][0];
         assert(interpolation[0][6] == interpolation[2][4]);
         assert(interpolation[1][5] == interpolation[2][4]);
         assert(interpolation[3][3] == interpolation[2][4]);
-        out_motions[motion_index].m_translation_z_cubic_bezier_1_y = interpolation[2][4];
+        out_motions[motion_index].m_translation_z_cubic_bezier[1] = interpolation[2][4];
         assert(interpolation[0][10] == interpolation[2][8]);
         assert(interpolation[1][9] == interpolation[2][8]);
         assert(interpolation[3][7] == interpolation[2][8]);
-        out_motions[motion_index].m_translation_z_cubic_bezier_2_x = interpolation[2][8];
+        out_motions[motion_index].m_translation_z_cubic_bezier[2] = interpolation[2][8];
         assert(interpolation[0][14] == interpolation[2][12]);
         assert(interpolation[1][13] == interpolation[2][12]);
         assert(interpolation[3][11] == interpolation[2][12]);
-        out_motions[motion_index].m_translation_z_cubic_bezier_2_y = interpolation[2][12];
+        out_motions[motion_index].m_translation_z_cubic_bezier[3] = interpolation[2][12];
 
         assert(interpolation[0][3] == 0U);
         assert(interpolation[1][2] == interpolation[3][0]);
         assert(interpolation[2][1] == interpolation[3][0]);
-        out_motions[motion_index].m_rotation_cubic_bezier_1_x = interpolation[3][0];
+        out_motions[motion_index].m_rotation_cubic_bezier[0] = interpolation[3][0];
         assert(interpolation[0][7] == interpolation[3][4]);
         assert(interpolation[1][6] == interpolation[3][4]);
         assert(interpolation[2][5] == interpolation[3][4]);
-        out_motions[motion_index].m_rotation_cubic_bezier_1_y = interpolation[3][4];
+        out_motions[motion_index].m_rotation_cubic_bezier[1] = interpolation[3][4];
         assert(interpolation[0][11] == interpolation[3][8]);
         assert(interpolation[1][10] == interpolation[3][8]);
         assert(interpolation[2][9] == interpolation[3][8]);
-        out_motions[motion_index].m_rotation_cubic_bezier_2_x = interpolation[3][8];
+        out_motions[motion_index].m_rotation_cubic_bezier[2] = interpolation[3][8];
         assert(interpolation[0][15] == interpolation[3][12]);
         assert(interpolation[1][14] == interpolation[3][12]);
         assert(interpolation[2][13] == interpolation[3][12]);
-        out_motions[motion_index].m_rotation_cubic_bezier_2_y = interpolation[3][12];
+        out_motions[motion_index].m_rotation_cubic_bezier[3] = interpolation[3][12];
 
-        if (internal_unlikely(out_motions[motion_index].m_translation_x_cubic_bezier_1_x > static_cast<uint8_t>(INT8_MAX)))
+        for (uint32_t cubic_bezier_k_index = 0U; cubic_bezier_k_index < 4U; ++cubic_bezier_k_index)
         {
-            // Tolerance
-            out_motions[motion_index].m_translation_x_cubic_bezier_1_x = 0U;
-        }
+            if (internal_unlikely(out_motions[motion_index].m_translation_x_cubic_bezier[cubic_bezier_k_index] > static_cast<uint8_t>(INT8_MAX)))
+            {
+                // Tolerance
+                out_motions[motion_index].m_translation_x_cubic_bezier[cubic_bezier_k_index] = 0U;
+            }
 
-        if (internal_unlikely(out_motions[motion_index].m_translation_x_cubic_bezier_1_y > static_cast<uint8_t>(INT8_MAX)))
-        {
-            // Tolerance
-            out_motions[motion_index].m_translation_x_cubic_bezier_1_y = 0U;
-        }
+            if (internal_unlikely(out_motions[motion_index].m_translation_y_cubic_bezier[cubic_bezier_k_index] > static_cast<uint8_t>(INT8_MAX)))
+            {
+                // Tolerance
+                out_motions[motion_index].m_translation_y_cubic_bezier[cubic_bezier_k_index] = 0U;
+            }
 
-        if (internal_unlikely(out_motions[motion_index].m_translation_x_cubic_bezier_2_x > static_cast<uint8_t>(INT8_MAX)))
-        {
-            // Tolerance
-            out_motions[motion_index].m_translation_x_cubic_bezier_2_x = 0U;
-        }
+            if (internal_unlikely(out_motions[motion_index].m_translation_z_cubic_bezier[cubic_bezier_k_index] > static_cast<uint8_t>(INT8_MAX)))
+            {
+                // Tolerance
+                out_motions[motion_index].m_translation_z_cubic_bezier[cubic_bezier_k_index] = 0U;
+            }
 
-        if (internal_unlikely(out_motions[motion_index].m_translation_x_cubic_bezier_2_y > static_cast<uint8_t>(INT8_MAX)))
-        {
-            // Tolerance
-            out_motions[motion_index].m_translation_x_cubic_bezier_2_y = 0U;
-        }
-
-        if (internal_unlikely(out_motions[motion_index].m_translation_y_cubic_bezier_1_x > static_cast<uint8_t>(INT8_MAX)))
-        {
-            // Tolerance
-            out_motions[motion_index].m_translation_y_cubic_bezier_1_x = 0U;
-        }
-
-        if (internal_unlikely(out_motions[motion_index].m_translation_y_cubic_bezier_1_y > static_cast<uint8_t>(INT8_MAX)))
-        {
-            // Tolerance
-            out_motions[motion_index].m_translation_y_cubic_bezier_1_y = 0U;
-        }
-
-        if (internal_unlikely(out_motions[motion_index].m_translation_y_cubic_bezier_2_x > static_cast<uint8_t>(INT8_MAX)))
-        {
-            // Tolerance
-            out_motions[motion_index].m_translation_y_cubic_bezier_2_x = 0U;
-        }
-
-        if (internal_unlikely(out_motions[motion_index].m_translation_y_cubic_bezier_2_y > static_cast<uint8_t>(INT8_MAX)))
-        {
-            // Tolerance
-            out_motions[motion_index].m_translation_y_cubic_bezier_2_y = 0U;
-        }
-
-        if (internal_unlikely(out_motions[motion_index].m_translation_z_cubic_bezier_1_x > static_cast<uint8_t>(INT8_MAX)))
-        {
-            // Tolerance
-            out_motions[motion_index].m_translation_z_cubic_bezier_1_x = 0U;
-        }
-
-        if (internal_unlikely(out_motions[motion_index].m_translation_z_cubic_bezier_1_y > static_cast<uint8_t>(INT8_MAX)))
-        {
-            // Tolerance
-            out_motions[motion_index].m_translation_z_cubic_bezier_1_y = 0U;
-        }
-
-        if (internal_unlikely(out_motions[motion_index].m_translation_z_cubic_bezier_2_x > static_cast<uint8_t>(INT8_MAX)))
-        {
-            // Tolerance
-            out_motions[motion_index].m_translation_z_cubic_bezier_2_x = 0U;
-        }
-
-        if (internal_unlikely(out_motions[motion_index].m_translation_z_cubic_bezier_2_y > static_cast<uint8_t>(INT8_MAX)))
-        {
-            // Tolerance
-            out_motions[motion_index].m_translation_z_cubic_bezier_2_y = 0U;
-        }
-
-        if (internal_unlikely(out_motions[motion_index].m_rotation_cubic_bezier_1_x > static_cast<uint8_t>(INT8_MAX)))
-        {
-            // Tolerance
-            out_motions[motion_index].m_rotation_cubic_bezier_1_x = 0U;
-        }
-
-        if (internal_unlikely(out_motions[motion_index].m_rotation_cubic_bezier_1_y > static_cast<uint8_t>(INT8_MAX)))
-        {
-            // Tolerance
-            out_motions[motion_index].m_rotation_cubic_bezier_1_y = 0U;
-        }
-
-        if (internal_unlikely(out_motions[motion_index].m_rotation_cubic_bezier_2_x > static_cast<uint8_t>(INT8_MAX)))
-        {
-            // Tolerance
-            out_motions[motion_index].m_rotation_cubic_bezier_2_x = 0U;
-        }
-
-        if (internal_unlikely(out_motions[motion_index].m_rotation_cubic_bezier_2_y > static_cast<uint8_t>(INT8_MAX)))
-        {
-            // Tolerance
-            out_motions[motion_index].m_rotation_cubic_bezier_2_y = 0U;
+            if (internal_unlikely(out_motions[motion_index].m_rotation_cubic_bezier[cubic_bezier_k_index] > static_cast<uint8_t>(INT8_MAX)))
+            {
+                // Tolerance
+                out_motions[motion_index].m_rotation_cubic_bezier[cubic_bezier_k_index] = 0U;
+            }
         }
     }
 
@@ -463,35 +426,74 @@ static inline bool internal_data_read_mmd_vmd_cameras(void const *data_base, siz
         // https://blog.goo.ne.jp/torisu_tetosuki/e/bc9f1c4d597341b394bd02b64597499d
         // https://w.atwiki.jp/kumiho_k/pages/15.html
 
-        out_cameras[camera_index].m_focus_position_x_cubic_bezier_1_x = interpolation[0][0];
-        out_cameras[camera_index].m_focus_position_x_cubic_bezier_1_y = interpolation[0][2];
-        out_cameras[camera_index].m_focus_position_x_cubic_bezier_2_x = interpolation[0][1];
-        out_cameras[camera_index].m_focus_position_x_cubic_bezier_2_y = interpolation[0][3];
+        out_cameras[camera_index].m_focus_position_x_cubic_bezier[0] = interpolation[0][0];
+        out_cameras[camera_index].m_focus_position_x_cubic_bezier[1] = interpolation[0][2];
+        out_cameras[camera_index].m_focus_position_x_cubic_bezier[2] = interpolation[0][1];
+        out_cameras[camera_index].m_focus_position_x_cubic_bezier[3] = interpolation[0][3];
 
-        out_cameras[camera_index].m_focus_position_y_cubic_bezier_1_x = interpolation[1][0];
-        out_cameras[camera_index].m_focus_position_y_cubic_bezier_1_y = interpolation[1][2];
-        out_cameras[camera_index].m_focus_position_y_cubic_bezier_2_x = interpolation[1][1];
-        out_cameras[camera_index].m_focus_position_y_cubic_bezier_2_y = interpolation[1][3];
+        out_cameras[camera_index].m_focus_position_y_cubic_bezier[0] = interpolation[1][0];
+        out_cameras[camera_index].m_focus_position_y_cubic_bezier[1] = interpolation[1][2];
+        out_cameras[camera_index].m_focus_position_y_cubic_bezier[2] = interpolation[1][1];
+        out_cameras[camera_index].m_focus_position_y_cubic_bezier[3] = interpolation[1][3];
 
-        out_cameras[camera_index].m_focus_position_z_cubic_bezier_1_x = interpolation[2][0];
-        out_cameras[camera_index].m_focus_position_z_cubic_bezier_1_y = interpolation[2][2];
-        out_cameras[camera_index].m_focus_position_z_cubic_bezier_2_x = interpolation[2][1];
-        out_cameras[camera_index].m_focus_position_z_cubic_bezier_2_y = interpolation[2][3];
+        out_cameras[camera_index].m_focus_position_z_cubic_bezier[0] = interpolation[2][0];
+        out_cameras[camera_index].m_focus_position_z_cubic_bezier[1] = interpolation[2][2];
+        out_cameras[camera_index].m_focus_position_z_cubic_bezier[2] = interpolation[2][1];
+        out_cameras[camera_index].m_focus_position_z_cubic_bezier[3] = interpolation[2][3];
 
-        out_cameras[camera_index].m_rotation_cubic_bezier_1_x = interpolation[3][0];
-        out_cameras[camera_index].m_rotation_cubic_bezier_1_y = interpolation[3][2];
-        out_cameras[camera_index].m_rotation_cubic_bezier_2_x = interpolation[3][1];
-        out_cameras[camera_index].m_rotation_cubic_bezier_2_y = interpolation[3][3];
+        out_cameras[camera_index].m_rotation_cubic_bezier[0] = interpolation[3][0];
+        out_cameras[camera_index].m_rotation_cubic_bezier[1] = interpolation[3][2];
+        out_cameras[camera_index].m_rotation_cubic_bezier[2] = interpolation[3][1];
+        out_cameras[camera_index].m_rotation_cubic_bezier[3] = interpolation[3][3];
 
-        out_cameras[camera_index].m_distance_cubic_bezier_1_x = interpolation[4][0];
-        out_cameras[camera_index].m_distance_cubic_bezier_1_y = interpolation[4][2];
-        out_cameras[camera_index].m_distance_cubic_bezier_2_x = interpolation[4][1];
-        out_cameras[camera_index].m_distance_cubic_bezier_2_y = interpolation[4][3];
+        out_cameras[camera_index].m_distance_cubic_bezier[0] = interpolation[4][0];
+        out_cameras[camera_index].m_distance_cubic_bezier[1] = interpolation[4][2];
+        out_cameras[camera_index].m_distance_cubic_bezier[2] = interpolation[4][1];
+        out_cameras[camera_index].m_distance_cubic_bezier[3] = interpolation[4][3];
 
-        out_cameras[camera_index].m_fov_angle_cubic_bezier_1_x = interpolation[5][0];
-        out_cameras[camera_index].m_fov_angle_cubic_bezier_1_y = interpolation[5][2];
-        out_cameras[camera_index].m_fov_angle_cubic_bezier_2_x = interpolation[5][1];
-        out_cameras[camera_index].m_fov_angle_cubic_bezier_2_y = interpolation[5][3];
+        out_cameras[camera_index].m_fov_angle_cubic_bezier[0] = interpolation[5][0];
+        out_cameras[camera_index].m_fov_angle_cubic_bezier[1] = interpolation[5][2];
+        out_cameras[camera_index].m_fov_angle_cubic_bezier[2] = interpolation[5][1];
+        out_cameras[camera_index].m_fov_angle_cubic_bezier[3] = interpolation[5][3];
+
+        for (uint32_t cubic_bezier_k_index = 0U; cubic_bezier_k_index < 4U; ++cubic_bezier_k_index)
+        {
+            if (internal_unlikely(out_cameras[camera_index].m_focus_position_x_cubic_bezier[cubic_bezier_k_index] > static_cast<uint8_t>(INT8_MAX)))
+            {
+                // Tolerance
+                out_cameras[camera_index].m_focus_position_x_cubic_bezier[cubic_bezier_k_index] = 0U;
+            }
+
+            if (internal_unlikely(out_cameras[camera_index].m_focus_position_y_cubic_bezier[cubic_bezier_k_index] > static_cast<uint8_t>(INT8_MAX)))
+            {
+                // Tolerance
+                out_cameras[camera_index].m_focus_position_y_cubic_bezier[cubic_bezier_k_index] = 0U;
+            }
+
+            if (internal_unlikely(out_cameras[camera_index].m_focus_position_z_cubic_bezier[cubic_bezier_k_index] > static_cast<uint8_t>(INT8_MAX)))
+            {
+                // Tolerance
+                out_cameras[camera_index].m_focus_position_z_cubic_bezier[cubic_bezier_k_index] = 0U;
+            }
+
+            if (internal_unlikely(out_cameras[camera_index].m_rotation_cubic_bezier[cubic_bezier_k_index] > static_cast<uint8_t>(INT8_MAX)))
+            {
+                // Tolerance
+                out_cameras[camera_index].m_rotation_cubic_bezier[cubic_bezier_k_index] = 0U;
+            }
+
+            if (internal_unlikely(out_cameras[camera_index].m_distance_cubic_bezier[cubic_bezier_k_index] > static_cast<uint8_t>(INT8_MAX)))
+            {
+                // Tolerance
+                out_cameras[camera_index].m_distance_cubic_bezier[cubic_bezier_k_index] = 0U;
+            }
+
+            if (internal_unlikely(out_cameras[camera_index].m_fov_angle_cubic_bezier[cubic_bezier_k_index] > static_cast<uint8_t>(INT8_MAX)))
+            {
+                // Tolerance
+                out_cameras[camera_index].m_fov_angle_cubic_bezier[cubic_bezier_k_index] = 0U;
+            }
+        }
 
         uint32_t fov_angle;
         if (internal_unlikely(!internal_data_read_uint32(data_base, data_size, inout_data_offset, &fov_angle)))

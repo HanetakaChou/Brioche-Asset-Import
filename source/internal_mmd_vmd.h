@@ -49,22 +49,10 @@ struct mmd_vmd_motion_t
     uint32_t m_frame_number;
     mmd_vmd_vec3_t m_translation;
     mmd_vmd_vec4_t m_rotation;
-    uint8_t m_translation_x_cubic_bezier_1_x;
-    uint8_t m_translation_x_cubic_bezier_1_y;
-    uint8_t m_translation_x_cubic_bezier_2_x;
-    uint8_t m_translation_x_cubic_bezier_2_y;
-    uint8_t m_translation_y_cubic_bezier_1_x;
-    uint8_t m_translation_y_cubic_bezier_1_y;
-    uint8_t m_translation_y_cubic_bezier_2_x;
-    uint8_t m_translation_y_cubic_bezier_2_y;
-    uint8_t m_translation_z_cubic_bezier_1_x;
-    uint8_t m_translation_z_cubic_bezier_1_y;
-    uint8_t m_translation_z_cubic_bezier_2_x;
-    uint8_t m_translation_z_cubic_bezier_2_y;
-    uint8_t m_rotation_cubic_bezier_1_x;
-    uint8_t m_rotation_cubic_bezier_1_y;
-    uint8_t m_rotation_cubic_bezier_2_x;
-    uint8_t m_rotation_cubic_bezier_2_y;
+    uint8_t m_translation_x_cubic_bezier[4];
+    uint8_t m_translation_y_cubic_bezier[4];
+    uint8_t m_translation_z_cubic_bezier[4];
+    uint8_t m_rotation_cubic_bezier[4];
 };
 
 struct mmd_vmd_morph_t
@@ -82,30 +70,12 @@ struct mmd_vmd_camera_t
     float m_distance;
     float m_fov_angle;
     bool m_orthographic;
-    uint8_t m_focus_position_x_cubic_bezier_1_x;
-    uint8_t m_focus_position_x_cubic_bezier_1_y;
-    uint8_t m_focus_position_x_cubic_bezier_2_x;
-    uint8_t m_focus_position_x_cubic_bezier_2_y;
-    uint8_t m_focus_position_y_cubic_bezier_1_x;
-    uint8_t m_focus_position_y_cubic_bezier_1_y;
-    uint8_t m_focus_position_y_cubic_bezier_2_x;
-    uint8_t m_focus_position_y_cubic_bezier_2_y;
-    uint8_t m_focus_position_z_cubic_bezier_1_x;
-    uint8_t m_focus_position_z_cubic_bezier_1_y;
-    uint8_t m_focus_position_z_cubic_bezier_2_x;
-    uint8_t m_focus_position_z_cubic_bezier_2_y;
-    uint8_t m_rotation_cubic_bezier_1_x;
-    uint8_t m_rotation_cubic_bezier_1_y;
-    uint8_t m_rotation_cubic_bezier_2_x;
-    uint8_t m_rotation_cubic_bezier_2_y;
-    uint8_t m_distance_cubic_bezier_1_x;
-    uint8_t m_distance_cubic_bezier_1_y;
-    uint8_t m_distance_cubic_bezier_2_x;
-    uint8_t m_distance_cubic_bezier_2_y;
-    uint8_t m_fov_angle_cubic_bezier_1_x;
-    uint8_t m_fov_angle_cubic_bezier_1_y;
-    uint8_t m_fov_angle_cubic_bezier_2_x;
-    uint8_t m_fov_angle_cubic_bezier_2_y;
+    uint8_t m_focus_position_x_cubic_bezier[4];
+    uint8_t m_focus_position_y_cubic_bezier[4];
+    uint8_t m_focus_position_z_cubic_bezier[4];
+    uint8_t m_rotation_cubic_bezier[4];
+    uint8_t m_distance_cubic_bezier[4];
+    uint8_t m_fov_angle_cubic_bezier[4];
 };
 
 struct mmd_vmd_ik_t

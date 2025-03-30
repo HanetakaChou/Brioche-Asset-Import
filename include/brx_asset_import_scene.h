@@ -58,6 +58,12 @@ struct brx_asset_import_geometry_vertex_joint
     uint32_t m_weights;
 };
 
+struct brx_asset_import_rigid_transform
+{
+    float m_rotation[4];
+    float m_translation[3];
+};
+
 class brx_asset_import_scene
 {
 public:
@@ -107,15 +113,21 @@ class brx_asset_import_surface
 
 class brx_asset_import_morph_animation
 {
-
+    virtual uint32_t const get_weight_channel_count() const = 0;
+    virtual char const *get_weight_channel_name(uint32_t channel_index) const = 0;
+    virtual uint32_t const get_frame_count() const = 0;
+    virtual float const get_weight(uint32_t frame_index, uint32_t channel_index) const = 0;
 };
 
 class brx_asset_import_skeleton_animation
 {
-    virtual uint32_t const get_skeleton_joint_count() const = 0;
-    virtual char const *get_skeleton_joint_name(uint32_t skeleton_joint_index) const = 0;
+    virtual uint32_t const get_rigid_transform_channel_count() const = 0;
+    virtual char const *get_rigid_transform_channel_name(uint32_t channel_index) const = 0;
+    virtual uint32_t const get_ik_switch_channel_count() const = 0;
+    virtual char const *get_ik_switch_channel_name(uint32_t channel_index) const = 0;
     virtual uint32_t const get_frame_count() const = 0;
-    virtual brx_motion_rigid_transform const *get_animation_pose_skeleton_joint_transforms(uint32_t frame_index) const = 0;
+    virtual brx_asset_import_rigid_transform const *get_rigid_transform(uint32_t frame_index, uint32_t channel_index) const = 0;
+    virtual bool get_ik_switch(uint32_t frame_index, uint32_t channel_index) const = 0;
 };
 
 extern "C" brx_asset_import_scene *brx_asset_import_create_scene(brx_asset_import_input_stream_factory *input_stream_factory, char const *file_name);

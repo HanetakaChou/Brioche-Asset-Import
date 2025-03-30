@@ -155,7 +155,16 @@ extern bool internal_data_read_mmd_pmx(void const *data_base, size_t data_size, 
         return false;
     }
 
-    // TODO: Soft Body
+    // TODO:
+    // if (data_offset < data_size)
+    // {
+    //     read soft body
+    // }
+    // else
+    // {
+    //     assert(data_size == data_offset);
+    // }
+
     assert(data_size == data_offset);
 
     return true;

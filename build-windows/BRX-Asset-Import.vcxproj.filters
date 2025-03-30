@@ -90,7 +90,7 @@
     <ClInclude Include="..\source\internal_mmd_vmd.h">
       <Filter>source</Filter>
     </ClInclude>
-    <ClInclude Include="..\source\internal_import_mmd_animation.h">
+    <ClInclude Include="..\source\internal_import_mmd_motion.h">
       <Filter>source</Filter>
     </ClInclude>
   </ItemGroup>
@@ -155,7 +155,7 @@
     <ClCompile Include="..\source\internal_mmd_vmd.cpp">
       <Filter>source</Filter>
     </ClCompile>
-    <ClCompile Include="..\source\internal_import_mmd_animation.cpp">
+    <ClCompile Include="..\source\internal_import_mmd_motion.cpp">
       <Filter>source</Filter>
     </ClCompile>
   </ItemGroup>

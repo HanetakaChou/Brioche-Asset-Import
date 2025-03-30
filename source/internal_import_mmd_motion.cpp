@@ -15,8 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "internal_import_mmd_model.h"
+#include "internal_import_mmd_motion.h"
 #include "internal_mmd_vmd.h"
+#include "../../McRT-Malloc/include/mcrt_map.h"
+#include "../../McRT-Malloc/include/mcrt_unordered_map.h"
 #include <algorithm>
 #include <cmath>
 #include <cassert>
@@ -36,6 +38,15 @@
 #error Unknown Compiler
 #endif
 
+struct internal_rigid_transform_key_frame_t
+{
+    brx_asset_import_rigid_transform m_rigid_transform;
+    uint8_t m_translation_x_cubic_bezier[4];
+    uint8_t m_translation_y_cubic_bezier[4];
+    uint8_t m_translation_z_cubic_bezier[4];
+    uint8_t m_rotation_cubic_bezier[4];
+};
+
 static inline float cubic_bezier(uint8_t const in_packed_k_1_x, uint8_t const in_packed_k_1_y, uint8_t const in_packed_k_2_x, uint8_t const in_packed_k_2_y, float const in_x);
 
 extern bool internal_import_mmd_animation(void const *data_base, size_t data_size, mcrt_vector<brx_asset_import_model_surface_group> &out_surface_groups)
@@ -45,6 +56,10 @@ extern bool internal_import_mmd_animation(void const *data_base, size_t data_siz
     {
         return false;
     }
+
+    mcrt_unordered_map<mcrt_string, mcrt_map<uint32_t, float>> morph_animation_channel_weights;
+    mcrt_unordered_map<mcrt_string, mcrt_map<uint32_t, internal_rigid_transform_key_frame_t>> skeleton_animation_channel_rigid_transforms;
+    mcrt_unordered_map<mcrt_string, mcrt_map<uint32_t, bool>> skeleton_animation_channel_ik_switches;
 
     return true;
 }
