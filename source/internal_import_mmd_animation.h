@@ -15,8 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef _INTERNAL_IMPORT_MMD_SCENE_H_
-#define _INTERNAL_IMPORT_MMD_SCENE_H_ 1
+#ifndef _INTERNAL_IMPORT_MMD_ANIMATION_H_
+#define _INTERNAL_IMPORT_MMD_ANIMATION_H_ 1
 
 #include "brx_asset_import_model_scene.h"
 #include <cstddef>

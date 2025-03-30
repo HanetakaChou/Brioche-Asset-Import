@@ -49,22 +49,22 @@ struct mmd_vmd_motion_t
     uint32_t m_frame_number;
     mmd_vmd_vec3_t m_translation;
     mmd_vmd_vec4_t m_rotation;
-    uint8_t m_translation_x_cubic_bezier_a_x;
-    uint8_t m_translation_x_cubic_bezier_a_y;
-    uint8_t m_translation_x_cubic_bezier_b_x;
-    uint8_t m_translation_x_cubic_bezier_b_y;
-    uint8_t m_translation_y_cubic_bezier_a_x;
-    uint8_t m_translation_y_cubic_bezier_a_y;
-    uint8_t m_translation_y_cubic_bezier_b_x;
-    uint8_t m_translation_y_cubic_bezier_b_y;
-    uint8_t m_translation_z_cubic_bezier_a_x;
-    uint8_t m_translation_z_cubic_bezier_a_y;
-    uint8_t m_translation_z_cubic_bezier_b_x;
-    uint8_t m_translation_z_cubic_bezier_b_y;
-    uint8_t m_rotation_cubic_bezier_a_x;
-    uint8_t m_rotation_cubic_bezier_a_y;
-    uint8_t m_rotation_cubic_bezier_b_x;
-    uint8_t m_rotation_cubic_bezier_b_y;
+    uint8_t m_translation_x_cubic_bezier_1_x;
+    uint8_t m_translation_x_cubic_bezier_1_y;
+    uint8_t m_translation_x_cubic_bezier_2_x;
+    uint8_t m_translation_x_cubic_bezier_2_y;
+    uint8_t m_translation_y_cubic_bezier_1_x;
+    uint8_t m_translation_y_cubic_bezier_1_y;
+    uint8_t m_translation_y_cubic_bezier_2_x;
+    uint8_t m_translation_y_cubic_bezier_2_y;
+    uint8_t m_translation_z_cubic_bezier_1_x;
+    uint8_t m_translation_z_cubic_bezier_1_y;
+    uint8_t m_translation_z_cubic_bezier_2_x;
+    uint8_t m_translation_z_cubic_bezier_2_y;
+    uint8_t m_rotation_cubic_bezier_1_x;
+    uint8_t m_rotation_cubic_bezier_1_y;
+    uint8_t m_rotation_cubic_bezier_2_x;
+    uint8_t m_rotation_cubic_bezier_2_y;
 };
 
 struct mmd_vmd_morph_t
@@ -74,11 +74,45 @@ struct mmd_vmd_morph_t
     float m_weight;
 };
 
+struct mmd_vmd_camera_t
+{
+    uint32_t m_frame_number;
+    mmd_vmd_vec3_t m_focus_position;
+    mmd_vmd_vec3_t m_rotation;
+    float m_distance;
+    float m_fov_angle;
+    bool m_orthographic;
+    uint8_t m_focus_position_x_cubic_bezier_1_x;
+    uint8_t m_focus_position_x_cubic_bezier_1_y;
+    uint8_t m_focus_position_x_cubic_bezier_2_x;
+    uint8_t m_focus_position_x_cubic_bezier_2_y;
+    uint8_t m_focus_position_y_cubic_bezier_1_x;
+    uint8_t m_focus_position_y_cubic_bezier_1_y;
+    uint8_t m_focus_position_y_cubic_bezier_2_x;
+    uint8_t m_focus_position_y_cubic_bezier_2_y;
+    uint8_t m_focus_position_z_cubic_bezier_1_x;
+    uint8_t m_focus_position_z_cubic_bezier_1_y;
+    uint8_t m_focus_position_z_cubic_bezier_2_x;
+    uint8_t m_focus_position_z_cubic_bezier_2_y;
+    uint8_t m_rotation_cubic_bezier_1_x;
+    uint8_t m_rotation_cubic_bezier_1_y;
+    uint8_t m_rotation_cubic_bezier_2_x;
+    uint8_t m_rotation_cubic_bezier_2_y;
+    uint8_t m_distance_cubic_bezier_1_x;
+    uint8_t m_distance_cubic_bezier_1_y;
+    uint8_t m_distance_cubic_bezier_2_x;
+    uint8_t m_distance_cubic_bezier_2_y;
+    uint8_t m_fov_angle_cubic_bezier_1_x;
+    uint8_t m_fov_angle_cubic_bezier_1_y;
+    uint8_t m_fov_angle_cubic_bezier_2_x;
+    uint8_t m_fov_angle_cubic_bezier_2_y;
+};
+
 struct mmd_vmd_ik_t
 {
     mcrt_string m_name;
     uint32_t m_frame_number;
-    uint8_t m_enable;
+    bool m_enable;
 };
 
 struct mmd_vmd_t
@@ -86,6 +120,7 @@ struct mmd_vmd_t
     mmd_vmd_header_t m_header;
     mcrt_vector<mmd_vmd_motion_t> m_motions;
     mcrt_vector<mmd_vmd_morph_t> m_morphs;
+    mcrt_vector<mmd_vmd_camera_t> m_cameras;
     mcrt_vector<mmd_vmd_ik_t> m_iks;
 };
 

@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "internal_import_mmd_scene.h"
+#include "internal_import_mmd_model.h"
 #include "internal_mmd_pmx.h"
-#include "internal_mmd_vmd.h"
+#include <cassert>
 
 #if defined(__GNUC__)
 // GCC or CLANG
@@ -37,18 +37,11 @@
 // TODO: change to static
 extern bool internal_import_mmd_model(void const *data_base, size_t data_size, mcrt_vector<brx_asset_import_model_surface_group> &out_surface_groups)
 {
-    mmd_vmd_t mmd_vmd;
-    if(!internal_data_read_mmd_vmd(data_base, data_size, &mmd_vmd))
-    {
-        return false;
-    }
-
     mmd_pmx_t mmd_pmx;
     if (!internal_data_read_mmd_pmx(data_base, data_size, &mmd_pmx))
     {
         return false;
     }
-
 
     // normalize vertex
 
@@ -56,4 +49,3 @@ extern bool internal_import_mmd_model(void const *data_base, size_t data_size, m
 
     return true;
 }
-

@@ -28,7 +28,9 @@
 #include <cmath>
 #include <algorithm>
 #include <assert.h>
-#include "internal_import_mmd_scene.h"
+#include "brx_asset_import_model_scene.h"
+
+extern bool internal_import_mmd_animation(void const *data_base, size_t data_size, mcrt_vector<brx_asset_import_model_surface_group> &out_surface_groups);
 
 extern bool internal_import_mmd_model(void const *data_base, size_t data_size, mcrt_vector<brx_asset_import_model_surface_group> &out_surface_groups);
 
@@ -73,7 +75,7 @@ extern bool import_gltf_scene_asset(mcrt_vector<scene_mesh_data> &out_total_mesh
     assert(!input_stream_data.empty());
 
     mcrt_vector<brx_asset_import_model_surface_group> surface_groups;
-    internal_import_mmd_model(input_stream_data.data(), input_stream_data.size(), surface_groups);
+    internal_import_mmd_animation(input_stream_data.data(), input_stream_data.size(), surface_groups);
 
     return true;
 }
