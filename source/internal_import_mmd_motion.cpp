@@ -19,6 +19,20 @@
 #include "internal_mmd_vmd.h"
 #include "../../McRT-Malloc/include/mcrt_map.h"
 #include "../../McRT-Malloc/include/mcrt_unordered_map.h"
+#if defined(__GNUC__)
+// GCC or CLANG
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunknown-pragmas"
+#include <DirectXMath.h>
+#include <DirectXCollision.h>
+#pragma GCC diagnostic pop
+#elif defined(_MSC_VER)
+// MSVC or CLANG-CL
+#include <DirectXMath.h>
+#include <DirectXCollision.h>
+#else
+#error Unknown Compiler
+#endif
 #include <algorithm>
 #include <cmath>
 #include <cassert>
@@ -49,7 +63,7 @@ struct internal_rigid_transform_key_frame_t
 
 static inline float internal_cubic_bezier(uint8_t const in_packed_k_1_x, uint8_t const in_packed_k_1_y, uint8_t const in_packed_k_2_x, uint8_t const in_packed_k_2_y, float const in_x);
 
-extern bool internal_import_mmd_animation(void const *data_base, size_t data_size, mcrt_vector<brx_asset_import_model_surface_group> &out_surface_groups)
+extern bool internal_import_mmd_motion(void const *data_base, size_t data_size, mcrt_vector<brx_asset_import_model_surface_group> &out_surface_groups)
 {
 
     mcrt_vector<mcrt_string> weight_channel_names;
@@ -59,10 +73,10 @@ extern bool internal_import_mmd_animation(void const *data_base, size_t data_siz
     mcrt_vector<mcrt_string> ik_switch_channel_names;
     mcrt_vector<bool> ik_switches;
     {
-        uint32_t frame_count = 0U;
-        mcrt_unordered_map<mcrt_string, mcrt_map<uint32_t, float>> morph_animation_weight_channel_key_frames;
-        mcrt_unordered_map<mcrt_string, mcrt_map<uint32_t, internal_rigid_transform_key_frame_t>> skeleton_animation_rigid_transform_channel_key_frames;
-        mcrt_unordered_map<mcrt_string, mcrt_map<uint32_t, bool>> skeleton_animation_ik_switch_channel_key_frames;
+        uint32_t max_frame_number = 0U;
+        mcrt_unordered_map<mcrt_string, mcrt_map<uint32_t, float>> weight_channels;
+        mcrt_unordered_map<mcrt_string, mcrt_map<uint32_t, internal_rigid_transform_key_frame_t>> rigid_transform_channels;
+        mcrt_unordered_map<mcrt_string, mcrt_map<uint32_t, bool>> ik_switch_channels;
         {
             mmd_vmd_t mmd_vmd;
             if (internal_unlikely(!internal_data_read_mmd_vmd(data_base, data_size, &mmd_vmd)))
@@ -72,18 +86,18 @@ extern bool internal_import_mmd_animation(void const *data_base, size_t data_siz
 
             for (mmd_vmd_morph_t const &mmd_vmd_morph : mmd_vmd.m_morphs)
             {
-                frame_count = std::max(mmd_vmd_morph.m_frame_number, frame_count);
+                max_frame_number = std::max(mmd_vmd_morph.m_frame_number, max_frame_number);
 
-                assert(morph_animation_weight_channel_key_frames[mmd_vmd_morph.m_name].end() == morph_animation_weight_channel_key_frames[mmd_vmd_morph.m_name].find(mmd_vmd_morph.m_frame_number));
-                morph_animation_weight_channel_key_frames[mmd_vmd_morph.m_name][mmd_vmd_morph.m_frame_number] = mmd_vmd_morph.m_weight;
+                assert(weight_channels[mmd_vmd_morph.m_name].end() == weight_channels[mmd_vmd_morph.m_name].find(mmd_vmd_morph.m_frame_number));
+                weight_channels[mmd_vmd_morph.m_name][mmd_vmd_morph.m_frame_number] = mmd_vmd_morph.m_weight;
             }
 
             for (mmd_vmd_motion_t const &mmd_vmd_motion : mmd_vmd.m_motions)
             {
-                frame_count = std::max(mmd_vmd_motion.m_frame_number, frame_count);
+                max_frame_number = std::max(mmd_vmd_motion.m_frame_number, max_frame_number);
 
-                assert(skeleton_animation_rigid_transform_channel_key_frames[mmd_vmd_motion.m_name].end() == skeleton_animation_rigid_transform_channel_key_frames[mmd_vmd_motion.m_name].find(mmd_vmd_motion.m_frame_number));
-                skeleton_animation_rigid_transform_channel_key_frames[mmd_vmd_motion.m_name][mmd_vmd_motion.m_frame_number] = internal_rigid_transform_key_frame_t{
+                assert(rigid_transform_channels[mmd_vmd_motion.m_name].end() == rigid_transform_channels[mmd_vmd_motion.m_name].find(mmd_vmd_motion.m_frame_number));
+                rigid_transform_channels[mmd_vmd_motion.m_name][mmd_vmd_motion.m_frame_number] = internal_rigid_transform_key_frame_t{
                     {
                         {mmd_vmd_motion.m_rotation.m_x, mmd_vmd_motion.m_rotation.m_y, mmd_vmd_motion.m_rotation.m_z, mmd_vmd_motion.m_rotation.m_w},
                         {mmd_vmd_motion.m_translation.m_x, mmd_vmd_motion.m_translation.m_y, mmd_vmd_motion.m_translation.m_z},
@@ -96,53 +110,261 @@ extern bool internal_import_mmd_animation(void const *data_base, size_t data_siz
 
             for (mmd_vmd_ik_t const &mmd_vmd_iks : mmd_vmd.m_iks)
             {
-                frame_count = std::max(mmd_vmd_iks.m_frame_number, frame_count);
+                max_frame_number = std::max(mmd_vmd_iks.m_frame_number, max_frame_number);
 
-                assert(skeleton_animation_ik_switch_channel_key_frames[mmd_vmd_iks.m_name].end() == skeleton_animation_ik_switch_channel_key_frames[mmd_vmd_iks.m_name].find(mmd_vmd_iks.m_frame_number));
-                skeleton_animation_ik_switch_channel_key_frames[mmd_vmd_iks.m_name][mmd_vmd_iks.m_frame_number] = mmd_vmd_iks.m_enable;
+                assert(ik_switch_channels[mmd_vmd_iks.m_name].end() == ik_switch_channels[mmd_vmd_iks.m_name].find(mmd_vmd_iks.m_frame_number));
+                ik_switch_channels[mmd_vmd_iks.m_name][mmd_vmd_iks.m_frame_number] = mmd_vmd_iks.m_enable;
             }
         }
 
-        weight_channel_names.resize(static_cast<size_t>(morph_animation_weight_channel_key_frames.size()));
-        weights.resize(static_cast<size_t>(morph_animation_weight_channel_key_frames.size() * frame_count));
-
-        rigid_transform_channel_names.resize(static_cast<size_t>(skeleton_animation_rigid_transform_channel_key_frames.size()));
-        rigid_transforms.resize(static_cast<size_t>(skeleton_animation_rigid_transform_channel_key_frames.size() * frame_count));
-
-        ik_switch_channel_names.resize(static_cast<size_t>(skeleton_animation_ik_switch_channel_key_frames.size()));
-        ik_switches.resize(static_cast<size_t>(skeleton_animation_ik_switch_channel_key_frames.size() * frame_count));
-
+        // Frame Rate = 2
+        // Max Time = 2
+        //
+        // Time  0.0 0.5 1.0 1.5 2.0
+        // Frame 0   1   2   3   4
+        // Frame Count = 2 * 2 + 1 = 5
+        //
+        // Our Method
+        // Time  0.0 0.5 1.0 1.5 2.0
+        // Frame    0   1   2   3
+        // Frame Count = 2 * 2 = 4
+        uint32_t const frame_count = max_frame_number;
         {
+            weight_channel_names.resize(static_cast<size_t>(weight_channels.size()));
+            weights.resize(static_cast<size_t>(weight_channels.size() * frame_count));
+
             uint32_t weight_channel_index = 0U;
-            for (auto const &morph_animation_weight_channel_key_frame : morph_animation_weight_channel_key_frames)
+            for (auto const &weight_channel : weight_channels)
             {
-                weight_channel_names[weight_channel_index] = morph_animation_weight_channel_key_frame.first;
+                weight_channel_names[weight_channel_index] = weight_channel.first;
                 ++weight_channel_index;
             }
-        }
 
-        {
+            rigid_transform_channel_names.resize(static_cast<size_t>(rigid_transform_channels.size()));
+            rigid_transforms.resize(static_cast<size_t>(rigid_transform_channels.size() * frame_count));
+
             uint32_t rigid_transform_channel_index = 0U;
-            for (auto const &skeleton_animation_rigid_transform_channel_key_frame : skeleton_animation_rigid_transform_channel_key_frames)
+            for (auto const &rigid_transform_channel : rigid_transform_channels)
             {
-                rigid_transform_channel_names[rigid_transform_channel_index] = skeleton_animation_rigid_transform_channel_key_frame.first;
+                rigid_transform_channel_names[rigid_transform_channel_index] = rigid_transform_channel.first;
                 ++rigid_transform_channel_index;
             }
-        }
 
-        {
+            ik_switch_channel_names.resize(static_cast<size_t>(ik_switch_channels.size()));
+            ik_switches.resize(static_cast<size_t>(ik_switch_channels.size() * frame_count));
+
             uint32_t ik_switch_channel_index = 0U;
-            for (auto const &skeleton_animation_ik_switch_channel_key_frame : skeleton_animation_ik_switch_channel_key_frames)
+            for (auto const &ik_switch_channel : ik_switch_channels)
             {
-                ik_switch_channel_names[ik_switch_channel_index] = skeleton_animation_ik_switch_channel_key_frame.first;
+                ik_switch_channel_names[ik_switch_channel_index] = ik_switch_channel.first;
                 ++ik_switch_channel_index;
             }
         }
 
-        int huhu = 0;
-    }
+        uint32_t const weight_channel_count = weight_channel_names.size();
+        uint32_t const rigid_transform_channel_count = rigid_transform_channel_names.size();
+        uint32_t const ik_switch_channel_count = ik_switch_channel_names.size();
 
-    return true;
+        assert(weight_channels.size() == weight_channel_count);
+        assert(rigid_transform_channels.size() == rigid_transform_channel_count);
+        assert(ik_switch_channels.size() == ik_switch_channel_count);
+
+        for (uint32_t frame_index = 0; frame_index < frame_count; ++frame_index)
+        {
+            for (uint32_t weight_channel_index = 0U; weight_channel_index < weight_channel_count; ++weight_channel_index)
+            {
+                auto const &weight_channel = weight_channels[weight_channel_names[weight_channel_index]];
+
+                auto const &key_upper_bound = weight_channel.upper_bound(frame_index);
+
+                if (weight_channel.end() != key_upper_bound)
+                {
+                    if (weight_channel.begin() != key_upper_bound)
+                    {
+                        auto const &key_next = key_upper_bound;
+                        auto const &key_previous = std::prev(key_upper_bound);
+
+                        float const sample_time = static_cast<float>(frame_index) + 0.5F;
+                        assert((0U == max_frame_number) || (sample_time < max_frame_number));
+
+                        assert(static_cast<float>(key_next->first) > sample_time);
+                        assert(sample_time > static_cast<float>(key_previous->first));
+
+                        float const normalized_time = (sample_time - static_cast<float>(key_previous->first)) / (static_cast<float>(key_next->first) - static_cast<float>(key_previous->first));
+                        assert((normalized_time >= 0.0F) && (normalized_time <= 1.0F));
+
+                        weights[weight_channel_count * frame_index + weight_channel_index] = (key_next->second - key_previous->second) * normalized_time + key_previous->second;
+                    }
+                    else
+                    {
+                        auto const &key_next = key_upper_bound;
+
+                        float const sample_time = static_cast<float>(frame_index) + 0.5F;
+                        assert((0U == max_frame_number) || (sample_time < max_frame_number));
+
+                        assert(static_cast<float>(key_next->first) > sample_time);
+
+                        // weight of the bind pose is zero
+                        constexpr uint32_t const key_previous_frame_number = 0U;
+                        constexpr float const key_previous_weight = 0.0F;
+
+                        float const normalized_time = (sample_time - static_cast<float>(key_previous_frame_number)) / (static_cast<float>(key_next->first) - static_cast<float>(key_previous_frame_number));
+                        assert((normalized_time >= 0.0F) && (normalized_time <= 1.0F));
+
+                        weights[weight_channel_count * frame_index + weight_channel_index] = (key_next->second - key_previous_weight) * normalized_time + key_previous_weight;
+                    }
+                }
+                else
+                {
+                    auto const &key_previous = std::prev(key_upper_bound);
+                    assert(&(*weight_channel.rbegin()) == &(*key_previous));
+
+                    float const sample_time = static_cast<float>(frame_index) + 0.5F;
+                    assert((0U == max_frame_number) || (sample_time < max_frame_number));
+                    assert(sample_time > static_cast<float>(key_previous->first));
+
+                    weights[weight_channel_count * frame_index + weight_channel_index] = key_previous->second;
+                }
+            }
+
+            for (uint32_t rigid_transform_channel_index = 0U; rigid_transform_channel_index < rigid_transform_channel_count; ++rigid_transform_channel_index)
+            {
+                auto const &rigid_transform_channel = rigid_transform_channels[rigid_transform_channel_names[rigid_transform_channel_index]];
+
+                auto const &key_upper_bound = rigid_transform_channel.upper_bound(frame_index);
+
+                if (rigid_transform_channel.end() != key_upper_bound)
+                {
+                    if (rigid_transform_channel.begin() != key_upper_bound)
+                    {
+                        auto const &key_next = key_upper_bound;
+                        auto const &key_previous = std::prev(key_upper_bound);
+
+                        float const sample_time = static_cast<float>(frame_index) + 0.5F;
+                        assert((0U == max_frame_number) || (sample_time < max_frame_number));
+
+                        assert(static_cast<float>(key_next->first) > sample_time);
+                        assert(sample_time > static_cast<float>(key_previous->first));
+
+                        float const normalized_time = (sample_time - static_cast<float>(key_previous->first)) / (static_cast<float>(key_next->first) - static_cast<float>(key_previous->first));
+                        assert((normalized_time >= 0.0F) && (normalized_time <= 1.0F));
+
+                        float const rotation_lerp_factor = internal_cubic_bezier(key_previous->second.m_rotation_cubic_bezier[0], key_previous->second.m_rotation_cubic_bezier[1], key_previous->second.m_rotation_cubic_bezier[2], key_previous->second.m_rotation_cubic_bezier[3], normalized_time);
+                        float const translation_x_lerp_factor = internal_cubic_bezier(key_previous->second.m_translation_x_cubic_bezier[0], key_previous->second.m_translation_x_cubic_bezier[1], key_previous->second.m_translation_x_cubic_bezier[2], key_previous->second.m_translation_x_cubic_bezier[3], normalized_time);
+                        float const translation_y_lerp_factor = internal_cubic_bezier(key_previous->second.m_translation_y_cubic_bezier[0], key_previous->second.m_translation_y_cubic_bezier[1], key_previous->second.m_translation_y_cubic_bezier[2], key_previous->second.m_translation_y_cubic_bezier[3], normalized_time);
+                        float const translation_z_lerp_factor = internal_cubic_bezier(key_previous->second.m_translation_z_cubic_bezier[0], key_previous->second.m_translation_z_cubic_bezier[1], key_previous->second.m_translation_z_cubic_bezier[2], key_previous->second.m_translation_z_cubic_bezier[3], normalized_time);
+
+                        DirectX::XMFLOAT4 const rotation_previous(key_previous->second.m_rigid_transform.m_rotation[0], key_previous->second.m_rigid_transform.m_rotation[1], key_previous->second.m_rigid_transform.m_rotation[2], key_previous->second.m_rigid_transform.m_rotation[3]);
+                        DirectX::XMFLOAT4 const rotation_next(key_next->second.m_rigid_transform.m_rotation[0], key_next->second.m_rigid_transform.m_rotation[1], key_next->second.m_rigid_transform.m_rotation[2], key_next->second.m_rigid_transform.m_rotation[3]);
+
+                        DirectX::XMFLOAT4 sample_rotation;
+                        DirectX::XMStoreFloat4(&sample_rotation, DirectX::XMQuaternionSlerp(DirectX::XMLoadFloat4(&rotation_previous), DirectX::XMLoadFloat4(&rotation_next), rotation_lerp_factor));
+
+                        rigid_transforms[rigid_transform_channel_count * frame_index + rigid_transform_channel_index].m_rotation[0] = sample_rotation.x;
+                        rigid_transforms[rigid_transform_channel_count * frame_index + rigid_transform_channel_index].m_rotation[1] = sample_rotation.y;
+                        rigid_transforms[rigid_transform_channel_count * frame_index + rigid_transform_channel_index].m_rotation[2] = sample_rotation.z;
+                        rigid_transforms[rigid_transform_channel_count * frame_index + rigid_transform_channel_index].m_rotation[3] = sample_rotation.w;
+
+                        DirectX::XMFLOAT3 const translation_previous(key_previous->second.m_rigid_transform.m_translation[0], key_previous->second.m_rigid_transform.m_translation[1], key_previous->second.m_rigid_transform.m_translation[2]);
+                        DirectX::XMFLOAT3 const translation_next(key_next->second.m_rigid_transform.m_translation[0], key_next->second.m_rigid_transform.m_translation[1], key_next->second.m_rigid_transform.m_translation[2]);
+                        DirectX::XMFLOAT3 const lerp_factor(translation_x_lerp_factor, translation_y_lerp_factor, translation_z_lerp_factor);
+
+                        DirectX::XMFLOAT3 sample_translation;
+                        DirectX::XMStoreFloat3(&sample_translation, DirectX::XMVectorLerpV(DirectX::XMLoadFloat3(&translation_previous), DirectX::XMLoadFloat3(&translation_next), DirectX::XMLoadFloat3(&lerp_factor)));
+
+                        rigid_transforms[rigid_transform_channel_count * frame_index + rigid_transform_channel_index].m_translation[0] = sample_translation.x;
+                        rigid_transforms[rigid_transform_channel_count * frame_index + rigid_transform_channel_index].m_translation[1] = sample_translation.y;
+                        rigid_transforms[rigid_transform_channel_count * frame_index + rigid_transform_channel_index].m_translation[2] = sample_translation.z;
+                    }
+                    else
+                    {
+                        auto const &key_next = key_upper_bound;
+
+                        float const sample_time = static_cast<float>(frame_index) + 0.5F;
+                        assert((0U == max_frame_number) || (sample_time < max_frame_number));
+
+                        assert(static_cast<float>(key_next->first) > sample_time);
+
+                        // TODO: lerp from the bind pose
+                        rigid_transforms[rigid_transform_channel_count * frame_index + rigid_transform_channel_index].m_rotation[0] = key_next->second.m_rigid_transform.m_rotation[0];
+                        rigid_transforms[rigid_transform_channel_count * frame_index + rigid_transform_channel_index].m_rotation[1] = key_next->second.m_rigid_transform.m_rotation[1];
+                        rigid_transforms[rigid_transform_channel_count * frame_index + rigid_transform_channel_index].m_rotation[2] = key_next->second.m_rigid_transform.m_rotation[2];
+                        rigid_transforms[rigid_transform_channel_count * frame_index + rigid_transform_channel_index].m_rotation[3] = key_next->second.m_rigid_transform.m_rotation[3];
+
+                        rigid_transforms[rigid_transform_channel_count * frame_index + rigid_transform_channel_index].m_translation[0] = key_next->second.m_rigid_transform.m_translation[0];
+                        rigid_transforms[rigid_transform_channel_count * frame_index + rigid_transform_channel_index].m_translation[1] = key_next->second.m_rigid_transform.m_translation[1];
+                        rigid_transforms[rigid_transform_channel_count * frame_index + rigid_transform_channel_index].m_translation[2] = key_next->second.m_rigid_transform.m_translation[2];
+                    }
+                }
+                else
+                {
+                    auto const &key_previous = std::prev(key_upper_bound);
+                    assert(&(*rigid_transform_channel.rbegin()) == &(*key_previous));
+
+                    float const sample_time = static_cast<float>(frame_index) + 0.5F;
+                    assert((0U == max_frame_number) || (sample_time < max_frame_number));
+                    assert(sample_time > static_cast<float>(key_previous->first));
+
+                    rigid_transforms[rigid_transform_channel_count * frame_index + rigid_transform_channel_index].m_rotation[0] = key_previous->second.m_rigid_transform.m_rotation[0];
+                    rigid_transforms[rigid_transform_channel_count * frame_index + rigid_transform_channel_index].m_rotation[1] = key_previous->second.m_rigid_transform.m_rotation[1];
+                    rigid_transforms[rigid_transform_channel_count * frame_index + rigid_transform_channel_index].m_rotation[2] = key_previous->second.m_rigid_transform.m_rotation[2];
+                    rigid_transforms[rigid_transform_channel_count * frame_index + rigid_transform_channel_index].m_rotation[3] = key_previous->second.m_rigid_transform.m_rotation[3];
+
+                    rigid_transforms[rigid_transform_channel_count * frame_index + rigid_transform_channel_index].m_translation[0] = key_previous->second.m_rigid_transform.m_translation[0];
+                    rigid_transforms[rigid_transform_channel_count * frame_index + rigid_transform_channel_index].m_translation[1] = key_previous->second.m_rigid_transform.m_translation[1];
+                    rigid_transforms[rigid_transform_channel_count * frame_index + rigid_transform_channel_index].m_translation[2] = key_previous->second.m_rigid_transform.m_translation[2];
+                }
+            }
+
+            for (uint32_t ik_switch_channel_index = 0U; ik_switch_channel_index < ik_switch_channel_count; ++ik_switch_channel_index)
+            {
+                auto const &ik_switch_channel = ik_switch_channels[ik_switch_channel_names[ik_switch_channel_index]];
+
+                auto const &key_upper_bound = ik_switch_channel.upper_bound(frame_index);
+
+                if (ik_switch_channel.end() != key_upper_bound)
+                {
+                    if (ik_switch_channel.begin() != key_upper_bound)
+                    {
+                        auto const &key_next = key_upper_bound;
+                        auto const &key_previous = std::prev(key_upper_bound);
+
+                        float const sample_time = static_cast<float>(frame_index) + 0.5F;
+                        assert((0U == max_frame_number) || (sample_time < max_frame_number));
+
+                        assert(static_cast<float>(key_next->first) > sample_time);
+                        assert(sample_time > static_cast<float>(key_previous->first));
+
+                        ik_switches[ik_switch_channel_count * frame_index + ik_switch_channel_index] = key_previous->second;
+                    }
+                    else
+                    {
+                        auto const &key_next = key_upper_bound;
+
+                        float const sample_time = static_cast<float>(frame_index) + 0.5F;
+                        assert((0U == max_frame_number) || (sample_time < max_frame_number));
+
+                        assert(static_cast<float>(key_next->first) > sample_time);
+
+                        ik_switches[ik_switch_channel_count * frame_index + ik_switch_channel_index] = key_next->second;
+                    }
+                }
+                else
+                {
+                    auto const &key_previous = std::prev(key_upper_bound);
+                    assert(&(*ik_switch_channel.rbegin()) == &(*key_previous));
+
+                    float const sample_time = static_cast<float>(frame_index) + 0.5F;
+                    assert((0U == max_frame_number) || (sample_time < max_frame_number));
+                    assert(sample_time > static_cast<float>(key_previous->first));
+
+                    ik_switches[ik_switch_channel_count * frame_index + ik_switch_channel_index] = key_previous->second;
+                }
+            }
+        }
+
+        return true;
+    }
 }
 
 static inline float internal_cubic_bezier(uint8_t const in_packed_k_1_x, uint8_t const in_packed_k_1_y, uint8_t const in_packed_k_2_x, uint8_t const in_packed_k_2_y, float const in_x)
@@ -153,6 +375,7 @@ static inline float internal_cubic_bezier(uint8_t const in_packed_k_1_x, uint8_t
     assert(in_packed_k_1_y <= static_cast<uint8_t>(INT8_MAX));
     assert(in_packed_k_2_x <= static_cast<uint8_t>(INT8_MAX));
     assert(in_packed_k_2_y <= static_cast<uint8_t>(INT8_MAX));
+    assert((in_x >= 0.0F) && (in_x <= 1.0F));
 
     // [_FnBezier.__find_roots](https://github.com/MMD-Blender/blender_mmd_tools/blob/main/mmd_tools/core/vmd/importer.py#L198)
 

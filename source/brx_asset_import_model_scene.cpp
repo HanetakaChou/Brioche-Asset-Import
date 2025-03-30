@@ -180,7 +180,7 @@ uint32_t const brx_asset_import_model_morph_animation::get_frame_count() const
 
 float const brx_asset_import_model_morph_animation::get_weight(uint32_t frame_index, uint32_t channel_index) const
 {
-    return this->m_weights[this->get_frame_count() * frame_index + channel_index];
+    return this->m_weights[this->m_weight_channel_names.size() * frame_index + channel_index];
 }
 
 brx_asset_import_model_skeleton_animation::brx_asset_import_model_skeleton_animation(
@@ -249,12 +249,12 @@ uint32_t const brx_asset_import_model_skeleton_animation::get_frame_count() cons
 
 brx_asset_import_rigid_transform const *brx_asset_import_model_skeleton_animation::get_rigid_transform(uint32_t frame_index, uint32_t channel_index) const
 {
-    return &this->m_rigid_transforms[this->get_frame_count() * frame_index + channel_index];
+    return &this->m_rigid_transforms[this->m_rigid_transform_channel_names.size() * frame_index + channel_index];
 }
 
 bool brx_asset_import_model_skeleton_animation::get_ik_switch(uint32_t frame_index, uint32_t channel_index) const
 {
-    return this->m_ik_switches[this->get_frame_count() * frame_index + channel_index];
+    return this->m_ik_switches[this->m_ik_switch_channel_names.size() * frame_index + channel_index];
 }
 
 brx_asset_import_model_scene::brx_asset_import_model_scene(mcrt_vector<brx_asset_import_model_surface_group> &&surface_groups) : m_surface_groups(std::move(surface_groups))
