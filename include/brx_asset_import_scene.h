@@ -113,20 +113,22 @@ class brx_asset_import_surface
 
 class brx_asset_import_morph_animation
 {
+public:
+    virtual uint32_t const get_frame_count() const = 0;
     virtual uint32_t const get_weight_channel_count() const = 0;
     virtual char const *get_weight_channel_name(uint32_t channel_index) const = 0;
-    virtual uint32_t const get_frame_count() const = 0;
     virtual float const get_weight(uint32_t frame_index, uint32_t channel_index) const = 0;
 };
 
 class brx_asset_import_skeleton_animation
 {
+public:
+    virtual uint32_t const get_frame_count() const = 0;
     virtual uint32_t const get_rigid_transform_channel_count() const = 0;
     virtual char const *get_rigid_transform_channel_name(uint32_t channel_index) const = 0;
+    virtual brx_asset_import_rigid_transform const *get_rigid_transform(uint32_t frame_index, uint32_t channel_index) const = 0;
     virtual uint32_t const get_ik_switch_channel_count() const = 0;
     virtual char const *get_ik_switch_channel_name(uint32_t channel_index) const = 0;
-    virtual uint32_t const get_frame_count() const = 0;
-    virtual brx_asset_import_rigid_transform const *get_rigid_transform(uint32_t frame_index, uint32_t channel_index) const = 0;
     virtual bool get_ik_switch(uint32_t frame_index, uint32_t channel_index) const = 0;
 };
 

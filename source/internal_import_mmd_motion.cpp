@@ -47,24 +47,105 @@ struct internal_rigid_transform_key_frame_t
     uint8_t m_rotation_cubic_bezier[4];
 };
 
-static inline float cubic_bezier(uint8_t const in_packed_k_1_x, uint8_t const in_packed_k_1_y, uint8_t const in_packed_k_2_x, uint8_t const in_packed_k_2_y, float const in_x);
+static inline float internal_cubic_bezier(uint8_t const in_packed_k_1_x, uint8_t const in_packed_k_1_y, uint8_t const in_packed_k_2_x, uint8_t const in_packed_k_2_y, float const in_x);
 
 extern bool internal_import_mmd_animation(void const *data_base, size_t data_size, mcrt_vector<brx_asset_import_model_surface_group> &out_surface_groups)
 {
-    mmd_vmd_t mmd_vmd;
-    if (!internal_data_read_mmd_vmd(data_base, data_size, &mmd_vmd))
-    {
-        return false;
-    }
 
-    mcrt_unordered_map<mcrt_string, mcrt_map<uint32_t, float>> morph_animation_channel_weights;
-    mcrt_unordered_map<mcrt_string, mcrt_map<uint32_t, internal_rigid_transform_key_frame_t>> skeleton_animation_channel_rigid_transforms;
-    mcrt_unordered_map<mcrt_string, mcrt_map<uint32_t, bool>> skeleton_animation_channel_ik_switches;
+    mcrt_vector<mcrt_string> weight_channel_names;
+    mcrt_vector<float> weights;
+    mcrt_vector<mcrt_string> rigid_transform_channel_names;
+    mcrt_vector<brx_asset_import_rigid_transform> rigid_transforms;
+    mcrt_vector<mcrt_string> ik_switch_channel_names;
+    mcrt_vector<bool> ik_switches;
+    {
+        uint32_t frame_count = 0U;
+        mcrt_unordered_map<mcrt_string, mcrt_map<uint32_t, float>> morph_animation_weight_channel_key_frames;
+        mcrt_unordered_map<mcrt_string, mcrt_map<uint32_t, internal_rigid_transform_key_frame_t>> skeleton_animation_rigid_transform_channel_key_frames;
+        mcrt_unordered_map<mcrt_string, mcrt_map<uint32_t, bool>> skeleton_animation_ik_switch_channel_key_frames;
+        {
+            mmd_vmd_t mmd_vmd;
+            if (internal_unlikely(!internal_data_read_mmd_vmd(data_base, data_size, &mmd_vmd)))
+            {
+                return false;
+            }
+
+            for (mmd_vmd_morph_t const &mmd_vmd_morph : mmd_vmd.m_morphs)
+            {
+                frame_count = std::max(mmd_vmd_morph.m_frame_number, frame_count);
+
+                assert(morph_animation_weight_channel_key_frames[mmd_vmd_morph.m_name].end() == morph_animation_weight_channel_key_frames[mmd_vmd_morph.m_name].find(mmd_vmd_morph.m_frame_number));
+                morph_animation_weight_channel_key_frames[mmd_vmd_morph.m_name][mmd_vmd_morph.m_frame_number] = mmd_vmd_morph.m_weight;
+            }
+
+            for (mmd_vmd_motion_t const &mmd_vmd_motion : mmd_vmd.m_motions)
+            {
+                frame_count = std::max(mmd_vmd_motion.m_frame_number, frame_count);
+
+                assert(skeleton_animation_rigid_transform_channel_key_frames[mmd_vmd_motion.m_name].end() == skeleton_animation_rigid_transform_channel_key_frames[mmd_vmd_motion.m_name].find(mmd_vmd_motion.m_frame_number));
+                skeleton_animation_rigid_transform_channel_key_frames[mmd_vmd_motion.m_name][mmd_vmd_motion.m_frame_number] = internal_rigid_transform_key_frame_t{
+                    {
+                        {mmd_vmd_motion.m_rotation.m_x, mmd_vmd_motion.m_rotation.m_y, mmd_vmd_motion.m_rotation.m_z, mmd_vmd_motion.m_rotation.m_w},
+                        {mmd_vmd_motion.m_translation.m_x, mmd_vmd_motion.m_translation.m_y, mmd_vmd_motion.m_translation.m_z},
+                    },
+                    {mmd_vmd_motion.m_translation_x_cubic_bezier[0], mmd_vmd_motion.m_translation_x_cubic_bezier[1], mmd_vmd_motion.m_translation_x_cubic_bezier[2], mmd_vmd_motion.m_translation_x_cubic_bezier[3]},
+                    {mmd_vmd_motion.m_translation_y_cubic_bezier[0], mmd_vmd_motion.m_translation_y_cubic_bezier[1], mmd_vmd_motion.m_translation_y_cubic_bezier[2], mmd_vmd_motion.m_translation_y_cubic_bezier[3]},
+                    {mmd_vmd_motion.m_translation_z_cubic_bezier[0], mmd_vmd_motion.m_translation_z_cubic_bezier[1], mmd_vmd_motion.m_translation_z_cubic_bezier[2], mmd_vmd_motion.m_translation_z_cubic_bezier[3]},
+                    {mmd_vmd_motion.m_rotation_cubic_bezier[0], mmd_vmd_motion.m_rotation_cubic_bezier[1], mmd_vmd_motion.m_rotation_cubic_bezier[2], mmd_vmd_motion.m_rotation_cubic_bezier[3]}};
+            }
+
+            for (mmd_vmd_ik_t const &mmd_vmd_iks : mmd_vmd.m_iks)
+            {
+                frame_count = std::max(mmd_vmd_iks.m_frame_number, frame_count);
+
+                assert(skeleton_animation_ik_switch_channel_key_frames[mmd_vmd_iks.m_name].end() == skeleton_animation_ik_switch_channel_key_frames[mmd_vmd_iks.m_name].find(mmd_vmd_iks.m_frame_number));
+                skeleton_animation_ik_switch_channel_key_frames[mmd_vmd_iks.m_name][mmd_vmd_iks.m_frame_number] = mmd_vmd_iks.m_enable;
+            }
+        }
+
+        weight_channel_names.resize(static_cast<size_t>(morph_animation_weight_channel_key_frames.size()));
+        weights.resize(static_cast<size_t>(morph_animation_weight_channel_key_frames.size() * frame_count));
+
+        rigid_transform_channel_names.resize(static_cast<size_t>(skeleton_animation_rigid_transform_channel_key_frames.size()));
+        rigid_transforms.resize(static_cast<size_t>(skeleton_animation_rigid_transform_channel_key_frames.size() * frame_count));
+
+        ik_switch_channel_names.resize(static_cast<size_t>(skeleton_animation_ik_switch_channel_key_frames.size()));
+        ik_switches.resize(static_cast<size_t>(skeleton_animation_ik_switch_channel_key_frames.size() * frame_count));
+
+        {
+            uint32_t weight_channel_index = 0U;
+            for (auto const &morph_animation_weight_channel_key_frame : morph_animation_weight_channel_key_frames)
+            {
+                weight_channel_names[weight_channel_index] = morph_animation_weight_channel_key_frame.first;
+                ++weight_channel_index;
+            }
+        }
+
+        {
+            uint32_t rigid_transform_channel_index = 0U;
+            for (auto const &skeleton_animation_rigid_transform_channel_key_frame : skeleton_animation_rigid_transform_channel_key_frames)
+            {
+                rigid_transform_channel_names[rigid_transform_channel_index] = skeleton_animation_rigid_transform_channel_key_frame.first;
+                ++rigid_transform_channel_index;
+            }
+        }
+
+        {
+            uint32_t ik_switch_channel_index = 0U;
+            for (auto const &skeleton_animation_ik_switch_channel_key_frame : skeleton_animation_ik_switch_channel_key_frames)
+            {
+                ik_switch_channel_names[ik_switch_channel_index] = skeleton_animation_ik_switch_channel_key_frame.first;
+                ++ik_switch_channel_index;
+            }
+        }
+
+        int huhu = 0;
+    }
 
     return true;
 }
 
-static inline float cubic_bezier(uint8_t const in_packed_k_1_x, uint8_t const in_packed_k_1_y, uint8_t const in_packed_k_2_x, uint8_t const in_packed_k_2_y, float const in_x)
+static inline float internal_cubic_bezier(uint8_t const in_packed_k_1_x, uint8_t const in_packed_k_1_y, uint8_t const in_packed_k_2_x, uint8_t const in_packed_k_2_y, float const in_x)
 {
     // https://developer.mozilla.org/en-US/docs/Web/CSS/easing-function/cubic-bezier
 

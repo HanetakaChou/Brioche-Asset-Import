@@ -185,12 +185,12 @@ float const brx_asset_import_model_morph_animation::get_weight(uint32_t frame_in
 
 brx_asset_import_model_skeleton_animation::brx_asset_import_model_skeleton_animation(
     mcrt_vector<mcrt_string> &&rigid_transform_channel_names,
-    mcrt_vector<mcrt_string> &&ik_switch_channel_names,
     mcrt_vector<brx_asset_import_rigid_transform> &&rigid_transforms,
+    mcrt_vector<mcrt_string> &&ik_switch_channel_names,
     mcrt_vector<bool> &&ik_switches)
     : m_rigid_transform_channel_names(std::move(rigid_transform_channel_names)),
-      m_ik_switch_channel_names(std::move(ik_switch_channel_names)),
       m_rigid_transforms(std::move(rigid_transforms)),
+      m_ik_switch_channel_names(std::move(ik_switch_channel_names)),
       m_ik_switches(std::move(ik_switches))
 
 {
