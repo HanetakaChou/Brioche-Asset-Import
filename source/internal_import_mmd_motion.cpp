@@ -65,7 +65,6 @@ static inline float internal_cubic_bezier(uint8_t const in_packed_k_1_x, uint8_t
 
 extern bool internal_import_mmd_motion(void const *data_base, size_t data_size, mcrt_vector<brx_asset_import_model_surface_group> &out_surface_groups)
 {
-
     mcrt_vector<mcrt_string> weight_channel_names;
     mcrt_vector<float> weights;
     mcrt_vector<mcrt_string> rigid_transform_channel_names;
@@ -258,7 +257,7 @@ extern bool internal_import_mmd_motion(void const *data_base, size_t data_size, 
                         DirectX::XMFLOAT4 const rotation_next(key_next->second.m_rigid_transform.m_rotation[0], key_next->second.m_rigid_transform.m_rotation[1], key_next->second.m_rigid_transform.m_rotation[2], key_next->second.m_rigid_transform.m_rotation[3]);
 
                         DirectX::XMFLOAT4 sample_rotation;
-                        DirectX::XMStoreFloat4(&sample_rotation, DirectX::XMQuaternionSlerp(DirectX::XMLoadFloat4(&rotation_previous), DirectX::XMLoadFloat4(&rotation_next), rotation_lerp_factor));
+                        DirectX::XMStoreFloat4(&sample_rotation, DirectX::XMQuaternionNormalize(DirectX::XMQuaternionSlerp(DirectX::XMQuaternionNormalize(DirectX::XMLoadFloat4(&rotation_previous)), DirectX::XMQuaternionNormalize(DirectX::XMLoadFloat4(&rotation_next)), rotation_lerp_factor)));
 
                         rigid_transforms[rigid_transform_channel_count * frame_index + rigid_transform_channel_index].m_rotation[0] = sample_rotation.x;
                         rigid_transforms[rigid_transform_channel_count * frame_index + rigid_transform_channel_index].m_rotation[1] = sample_rotation.y;
@@ -285,11 +284,16 @@ extern bool internal_import_mmd_motion(void const *data_base, size_t data_size, 
 
                         assert(static_cast<float>(key_next->first) > sample_time);
 
+                        DirectX::XMFLOAT4 const rotation_next(key_next->second.m_rigid_transform.m_rotation[0], key_next->second.m_rigid_transform.m_rotation[1], key_next->second.m_rigid_transform.m_rotation[2], key_next->second.m_rigid_transform.m_rotation[3]);
+
+                        DirectX::XMFLOAT4 rotation_next_normalized;
+                        DirectX::XMStoreFloat4(&rotation_next_normalized, DirectX::XMQuaternionNormalize(DirectX::XMLoadFloat4(&rotation_next)));
+
                         // TODO: lerp from the bind pose
-                        rigid_transforms[rigid_transform_channel_count * frame_index + rigid_transform_channel_index].m_rotation[0] = key_next->second.m_rigid_transform.m_rotation[0];
-                        rigid_transforms[rigid_transform_channel_count * frame_index + rigid_transform_channel_index].m_rotation[1] = key_next->second.m_rigid_transform.m_rotation[1];
-                        rigid_transforms[rigid_transform_channel_count * frame_index + rigid_transform_channel_index].m_rotation[2] = key_next->second.m_rigid_transform.m_rotation[2];
-                        rigid_transforms[rigid_transform_channel_count * frame_index + rigid_transform_channel_index].m_rotation[3] = key_next->second.m_rigid_transform.m_rotation[3];
+                        rigid_transforms[rigid_transform_channel_count * frame_index + rigid_transform_channel_index].m_rotation[0] = rotation_next_normalized.x;
+                        rigid_transforms[rigid_transform_channel_count * frame_index + rigid_transform_channel_index].m_rotation[1] = rotation_next_normalized.y;
+                        rigid_transforms[rigid_transform_channel_count * frame_index + rigid_transform_channel_index].m_rotation[2] = rotation_next_normalized.z;
+                        rigid_transforms[rigid_transform_channel_count * frame_index + rigid_transform_channel_index].m_rotation[3] = rotation_next_normalized.w;
 
                         rigid_transforms[rigid_transform_channel_count * frame_index + rigid_transform_channel_index].m_translation[0] = key_next->second.m_rigid_transform.m_translation[0];
                         rigid_transforms[rigid_transform_channel_count * frame_index + rigid_transform_channel_index].m_translation[1] = key_next->second.m_rigid_transform.m_translation[1];
@@ -305,10 +309,15 @@ extern bool internal_import_mmd_motion(void const *data_base, size_t data_size, 
                     assert((0U == max_frame_number) || (sample_time < max_frame_number));
                     assert(sample_time > static_cast<float>(key_previous->first));
 
-                    rigid_transforms[rigid_transform_channel_count * frame_index + rigid_transform_channel_index].m_rotation[0] = key_previous->second.m_rigid_transform.m_rotation[0];
-                    rigid_transforms[rigid_transform_channel_count * frame_index + rigid_transform_channel_index].m_rotation[1] = key_previous->second.m_rigid_transform.m_rotation[1];
-                    rigid_transforms[rigid_transform_channel_count * frame_index + rigid_transform_channel_index].m_rotation[2] = key_previous->second.m_rigid_transform.m_rotation[2];
-                    rigid_transforms[rigid_transform_channel_count * frame_index + rigid_transform_channel_index].m_rotation[3] = key_previous->second.m_rigid_transform.m_rotation[3];
+                    DirectX::XMFLOAT4 const rotation_previous(key_previous->second.m_rigid_transform.m_rotation[0], key_previous->second.m_rigid_transform.m_rotation[1], key_previous->second.m_rigid_transform.m_rotation[2], key_previous->second.m_rigid_transform.m_rotation[3]);
+
+                    DirectX::XMFLOAT4 rotation_previous_normalized;
+                    DirectX::XMStoreFloat4(&rotation_previous_normalized, DirectX::XMQuaternionNormalize(DirectX::XMLoadFloat4(&rotation_previous)));
+
+                    rigid_transforms[rigid_transform_channel_count * frame_index + rigid_transform_channel_index].m_rotation[0] = rotation_previous_normalized.x;
+                    rigid_transforms[rigid_transform_channel_count * frame_index + rigid_transform_channel_index].m_rotation[1] = rotation_previous_normalized.y;
+                    rigid_transforms[rigid_transform_channel_count * frame_index + rigid_transform_channel_index].m_rotation[2] = rotation_previous_normalized.z;
+                    rigid_transforms[rigid_transform_channel_count * frame_index + rigid_transform_channel_index].m_rotation[3] = rotation_previous_normalized.w;
 
                     rigid_transforms[rigid_transform_channel_count * frame_index + rigid_transform_channel_index].m_translation[0] = key_previous->second.m_rigid_transform.m_translation[0];
                     rigid_transforms[rigid_transform_channel_count * frame_index + rigid_transform_channel_index].m_translation[1] = key_previous->second.m_rigid_transform.m_translation[1];

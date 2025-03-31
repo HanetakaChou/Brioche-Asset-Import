@@ -19,8 +19,6 @@
 #define _BRX_ASSET_IMPORT_SCENE_H_ 1
 
 #include "brx_asset_import_input_stream.h"
-#include "../../Brioche-Analytic-Rendering-Interface/include/brx_anari_format.h"
-#include "../../Brioche-Motion/include/brx_motion_format.h"
 #include <cstddef>
 #include <cstdint>
 
@@ -29,24 +27,109 @@
 class brx_asset_import_scene;
 class brx_asset_import_surface_group;
 class brx_asset_import_surface;
-class brx_asset_import_morph_animation;
-class brx_asset_import_skeleton_animation;
+class brx_asset_import_animation;
 
 static constexpr uint32_t const BRX_ASSET_IMPORT_UINT32_INDEX_INVALID = static_cast<uint32_t>(~static_cast<uint32_t>(0U));
 
-enum BRX_ASSET_IMPORT_JOINT_CONSTRAINT_TYPE : uint32_t
+// [PMX TDA Miku Append](https://www.deviantart.com/xoriu/art/MMD-Facial-Expressions-Chart-341504917)
+// [PMX Mirai Akari](https://www.deviantart.com/inochi-pm/art/MMD-Facial-Expressions-Chart-V2-802048879)
+// [ARKit](https://developer.apple.com/documentation/arkit/arfaceanchor/blendshapelocation)
+// [FACS AU](https://www.cs.cmu.edu/~face/facs.htm)
+
+enum BRX_ASSET_IMPORT_MORPH_TARGET_NAME : uint32_t
 {
-    BRX_ASSET_IMPORT_JOINT_CONSTRAINT_COPY_TRANSFORM = 0,
-    BRX_ASSET_IMPORT_JOINT_CONSTRAINT_INVERSE_KINEMATICS = 1
+    // 真面目
+    BRX_ASSET_IMPORT_MORPH_TARGET_NAME_MMD_BROW_SERIOUS,
+    // 困る
+    BRX_ASSET_IMPORT_MORPH_TARGET_NAME_MMD_BROW_TROUBLE,
+    // 怒り
+    BRX_ASSET_IMPORT_MORPH_TARGET_NAME_MMD_BROW_ANGRY,
+    // にこり
+    BRX_ASSET_IMPORT_MORPH_TARGET_NAME_MMD_BROW_SMILE,
+    // まばたき
+    BRX_ASSET_IMPORT_MORPH_TARGET_NAME_MMD_EYE_BLINK,
+    // 笑い
+    BRX_ASSET_IMPORT_MORPH_TARGET_NAME_MMD_EYE_LAUGH,
+    // ウィンク
+    // ウィンク２
+    BRX_ASSET_IMPORT_MORPH_TARGET_NAME_MMD_EYE_WINK_L,
+    // ウィンク右
+    // ｳｨﾝｸ２右
+    BRX_ASSET_IMPORT_MORPH_TARGET_NAME_MMD_EYE_WINK_R,
+    // びっくり
+    BRX_ASSET_IMPORT_MORPH_TARGET_NAME_MMD_EYE_SURPRISE,
+    // あ
+    // あ２
+    BRX_ASSET_IMPORT_MORPH_TARGET_NAME_MMD_MOUTH_A,
+    // い
+    BRX_ASSET_IMPORT_MORPH_TARGET_NAME_MMD_MOUTH_I,
+    // う
+    BRX_ASSET_IMPORT_MORPH_TARGET_NAME_MMD_MOUTH_U,
+    // え
+    BRX_ASSET_IMPORT_MORPH_TARGET_NAME_MMD_MOUTH_E,
+    // お
+    BRX_ASSET_IMPORT_MORPH_TARGET_NAME_MMD_MOUTH_O,
+    // ん
+    BRX_ASSET_IMPORT_MORPH_TARGET_NAME_MMD_MOUTH_N,
+    // にっこり
+    // にやり
+    // にやり２
+    BRX_ASSET_IMPORT_MORPH_TARGET_NAME_MMD_MOUTH_SMILE,
+    //
+    BRX_ASSET_IMPORT_MORPH_TARGET_NAME_COUNT
 };
 
-struct brx_asset_import_geometry_vertex_position
+enum BRX_ASSET_IMPORT_SKELETON_JOINT_NAME : uint32_t
+{
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_VRM_HIPS = 0,
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_COUNT = 55
+};
+
+enum BRX_ASSET_IMPORT_PBR_TEXTURE_NAME : uint32_t
+{
+    BRX_ASSET_IMPORT_TEXTURE_NAME_PBR_BASE_COLOR = 0,
+    BRX_ASSET_IMPORT_TEXTURE_NAME_PBR_ROUGHNESS_METALLIC = 1,
+    BRX_ASSET_IMPORT_TEXTURE_NAME_PBR_NORMAL = 2,
+    BRX_ASSET_IMPORT_TEXTURE_NAME_PBR_EMISSIVE = 3,
+    BRX_ASSET_IMPORT_TEXTURE_NAME_PBR_COUNT = 4
+};
+
+enum BRX_ASSET_IMPORT_SKELETON_JOINT_CONSTRAINT_TYPE : uint32_t
+{
+    BRX_ASSET_IMPORT_SKELETON_JOINT_CONSTRAINT_COPY_TRANSFORM = 0,
+    BRX_ASSET_IMPORT_SKELETON_JOINT_CONSTRAINT_INVERSE_KINEMATICS = 1
+};
+
+enum BRX_ASSET_IMPORT_PHYSICS_RIGID_BODY_SHAPE_TYPE : uint32_t
+{
+    BRX_ASSET_IMPORT_PHYSICS_RIGID_BODY_SHAPE_SPHERE = 0,
+    BRX_ASSET_IMPORT_PHYSICS_RIGID_BODY_SHAPE_BOX = 1,
+    BRX_ASSET_IMPORT_PHYSICS_RIGID_BODY_SHAPE_CAPSULE = 2
+};
+
+enum BRX_ASSET_IMPORT_PHYSICS_RIGID_BODY_MOTION_TYPE : uint32_t
+{
+    BRX_ASSET_IMPORT_PHYSICS_RIGID_BODY_MOTION_FIXED = 0,
+    BRX_ASSET_IMPORT_PHYSICS_RIGID_BODY_MOTION_KEYFRAME = 1,
+    BRX_ASSET_IMPORT_PHYSICS_RIGID_BODY_MOTION_DYNAMIC = 2
+};
+
+enum BRX_ASSET_IMPORT_PHYSICS_CONSTRAINT_TYPE : uint32_t
+{
+    BRX_ASSET_IMPORT_PHYSICS_CONSTRAINT_FIXED = 0,
+    BRX_ASSET_IMPORT_PHYSICS_CONSTRAINT_BALL_AND_SOCKET = 1,
+    BRX_ASSET_IMPORT_PHYSICS_CONSTRAINT_HINGE = 2,
+    BRX_ASSET_IMPORT_PHYSICS_CONSTRAINT_PRISMATIC = 3,
+    BRX_ASSET_IMPORT_PHYSICS_CONSTRAINT_RAGDOLL = 4
+};
+
+struct brx_asset_import_vertex_position
 {
     // R32G32B32_FLOAT
     float m_position[3];
 };
 
-struct brx_asset_import_geometry_vertex_varying
+struct brx_asset_import_vertex_varying
 {
     // R16G16_SNORM (octahedron map)
     uint32_t m_normal;
@@ -56,7 +139,7 @@ struct brx_asset_import_geometry_vertex_varying
     uint32_t m_texcoord;
 };
 
-struct brx_asset_import_geometry_vertex_joint
+struct brx_asset_import_vertex_blending
 {
     // R16G16B16A16_UINT (xy)
     uint32_t m_indices_xy;
@@ -72,9 +155,9 @@ struct brx_asset_import_rigid_transform
     float m_translation[3];
 };
 
-struct brx_asset_import_joint_constraint
+struct brx_asset_import_skeleton_joint_constraint
 {
-    BRX_ASSET_IMPORT_JOINT_CONSTRAINT_TYPE m_constraint_type;
+    BRX_ASSET_IMPORT_SKELETON_JOINT_CONSTRAINT_TYPE m_constraint_type;
 
     union
     {
@@ -101,13 +184,49 @@ struct brx_asset_import_joint_constraint
     };
 };
 
+struct brx_asset_import_physics_rigid_body
+{
+    brx_asset_import_rigid_transform m_model_space_transform;
+    BRX_ASSET_IMPORT_PHYSICS_RIGID_BODY_SHAPE_TYPE m_shape_type;
+    float m_shape_size[3];
+    BRX_ASSET_IMPORT_PHYSICS_RIGID_BODY_MOTION_TYPE m_motion_type;
+    uint32_t m_collision_filter_group;
+    uint32_t m_collision_filter_mask;
+    float m_mass;
+    float m_linear_damping;
+    float m_angular_damping;
+    float m_friction;
+    float m_restitution;
+};
+
+struct brx_asset_import_physics_constraint
+{
+    uint32_t m_rigid_body_a_index;
+    uint32_t m_rigid_body_b_index;
+    BRX_ASSET_IMPORT_PHYSICS_CONSTRAINT_TYPE m_constraint_type;
+    float m_pivot[3];
+    float m_twist_axis[3];
+    float m_plane_axis[3];
+    float m_normal_axis[3];
+    float m_twist_limit[2];
+    float m_plane_limit[2];
+    float m_normal_limit[2];
+};
+
+struct brx_asset_import_ragdoll_direct_mapping
+{
+    uint32_t m_joint_index_a;
+    uint32_t m_joint_index_b;
+    float m_a_to_b_transform_model_space[4][4];
+};
+
 class brx_asset_import_scene
 {
 public:
     virtual uint32_t get_surface_group_count() const = 0;
     virtual brx_asset_import_surface_group const *get_surface_group(uint32_t group_index) const = 0;
-    virtual uint32_t get_skeleton_animation_count() const = 0;
-    virtual brx_asset_import_skeleton_animation *get_skeleton_animation(uint32_t skeleton_animation_index) const = 0;
+    virtual uint32_t get_animation_count() const = 0;
+    virtual brx_asset_import_animation *get_animation(uint32_t animation_index) const = 0;
 };
 
 class brx_asset_import_surface_group
@@ -119,48 +238,43 @@ public:
     // NULL: no skeleton
     // not NULL: skin
     virtual uint32_t const get_skeleton_joint_count() const = 0;
-    virtual char const *get_skeleton_joint_name(uint32_t skeleton_joint_index) const = 0;
     virtual uint32_t get_skeleton_joint_parent_index(uint32_t skeleton_joint_index) const = 0;
-    virtual brx_motion_rigid_transform const *get_skeleton_joint_bind_pose_transform(uint32_t skeleton_joint_index) const = 0;
-    virtual uint32_t get_vrm_skeleton_joint_index(BRX_MOTION_VRM_SKELETON_JOINT_NAME vrm_skeleton_joint_name) const = 0;
+    virtual brx_asset_import_rigid_transform const *get_skeleton_joint_bind_pose_transform_local_space(uint32_t skeleton_joint_index) const = 0;
+    virtual uint32_t get_skeleton_joint_index(BRX_ASSET_IMPORT_SKELETON_JOINT_NAME skeleton_joint_name) const = 0;
 };
 
 class brx_asset_import_surface
 {
-    // geometry
-    // less than 1: invalid
-    // 1: no morph animation
-    // greater than 1: morph animation
-    virtual uint32_t get_morph_target_count() const = 0;
-    virtual brx_asset_import_geometry_vertex_position const *get_morph_target_vertex_positions(uint32_t morph_target_index) const = 0;
-    virtual brx_asset_import_geometry_vertex_varying const *get_morph_target_vertex_varyings(uint32_t morph_target_index) const = 0;
-    virtual uint32_t get_vrm_morph_target_name_index(BRX_MOTION_VRM_MORPH_TARGET_NAME vrm_morph_target_name) const = 0;
-
+    virtual uint32_t get_vertex_count() const = 0;
+    virtual brx_asset_import_vertex_position const *get_vertex_position() const = 0;
+    virtual brx_asset_import_vertex_varying const *get_vertex_varying() const = 0;
     // NULL: no skin (even if there is one skeleton bound to the group)
     // not NULL: skin (there must be one skeleton bound to the group)
-    virtual brx_asset_import_geometry_vertex_joint const *get_vertex_joints() const = 0;
+    virtual brx_asset_import_vertex_blending const *get_vertex_blending() const = 0;
+
+    // geometry
+    // 0: no morph animation
+    // greater than 0: morph animation
+    virtual uint32_t get_morph_target_count() const = 0;
+    virtual brx_asset_import_vertex_position const *get_morph_target_vertex_positions(uint32_t morph_target_index) const = 0;
+    virtual brx_asset_import_vertex_varying const *get_morph_target_vertex_varyings(uint32_t morph_target_index) const = 0;
+    virtual uint32_t get_morph_target_name_index(BRX_ASSET_IMPORT_MORPH_TARGET_NAME morph_target_name) const = 0;
 
     // material
     virtual uint32_t get_texture_count() const = 0;
     // start with file:// : external file
     // start with data:// : internal data
     virtual char const *get_texture_url(uint32_t texture_index) const = 0;
-    virtual uint32_t get_pbr_texture_index(BRX_ANARI_PBR_TEXTURE_NAME pbr_texture_name) const = 0;
+    virtual uint32_t get_texture_index(BRX_ASSET_IMPORT_PBR_TEXTURE_NAME texture_name) const = 0;
 };
 
-class brx_asset_import_morph_animation
+class brx_asset_import_animation
 {
 public:
     virtual uint32_t const get_frame_count() const = 0;
     virtual uint32_t const get_weight_channel_count() const = 0;
     virtual char const *get_weight_channel_name(uint32_t channel_index) const = 0;
     virtual float const get_weight(uint32_t frame_index, uint32_t channel_index) const = 0;
-};
-
-class brx_asset_import_skeleton_animation
-{
-public:
-    virtual uint32_t const get_frame_count() const = 0;
     virtual uint32_t const get_rigid_transform_channel_count() const = 0;
     virtual char const *get_rigid_transform_channel_name(uint32_t channel_index) const = 0;
     virtual brx_asset_import_rigid_transform const *get_rigid_transform(uint32_t frame_index, uint32_t channel_index) const = 0;

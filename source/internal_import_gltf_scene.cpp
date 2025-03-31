@@ -41,13 +41,13 @@ extern void *cgltf_custom_alloc(void *, cgltf_size size);
 extern void cgltf_custom_free(void *, void *ptr);
 
 // TODO: change to static
-extern void internal_import_skeleton(cgltf_data const *data, mcrt_vector<DirectX::XMFLOAT4X4> &out_internal_node_world_transforms, mcrt_vector<mcrt_vector<cgltf_node const *>> &out_internal_mesh_instance_nodes, mcrt_vector<uint32_t> &out_internal_node_index_to_skeleton_joint_index, mcrt_vector<mcrt_string> &out_skeleton_joint_names, mcrt_vector<uint32_t> &out_skeleton_joint_parent_indices, mcrt_vector<brx_motion_rigid_transform> &out_skeleton_bind_pose_joint_transforms, uint32_t *out_vrm_skeleton_joint_names);
+extern void internal_import_skeleton(cgltf_data const *data, mcrt_vector<DirectX::XMFLOAT4X4> &out_internal_node_world_transforms, mcrt_vector<mcrt_vector<cgltf_node const *>> &out_internal_mesh_instance_nodes, mcrt_vector<uint32_t> &out_internal_node_index_to_skeleton_joint_index, mcrt_vector<mcrt_string> &out_skeleton_joint_names, mcrt_vector<uint32_t> &out_skeleton_joint_parent_indices, mcrt_vector<brx_asset_import_rigid_transform> &out_skeleton_bind_pose_joint_transforms, uint32_t *out_vrm_skeleton_joint_names);
 
 static inline void internal_import_surface(cgltf_data const *data, mcrt_vector<DirectX::XMFLOAT4X4> const &internal_node_world_transforms, mcrt_vector<mcrt_vector<cgltf_node const *>> const &internal_mesh_instances, mcrt_vector<uint32_t> const &internal_node_index_to_skeleton_joint_index, mcrt_vector<brx_asset_import_model_surface> &out_surfaces);
 
 // TODO: change to static
 // TODO: change name "out_skeleton_joint_names" to "animation channel name"
-extern void internal_import_skeleton_animation(cgltf_data const *data, cgltf_animation const *animation, uint32_t animation_frame_rate, mcrt_vector<mcrt_string> &out_skeleton_joint_names, mcrt_vector<brx_motion_rigid_transform> &out_skeleton_animation_joint_transforms);
+extern void internal_import_skeleton_animation(cgltf_data const *data, cgltf_animation const *animation, uint32_t animation_frame_rate, mcrt_vector<mcrt_string> &out_skeleton_joint_names, mcrt_vector<brx_asset_import_rigid_transform> &out_skeleton_animation_joint_transforms);
 
 static inline mcrt_string internal_import_skeleton_joint_name(cgltf_data const *data, cgltf_node const *node);
 
@@ -84,8 +84,8 @@ extern bool internal_import_gltf_scene(brx_asset_import_input_stream_factory *in
     mcrt_vector<mcrt_vector<cgltf_node const *>> internal_mesh_instances;
     mcrt_vector<mcrt_string> skeleton_joint_names;
     mcrt_vector<uint32_t> skeleton_joint_parent_indices;
-    mcrt_vector<brx_motion_rigid_transform> skeleton_bind_pose_joint_transforms;
-    uint32_t vrm_skeleton_joint_indices[BRX_MOTION_VRM_SKELETON_JOINT_NAME_COUNT];
+    mcrt_vector<brx_asset_import_rigid_transform> skeleton_bind_pose_joint_transforms;
+    uint32_t vrm_skeleton_joint_indices[BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_COUNT];
     mcrt_vector<uint32_t> internal_node_index_to_skeleton_joint_index;
     internal_import_skeleton(data, internal_node_world_transforms, internal_mesh_instances, internal_node_index_to_skeleton_joint_index, skeleton_joint_names, skeleton_joint_parent_indices, skeleton_bind_pose_joint_transforms, &vrm_skeleton_joint_indices[0]);
 
@@ -96,11 +96,11 @@ extern bool internal_import_gltf_scene(brx_asset_import_input_stream_factory *in
 // FLT_EPSILON
 static inline constexpr float const INTERNAL_SCALE_EPSILON = 7E-5F;
 
-extern void internal_import_skeleton(cgltf_data const *data, mcrt_vector<DirectX::XMFLOAT4X4> &out_internal_node_world_transforms, mcrt_vector<mcrt_vector<cgltf_node const *>> &out_internal_mesh_instance_nodes, mcrt_vector<uint32_t> &out_internal_node_index_to_skeleton_joint_index, mcrt_vector<mcrt_string> &out_skeleton_joint_names, mcrt_vector<uint32_t> &out_skeleton_joint_parent_indices, mcrt_vector<brx_motion_rigid_transform> &out_skeleton_bind_pose_joint_transforms, uint32_t *out_vrm_skeleton_joint_names)
+extern void internal_import_skeleton(cgltf_data const *data, mcrt_vector<DirectX::XMFLOAT4X4> &out_internal_node_world_transforms, mcrt_vector<mcrt_vector<cgltf_node const *>> &out_internal_mesh_instance_nodes, mcrt_vector<uint32_t> &out_internal_node_index_to_skeleton_joint_index, mcrt_vector<mcrt_string> &out_skeleton_joint_names, mcrt_vector<uint32_t> &out_skeleton_joint_parent_indices, mcrt_vector<brx_asset_import_rigid_transform> &out_skeleton_bind_pose_joint_transforms, uint32_t *out_vrm_skeleton_joint_names)
 {
     // TODO: support
     static_assert(-1 == static_cast<int32_t>(BRX_ASSET_IMPORT_UINT32_INDEX_INVALID), "");
-    std::memset(out_vrm_skeleton_joint_names, 0XFF, sizeof(uint32_t) * BRX_MOTION_VRM_SKELETON_JOINT_NAME_COUNT);
+    std::memset(out_vrm_skeleton_joint_names, 0XFF, sizeof(uint32_t) * BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_COUNT);
 
     assert(out_internal_node_world_transforms.empty());
     assert(out_internal_mesh_instance_nodes.empty());
@@ -111,7 +111,7 @@ extern void internal_import_skeleton(cgltf_data const *data, mcrt_vector<DirectX
 
     mcrt_unordered_set<uint32_t> node_index_in_skeleton;
 
-    mcrt_vector<brx_motion_rigid_transform> node_bind_pose_transforms(static_cast<size_t>(data->nodes_count));
+    mcrt_vector<brx_asset_import_rigid_transform> node_bind_pose_transforms(static_cast<size_t>(data->nodes_count));
 
     uint32_t root_node_index;
 
@@ -378,10 +378,10 @@ extern void internal_import_skeleton(cgltf_data const *data, mcrt_vector<DirectX
         {
             mcrt_vector<mcrt_string> &out_skeleton_joint_names = *static_cast<mcrt_vector<mcrt_string> *>(user_data_x);
             mcrt_vector<uint32_t> &out_skeleton_joint_parent_indices = *static_cast<mcrt_vector<uint32_t> *>(user_data_y);
-            mcrt_vector<brx_motion_rigid_transform> &out_skeleton_bind_pose_joint_transforms = *static_cast<mcrt_vector<brx_motion_rigid_transform> *>(user_data_z);
+            mcrt_vector<brx_asset_import_rigid_transform> &out_skeleton_bind_pose_joint_transforms = *static_cast<mcrt_vector<brx_asset_import_rigid_transform> *>(user_data_z);
             mcrt_vector<uint32_t> &out_internal_node_index_to_skeleton_joint_index = *static_cast<mcrt_vector<uint32_t> *>(user_data_u);
             mcrt_unordered_set<uint32_t> &node_index_in_skeleton = *static_cast<mcrt_unordered_set<uint32_t> *>(user_data_v);
-            mcrt_vector<brx_motion_rigid_transform> &node_bind_pose_transforms = *static_cast<mcrt_vector<brx_motion_rigid_transform> *>(user_data_w);
+            mcrt_vector<brx_asset_import_rigid_transform> &node_bind_pose_transforms = *static_cast<mcrt_vector<brx_asset_import_rigid_transform> *>(user_data_w);
             uint32_t const root_node_index = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(user_data_l));
             assert(NULL == user_data_m);
             assert(NULL == user_data_n);
@@ -465,7 +465,7 @@ static inline void internal_import_surface(cgltf_data const *data, mcrt_vector<D
     }
 }
 
-extern void internal_import_skeleton_animation(cgltf_data const *data, cgltf_animation const *animation, uint32_t animation_frame_rate, mcrt_vector<mcrt_string> &out_skeleton_joint_names, mcrt_vector<brx_motion_rigid_transform> &out_skeleton_animation_joint_transforms)
+extern void internal_import_skeleton_animation(cgltf_data const *data, cgltf_animation const *animation, uint32_t animation_frame_rate, mcrt_vector<mcrt_string> &out_skeleton_joint_names, mcrt_vector<brx_asset_import_rigid_transform> &out_skeleton_animation_joint_transforms)
 {
     assert(NULL != animation);
     assert(out_skeleton_joint_names.empty());
