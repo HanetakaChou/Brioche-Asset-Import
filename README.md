@@ -1,43 +1,28 @@
 ## Brioche Asset Import  
 
-[![build windows](https://github.com/HanetakaChou/Brioche-Asset-Import/actions/workflows/build-windows.yml/badge.svg?branch=demo)](https://github.com/HanetakaChou/Brioche-Asset-Import/actions/workflows/build-windows.yml)  
+- [ ] Scene  
+    - [ ] Mesh  
+        - [ ] [MMD (PMX)](https://github.com/MMD-Blender/blender_mmd_tools/tree/main)  
+        - [ ] [glTF (glTF, glB, VRM)](https://github.com/saturday06/VRM-Addon-for-Blender/blob/main/src/io_scene_vrm/common/human_bone_mapper/mmd_mapping.py)  
+    - [ ] Animation  
+        - [ ] [MMD (VMD)](https://github.com/MMD-Blender/blender_mmd_tools/tree/main)  
+        - [ ] [glTF (glTF, glB, VRMA)](https://github.com/saturday06/VRM-Addon-for-Blender/blob/main/src/io_scene_vrm/common/human_bone_mapper/mmd_mapping.py)     
+- [ ] Image  
+    - [ ] [Albedo Image](https://www.pbr-book.org/4ed/Radiometry,_Spectra,_and_Color/Color#FromRGBtoSpectra)  
+        - [x] [WebP](https://chromium.googlesource.com/webm/libwebp)  
+        - [x] [PNG](https://github.com/pnggroup/libpng)  
+        - [x] [JPEG](https://github.com/libjpeg-turbo/libjpeg-turbo)  
+    - [ ] [Illuminant Image](https://www.pbr-book.org/4ed/Radiometry,_Spectra,_and_Color/Color#x6-RGBIlluminants)  
+        - [ ] [OpenEXR](https://github.com/AcademySoftwareFoundation/openexr)  
+- [ ] Environment Map (Environment Lighting Image)  
+    - [ ] [Equirectangular (Latitude-Longitude) Map](https://www.pbr-book.org/3ed-2018/Light_Sources/Infinite_Area_Lights)  
+    - [ ] [Octahedral Map](https://www.pbr-book.org/4ed/Light_Sources/Infinite_Area_Lights#ImageInfiniteLights)  
+    - [ ] [~~Cube Map~~](https://dev.epicgames.com/documentation/en-us/unreal-engine/creating-cubemaps?application_version=4.27)  
 
-[Khronos ANARI: glTF To ANARI](https://github.com/KhronosGroup/ANARI-SDK/blob/next_release/src/anari_test_scenes/scenes/file/gltf2anari.h)  
-[Khronos ANARI: Hydra ANARI Render Delegate](https://github.com/KhronosGroup/ANARI-SDK/blob/next_release/src/hdanari/renderDelegate.h)  
-[Pxiar OpenUSD: Hydra Storm Render Delegate](https://github.com/PixarAnimationStudios/OpenUSD/blob/dev/pxr/imaging/hdSt/renderDelegate.h)  
 
-- [x] Scene  
-  - [x] glTF  
-- [ ] Mesh
-  - [ ] PMX 
-- [ ] Animation 
-  - [ ] VMD  
-- [x] Image  
-  - [x] DDS  
-  - [x] PVR  
-  - [ ] PNG  
-  - [ ] JPEG  
-
-### PMX
+### MMD PMX Bone Constraint  
 
 [TDA Miku Append](https://mikumikudance.fandom.com/wiki/Miku_Hatsune_Append_(Tda))  
-
-// everything happens in local space  
-
-// append transform (append OFF: animated transform + IK / append ON: append transfrom (do we stil need to consider IK in this situation?))  
-
-// we copy the offset bias from the bind pose or the absolute value?  
-
-// copy rotation bone constraint  
-// copy translation bone constraint  
-
-Apply Append Transform to Local Transform  
-
-Sync from Local Space to Model Space  
-
-Note: the Reaching IK does NOT change the local transform of the Tail joint (end effector)  
-
-// can we ignore the (animation input source) rotation of the local transform of the chain when IK is enabled // (when no limit)  // the initial state matters for iteration  
 
 ```graphviz  
 digraph 

@@ -32,16 +32,16 @@ brx_asset_import_model_surface::brx_asset_import_model_surface(
     mcrt_vector<brx_asset_import_vertex_position> &&vertex_positions,
     mcrt_vector<brx_asset_import_vertex_varying> &&vertex_varyings,
     mcrt_vector<brx_asset_import_vertex_blending> &&vertex_blendings,
-    mcrt_vector<mcrt_vector<brx_asset_import_vertex_position>> &&morph_target_vertex_positions,
-    mcrt_vector<mcrt_vector<brx_asset_import_vertex_varying>> &&morph_target_vertex_varyings,
+    mcrt_vector<mcrt_vector<brx_asset_import_vertex_position>> &&morph_targets_vertex_positions,
+    mcrt_vector<mcrt_vector<brx_asset_import_vertex_varying>> &&morph_targets_vertex_varyings,
     uint32_t const *morph_target_name_indices,
     mcrt_vector<mcrt_vector<char>> &&texture_urls,
     uint32_t const *texture_name_indices)
     : m_vertex_positions(std::move(vertex_positions)),
       m_vertex_varyings(std::move(vertex_varyings)),
       m_vertex_blendings(std::move(vertex_blendings)),
-      m_morph_target_vertex_positions(std::move(morph_target_vertex_positions)),
-      m_morph_target_vertex_varyings(std::move(morph_target_vertex_varyings)),
+      m_morph_targets_vertex_positions(std::move(morph_targets_vertex_positions)),
+      m_morph_targets_vertex_varyings(std::move(morph_targets_vertex_varyings)),
       m_texture_urls(std::move(texture_urls))
 {
     std::memcpy(this->m_morph_target_name_indices, morph_target_name_indices, sizeof(uint32_t) * BRX_ASSET_IMPORT_MORPH_TARGET_NAME_COUNT);
@@ -59,17 +59,17 @@ brx_asset_import_vertex_blending const *brx_asset_import_model_surface::get_vert
 
 uint32_t brx_asset_import_model_surface::get_morph_target_count() const
 {
-    return this->m_morph_target_vertex_positions.size();
+    return this->m_morph_targets_vertex_positions.size();
 }
 
 brx_asset_import_vertex_position const *brx_asset_import_model_surface::get_morph_target_vertex_positions(uint32_t morph_target_index) const
 {
-    return this->m_morph_target_vertex_positions[morph_target_index].data();
+    return this->m_morph_targets_vertex_positions[morph_target_index].data();
 }
 
 brx_asset_import_vertex_varying const *brx_asset_import_model_surface::get_morph_target_vertex_varyings(uint32_t morph_target_index) const
 {
-    return this->m_morph_target_vertex_varyings[morph_target_index].data();
+    return this->m_morph_targets_vertex_varyings[morph_target_index].data();
 }
 
 uint32_t brx_asset_import_model_surface::get_morph_target_name_index(BRX_ASSET_IMPORT_MORPH_TARGET_NAME morph_target_name) const
