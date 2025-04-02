@@ -52,6 +52,23 @@ brx_asset_import_model_surface::~brx_asset_import_model_surface()
 {
 }
 
+uint32_t brx_asset_import_model_surface::get_vertex_count() const
+{
+    assert(this->m_vertex_varyings.size() == this->m_vertex_positions.size());
+    assert(this->m_vertex_blendings.empty() || this->m_vertex_blendings.size() == this->m_vertex_positions.size());
+    return this->m_vertex_positions.size();
+}
+
+brx_asset_import_vertex_position const *brx_asset_import_model_surface::get_vertex_position() const
+{
+    return this->m_vertex_positions.data();
+}
+
+brx_asset_import_vertex_varying const *brx_asset_import_model_surface::get_vertex_varying() const
+{
+    return this->m_vertex_varyings.data();
+}
+
 brx_asset_import_vertex_blending const *brx_asset_import_model_surface::get_vertex_blending() const
 {
     return (!this->m_vertex_blendings.empty()) ? this->m_vertex_blendings.data() : NULL;

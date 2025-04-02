@@ -641,7 +641,7 @@ static inline bool internal_data_read_mmd_vmd_iks(void const *data_base, size_t 
                     return false;
                 }
 
-                out_iks.push_back({std::move(name), frame_number, static_cast<bool>(0U != enable)});
+                out_iks.emplace_back(mmd_vmd_ik_t{std::move(name), frame_number, static_cast<bool>(0U != enable)});
             }
         }
     }

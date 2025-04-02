@@ -125,6 +125,7 @@ struct mmd_pmx_morph_t
     // 0: group
     // 1: vertex position
     // 2: vertex uv
+    // 3: empty
     uint32_t m_morph_type;
     mcrt_vector<mmd_pmx_morph_offset_t> m_offsets;
 };

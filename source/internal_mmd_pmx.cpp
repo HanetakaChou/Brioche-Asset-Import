@@ -1034,7 +1034,6 @@ static inline bool internal_data_read_mmd_pmx_morphs(void const *data_base, size
             else if (1U == morph_type)
             {
                 // vertex position morph
-
                 out_morphs[morph_index].m_morph_type = 1U;
 
                 out_morphs[morph_index].m_offsets.resize(offset_count);
@@ -1055,7 +1054,7 @@ static inline bool internal_data_read_mmd_pmx_morphs(void const *data_base, size
             else if (2U == morph_type)
             {
                 // bone morph
-                assert(false);
+                out_morphs[morph_index].m_morph_type = 3U;
 
                 for (uint32_t offset_index = 0U; offset_index < offset_count; ++offset_index)
                 {
@@ -1082,7 +1081,6 @@ static inline bool internal_data_read_mmd_pmx_morphs(void const *data_base, size
             {
                 // vertex uv morph
                 assert(false);
-
                 out_morphs[morph_index].m_morph_type = 2U;
 
                 out_morphs[morph_index].m_offsets.resize(offset_count);
@@ -1109,7 +1107,7 @@ static inline bool internal_data_read_mmd_pmx_morphs(void const *data_base, size
             else if (4U == morph_type || 5U == morph_type || 6U == morph_type || 7U == morph_type)
             {
                 // vertex additional vec4 morph
-                assert(false);
+                out_morphs[morph_index].m_morph_type = 3U;
 
                 for (uint32_t offset_index = 0U; offset_index < offset_count; ++offset_index)
                 {
@@ -1129,7 +1127,7 @@ static inline bool internal_data_read_mmd_pmx_morphs(void const *data_base, size
             else if (8U == morph_type)
             {
                 // material morph
-                assert(false);
+                out_morphs[morph_index].m_morph_type = 3U;
 
                 for (uint32_t offset_index = 0U; offset_index < offset_count; ++offset_index)
                 {
@@ -1203,7 +1201,7 @@ static inline bool internal_data_read_mmd_pmx_morphs(void const *data_base, size
             else if (9U == morph_type)
             {
                 // flip morph
-                assert(false);
+                out_morphs[morph_index].m_morph_type = 3U;
 
                 for (uint32_t offset_index = 0U; offset_index < offset_count; ++offset_index)
                 {
@@ -1223,6 +1221,7 @@ static inline bool internal_data_read_mmd_pmx_morphs(void const *data_base, size
             else if (10U == morph_type)
             {
                 // impulse morph
+                out_morphs[morph_index].m_morph_type = 3U;
 
                 for (uint32_t offset_index = 0U; offset_index < offset_count; ++offset_index)
                 {
