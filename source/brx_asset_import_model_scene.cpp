@@ -32,11 +32,11 @@ brx_asset_import_model_surface::brx_asset_import_model_surface(
     mcrt_vector<brx_asset_import_vertex_position> &&vertex_positions,
     mcrt_vector<brx_asset_import_vertex_varying> &&vertex_varyings,
     mcrt_vector<brx_asset_import_vertex_blending> &&vertex_blendings,
+    uint32_t const *morph_target_name_indices,
     mcrt_vector<mcrt_vector<brx_asset_import_vertex_position>> &&morph_targets_vertex_positions,
     mcrt_vector<mcrt_vector<brx_asset_import_vertex_varying>> &&morph_targets_vertex_varyings,
-    uint32_t const *morph_target_name_indices,
-    mcrt_vector<mcrt_vector<char>> &&texture_urls,
-    uint32_t const *texture_name_indices)
+    uint32_t const *texture_name_indices,
+    mcrt_vector<mcrt_vector<char>> &&texture_urls)
     : m_vertex_positions(std::move(vertex_positions)),
       m_vertex_varyings(std::move(vertex_varyings)),
       m_vertex_blendings(std::move(vertex_blendings)),
@@ -44,7 +44,7 @@ brx_asset_import_model_surface::brx_asset_import_model_surface(
       m_morph_targets_vertex_varyings(std::move(morph_targets_vertex_varyings)),
       m_texture_urls(std::move(texture_urls))
 {
-    std::memcpy(this->m_morph_target_name_indices, morph_target_name_indices, sizeof(uint32_t) * BRX_ASSET_IMPORT_MORPH_TARGET_NAME_COUNT);
+    std::memcpy(this->m_morph_target_name_indices, morph_target_name_indices, sizeof(uint32_t) * BRX_ASSET_IMPORT_MORPH_TARGET_NAME_MMD_COUNT);
     std::memcpy(this->m_texture_name_indices, texture_name_indices, sizeof(uint32_t) * BRX_ASSET_IMPORT_TEXTURE_NAME_PBR_BASE_COLOR);
 }
 

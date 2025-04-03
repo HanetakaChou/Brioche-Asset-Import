@@ -28,24 +28,24 @@ class brx_asset_import_model_surface final : public brx_asset_import_surface
     mcrt_vector<brx_asset_import_vertex_varying> m_vertex_varyings;
     mcrt_vector<brx_asset_import_vertex_blending> m_vertex_blendings;
 
+    uint32_t m_morph_target_name_indices[BRX_ASSET_IMPORT_MORPH_TARGET_NAME_MMD_COUNT];
     mcrt_vector<mcrt_vector<brx_asset_import_vertex_position>> m_morph_targets_vertex_positions;
     mcrt_vector<mcrt_vector<brx_asset_import_vertex_varying>> m_morph_targets_vertex_varyings;
-    uint32_t m_morph_target_name_indices[BRX_ASSET_IMPORT_MORPH_TARGET_NAME_COUNT];
 
+    uint32_t m_texture_name_indices[BRX_ASSET_IMPORT_TEXTURE_NAME_PBR_COUNT];
     // use vector instead of string to support data binary
     mcrt_vector<mcrt_vector<char>> m_texture_urls;
-    uint32_t m_texture_name_indices[BRX_ASSET_IMPORT_TEXTURE_NAME_PBR_COUNT];
 
 public:
     brx_asset_import_model_surface(
         mcrt_vector<brx_asset_import_vertex_position> &&vertex_positions,
         mcrt_vector<brx_asset_import_vertex_varying> &&vertex_varyings,
         mcrt_vector<brx_asset_import_vertex_blending> &&vertex_blendings,
+        uint32_t const *morph_target_name_indices,
         mcrt_vector<mcrt_vector<brx_asset_import_vertex_position>> &&morph_targets_vertex_positions,
         mcrt_vector<mcrt_vector<brx_asset_import_vertex_varying>> &&morph_targets_vertex_varyings,
-        uint32_t const *morph_target_name_indices,
-        mcrt_vector<mcrt_vector<char>> &&texture_urls,
-        uint32_t const *texture_name_indices);
+        uint32_t const *texture_name_indices,
+        mcrt_vector<mcrt_vector<char>> &&texture_urls);
     ~brx_asset_import_model_surface();
 
 private:

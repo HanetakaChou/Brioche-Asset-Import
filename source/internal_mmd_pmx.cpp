@@ -80,7 +80,9 @@ static inline bool internal_data_read_mmd_pmx_vec4(void const *data_base, size_t
 
 static inline bool internal_data_read_mmd_pmx_text(void const *data_base, size_t data_size, size_t &inout_data_offset, uint8_t text_encoding, mcrt_string &out_text);
 
-static inline bool internal_data_read_mmd_pmx_index(void const *data_base, size_t data_size, size_t &inout_data_offset, uint8_t index_size, uint32_t *out_index);
+static inline bool internal_data_read_mmd_pmx_signed_index(void const *data_base, size_t data_size, size_t &inout_data_offset, uint8_t index_size, uint32_t *out_index);
+
+static inline bool internal_data_read_mmd_pmx_unsigned_index(void const *data_base, size_t data_size, size_t &inout_data_offset, uint8_t index_size, uint32_t *out_index);
 
 static inline bool internal_data_read_uint8(void const *data_base, size_t data_size, size_t &inout_data_offset, uint8_t *out_uint8);
 
@@ -356,7 +358,7 @@ static inline bool internal_data_read_mmd_pmx_vertices(void const *data_base, si
         if (0U == bone_weight_type)
         {
             // BDEF1
-            if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, bone_index_size, &out_vertices[vertex_index].m_bone_indices[0])))
+            if (internal_unlikely(!internal_data_read_mmd_pmx_signed_index(data_base, data_size, inout_data_offset, bone_index_size, &out_vertices[vertex_index].m_bone_indices[0])))
             {
                 return false;
             }
@@ -373,12 +375,12 @@ static inline bool internal_data_read_mmd_pmx_vertices(void const *data_base, si
         {
             // BDEF2
 
-            if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, bone_index_size, &out_vertices[vertex_index].m_bone_indices[0])))
+            if (internal_unlikely(!internal_data_read_mmd_pmx_signed_index(data_base, data_size, inout_data_offset, bone_index_size, &out_vertices[vertex_index].m_bone_indices[0])))
             {
                 return false;
             }
 
-            if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, bone_index_size, &out_vertices[vertex_index].m_bone_indices[1])))
+            if (internal_unlikely(!internal_data_read_mmd_pmx_signed_index(data_base, data_size, inout_data_offset, bone_index_size, &out_vertices[vertex_index].m_bone_indices[1])))
             {
                 return false;
             }
@@ -399,22 +401,22 @@ static inline bool internal_data_read_mmd_pmx_vertices(void const *data_base, si
             // BDEF4
             // QDEF
 
-            if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, bone_index_size, &out_vertices[vertex_index].m_bone_indices[0])))
+            if (internal_unlikely(!internal_data_read_mmd_pmx_signed_index(data_base, data_size, inout_data_offset, bone_index_size, &out_vertices[vertex_index].m_bone_indices[0])))
             {
                 return false;
             }
 
-            if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, bone_index_size, &out_vertices[vertex_index].m_bone_indices[1])))
+            if (internal_unlikely(!internal_data_read_mmd_pmx_signed_index(data_base, data_size, inout_data_offset, bone_index_size, &out_vertices[vertex_index].m_bone_indices[1])))
             {
                 return false;
             }
 
-            if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, bone_index_size, &out_vertices[vertex_index].m_bone_indices[2])))
+            if (internal_unlikely(!internal_data_read_mmd_pmx_signed_index(data_base, data_size, inout_data_offset, bone_index_size, &out_vertices[vertex_index].m_bone_indices[2])))
             {
                 return false;
             }
 
-            if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, bone_index_size, &out_vertices[vertex_index].m_bone_indices[3])))
+            if (internal_unlikely(!internal_data_read_mmd_pmx_signed_index(data_base, data_size, inout_data_offset, bone_index_size, &out_vertices[vertex_index].m_bone_indices[3])))
             {
                 return false;
             }
@@ -441,16 +443,16 @@ static inline bool internal_data_read_mmd_pmx_vertices(void const *data_base, si
         }
         else if (3U == bone_weight_type)
         {
-            assert(false);
+            // assert(false);
 
             // SDEF
 
-            if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, bone_index_size, &out_vertices[vertex_index].m_bone_indices[0])))
+            if (internal_unlikely(!internal_data_read_mmd_pmx_signed_index(data_base, data_size, inout_data_offset, bone_index_size, &out_vertices[vertex_index].m_bone_indices[0])))
             {
                 return false;
             }
 
-            if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, bone_index_size, &out_vertices[vertex_index].m_bone_indices[1])))
+            if (internal_unlikely(!internal_data_read_mmd_pmx_signed_index(data_base, data_size, inout_data_offset, bone_index_size, &out_vertices[vertex_index].m_bone_indices[1])))
             {
                 return false;
             }
@@ -528,19 +530,19 @@ static inline bool internal_data_read_mmd_pmx_faces(void const *data_base, size_
     {
         assert(vertex_index_index < vertex_index_count);
 
-        if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, vertex_index_size, &out_faces[face_index].m_vertex_indices[0])))
+        if (internal_unlikely(!internal_data_read_mmd_pmx_unsigned_index(data_base, data_size, inout_data_offset, vertex_index_size, &out_faces[face_index].m_vertex_indices[0])))
         {
             return false;
         }
         ++vertex_index_index;
 
-        if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, vertex_index_size, &out_faces[face_index].m_vertex_indices[1])))
+        if (internal_unlikely(!internal_data_read_mmd_pmx_unsigned_index(data_base, data_size, inout_data_offset, vertex_index_size, &out_faces[face_index].m_vertex_indices[1])))
         {
             return false;
         }
         ++vertex_index_index;
 
-        if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, vertex_index_size, &out_faces[face_index].m_vertex_indices[2])))
+        if (internal_unlikely(!internal_data_read_mmd_pmx_unsigned_index(data_base, data_size, inout_data_offset, vertex_index_size, &out_faces[face_index].m_vertex_indices[2])))
         {
             return false;
         }
@@ -553,7 +555,7 @@ static inline bool internal_data_read_mmd_pmx_faces(void const *data_base, size_
     while (vertex_index_index < vertex_index_count)
     {
         uint32_t unused_vertex_index;
-        if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, vertex_index_size, &unused_vertex_index)))
+        if (internal_unlikely(!internal_data_read_mmd_pmx_unsigned_index(data_base, data_size, inout_data_offset, vertex_index_size, &unused_vertex_index)))
         {
             return false;
         }
@@ -672,13 +674,13 @@ static inline bool internal_data_read_mmd_pmx_materials(void const *data_base, s
             return false;
         }
 
-        if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, texture_index_size, &out_materials[material_index].m_texture_index)))
+        if (internal_unlikely(!internal_data_read_mmd_pmx_signed_index(data_base, data_size, inout_data_offset, texture_index_size, &out_materials[material_index].m_texture_index)))
         {
             return false;
         }
 
         uint32_t unused_sphere_texture;
-        if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, texture_index_size, &unused_sphere_texture)))
+        if (internal_unlikely(!internal_data_read_mmd_pmx_signed_index(data_base, data_size, inout_data_offset, texture_index_size, &unused_sphere_texture)))
         {
             return false;
         }
@@ -698,7 +700,7 @@ static inline bool internal_data_read_mmd_pmx_materials(void const *data_base, s
         if (0 == is_shared_toon_texture)
         {
             uint32_t unused_toon_texture;
-            if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, texture_index_size, &unused_toon_texture)))
+            if (internal_unlikely(!internal_data_read_mmd_pmx_signed_index(data_base, data_size, inout_data_offset, texture_index_size, &unused_toon_texture)))
             {
                 return false;
             }
@@ -779,7 +781,7 @@ static inline bool internal_data_read_mmd_pmx_bones(void const *data_base, size_
             return false;
         }
 
-        if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, bone_index_size, &out_bones[bone_index].m_parent_index)))
+        if (internal_unlikely(!internal_data_read_mmd_pmx_signed_index(data_base, data_size, inout_data_offset, bone_index_size, &out_bones[bone_index].m_parent_index)))
         {
             return false;
         }
@@ -800,7 +802,7 @@ static inline bool internal_data_read_mmd_pmx_bones(void const *data_base, size_
         if ((0U != (bone_flags & 0X1U)))
         {
             uint32_t unused_display_destination;
-            if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, bone_index_size, &unused_display_destination)))
+            if (internal_unlikely(!internal_data_read_mmd_pmx_signed_index(data_base, data_size, inout_data_offset, bone_index_size, &unused_display_destination)))
             {
                 return false;
             }
@@ -820,7 +822,7 @@ static inline bool internal_data_read_mmd_pmx_bones(void const *data_base, size_
 
         if (out_bones[bone_index].m_append_rotation || out_bones[bone_index].m_append_translation)
         {
-            if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, bone_index_size, &out_bones[bone_index].m_append_parent_index)))
+            if (internal_unlikely(!internal_data_read_mmd_pmx_signed_index(data_base, data_size, inout_data_offset, bone_index_size, &out_bones[bone_index].m_append_parent_index)))
             {
                 return false;
             }
@@ -858,7 +860,7 @@ static inline bool internal_data_read_mmd_pmx_bones(void const *data_base, size_
         if ((0U != (bone_flags & 0X2000U)))
         {
             uint32_t unused_external_parent_key;
-            if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, bone_index_size, &unused_external_parent_key)))
+            if (internal_unlikely(!internal_data_read_mmd_pmx_signed_index(data_base, data_size, inout_data_offset, bone_index_size, &unused_external_parent_key)))
             {
                 return false;
             }
@@ -868,7 +870,7 @@ static inline bool internal_data_read_mmd_pmx_bones(void const *data_base, size_
 
         if (out_bones[bone_index].m_ik)
         {
-            if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, bone_index_size, &out_bones[bone_index].m_ik_end_effector_index)))
+            if (internal_unlikely(!internal_data_read_mmd_pmx_signed_index(data_base, data_size, inout_data_offset, bone_index_size, &out_bones[bone_index].m_ik_end_effector_index)))
             {
                 return false;
             }
@@ -904,7 +906,7 @@ static inline bool internal_data_read_mmd_pmx_bones(void const *data_base, size_
                 for (uint32_t ik_joint_index = 0U; ik_joint_index < ik_joint_count; ++ik_joint_index)
                 {
                     uint32_t const current_joint_index = current_joint_index_plus_1 - 1U;
-                    if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, bone_index_size, &out_bones[bone_index].m_ik_link_indices[current_joint_index])))
+                    if (internal_unlikely(!internal_data_read_mmd_pmx_signed_index(data_base, data_size, inout_data_offset, bone_index_size, &out_bones[bone_index].m_ik_link_indices[current_joint_index])))
                     {
                         return false;
                     }
@@ -1020,7 +1022,7 @@ static inline bool internal_data_read_mmd_pmx_morphs(void const *data_base, size
 
                 for (uint32_t offset_index = 0U; offset_index < offset_count; ++offset_index)
                 {
-                    if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, morph_index_size, &out_morphs[morph_index].m_offsets[offset_index].m_group.m_morph_index)))
+                    if (internal_unlikely(!internal_data_read_mmd_pmx_signed_index(data_base, data_size, inout_data_offset, morph_index_size, &out_morphs[morph_index].m_offsets[offset_index].m_group.m_morph_index)))
                     {
                         return false;
                     }
@@ -1040,7 +1042,7 @@ static inline bool internal_data_read_mmd_pmx_morphs(void const *data_base, size
 
                 for (uint32_t offset_index = 0U; offset_index < offset_count; ++offset_index)
                 {
-                    if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, vertex_index_size, &out_morphs[morph_index].m_offsets[offset_index].m_vertex_position.m_vertex_index)))
+                    if (internal_unlikely(!internal_data_read_mmd_pmx_unsigned_index(data_base, data_size, inout_data_offset, vertex_index_size, &out_morphs[morph_index].m_offsets[offset_index].m_vertex_position.m_vertex_index)))
                     {
                         return false;
                     }
@@ -1059,7 +1061,7 @@ static inline bool internal_data_read_mmd_pmx_morphs(void const *data_base, size
                 for (uint32_t offset_index = 0U; offset_index < offset_count; ++offset_index)
                 {
                     uint32_t unused_bone_index;
-                    if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, bone_index_size, &unused_bone_index)))
+                    if (internal_unlikely(!internal_data_read_mmd_pmx_signed_index(data_base, data_size, inout_data_offset, bone_index_size, &unused_bone_index)))
                     {
                         return false;
                     }
@@ -1087,7 +1089,7 @@ static inline bool internal_data_read_mmd_pmx_morphs(void const *data_base, size
 
                 for (uint32_t offset_index = 0U; offset_index < offset_count; ++offset_index)
                 {
-                    if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, vertex_index_size, &out_morphs[morph_index].m_offsets[offset_index].m_vertex_uv.m_vertex_index)))
+                    if (internal_unlikely(!internal_data_read_mmd_pmx_unsigned_index(data_base, data_size, inout_data_offset, vertex_index_size, &out_morphs[morph_index].m_offsets[offset_index].m_vertex_uv.m_vertex_index)))
                     {
                         return false;
                     }
@@ -1112,7 +1114,7 @@ static inline bool internal_data_read_mmd_pmx_morphs(void const *data_base, size
                 for (uint32_t offset_index = 0U; offset_index < offset_count; ++offset_index)
                 {
                     uint32_t unused_vertex_index;
-                    if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, vertex_index_size, &unused_vertex_index)))
+                    if (internal_unlikely(!internal_data_read_mmd_pmx_unsigned_index(data_base, data_size, inout_data_offset, vertex_index_size, &unused_vertex_index)))
                     {
                         return false;
                     }
@@ -1132,7 +1134,7 @@ static inline bool internal_data_read_mmd_pmx_morphs(void const *data_base, size
                 for (uint32_t offset_index = 0U; offset_index < offset_count; ++offset_index)
                 {
                     uint32_t unused_material_index;
-                    if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, material_index_size, &unused_material_index)))
+                    if (internal_unlikely(!internal_data_read_mmd_pmx_signed_index(data_base, data_size, inout_data_offset, material_index_size, &unused_material_index)))
                     {
                         return false;
                     }
@@ -1206,7 +1208,7 @@ static inline bool internal_data_read_mmd_pmx_morphs(void const *data_base, size
                 for (uint32_t offset_index = 0U; offset_index < offset_count; ++offset_index)
                 {
                     uint32_t unused_morph_index;
-                    if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, morph_index_size, &unused_morph_index)))
+                    if (internal_unlikely(!internal_data_read_mmd_pmx_signed_index(data_base, data_size, inout_data_offset, morph_index_size, &unused_morph_index)))
                     {
                         return false;
                     }
@@ -1226,7 +1228,7 @@ static inline bool internal_data_read_mmd_pmx_morphs(void const *data_base, size
                 for (uint32_t offset_index = 0U; offset_index < offset_count; ++offset_index)
                 {
                     uint32_t unused_rigid_body_index;
-                    if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, rigid_body_index_size, &unused_rigid_body_index)))
+                    if (internal_unlikely(!internal_data_read_mmd_pmx_signed_index(data_base, data_size, inout_data_offset, rigid_body_index_size, &unused_rigid_body_index)))
                     {
                         return false;
                     }
@@ -1322,7 +1324,7 @@ static inline bool internal_data_read_mmd_pmx_display_frames(void const *data_ba
                 if (0U == element_type)
                 {
                     uint32_t unused_bone_index;
-                    if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, bone_index_size, &unused_bone_index)))
+                    if (internal_unlikely(!internal_data_read_mmd_pmx_signed_index(data_base, data_size, inout_data_offset, bone_index_size, &unused_bone_index)))
                     {
                         return false;
                     }
@@ -1330,7 +1332,7 @@ static inline bool internal_data_read_mmd_pmx_display_frames(void const *data_ba
                 else if (1U == element_type)
                 {
                     uint32_t unused_morph_index;
-                    if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, morph_index_size, &unused_morph_index)))
+                    if (internal_unlikely(!internal_data_read_mmd_pmx_signed_index(data_base, data_size, inout_data_offset, morph_index_size, &unused_morph_index)))
                     {
                         return false;
                     }
@@ -1381,7 +1383,7 @@ static inline bool internal_data_read_mmd_pmx_rigid_bodies(void const *data_base
             return false;
         }
 
-        if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, bone_index_size, &out_rigid_bodies[rigid_body_index].m_bone_index)))
+        if (internal_unlikely(!internal_data_read_mmd_pmx_signed_index(data_base, data_size, inout_data_offset, bone_index_size, &out_rigid_bodies[rigid_body_index].m_bone_index)))
         {
             return false;
         }
@@ -1504,12 +1506,12 @@ static inline bool internal_data_read_mmd_pmx_constraints(void const *data_base,
             return false;
         }
 
-        if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, rigid_body_index_size, &out_joints[joint_index].m_rigid_body_a_index)))
+        if (internal_unlikely(!internal_data_read_mmd_pmx_signed_index(data_base, data_size, inout_data_offset, rigid_body_index_size, &out_joints[joint_index].m_rigid_body_a_index)))
         {
             return false;
         }
 
-        if (internal_unlikely(!internal_data_read_mmd_pmx_index(data_base, data_size, inout_data_offset, rigid_body_index_size, &out_joints[joint_index].m_rigid_body_b_index)))
+        if (internal_unlikely(!internal_data_read_mmd_pmx_signed_index(data_base, data_size, inout_data_offset, rigid_body_index_size, &out_joints[joint_index].m_rigid_body_b_index)))
         {
             return false;
         }
@@ -1988,30 +1990,9 @@ static inline bool internal_data_read_mmd_pmx_text(void const *data_base, size_t
     }
 }
 
-static inline bool internal_data_read_mmd_pmx_index(void const *data_base, size_t data_size, size_t &inout_data_offset, uint8_t index_size, uint32_t *out_index)
+static inline bool internal_data_read_mmd_pmx_signed_index(void const *data_base, size_t data_size, size_t &inout_data_offset, uint8_t index_size, uint32_t *out_index)
 {
-    if (2U == index_size)
-    {
-        uint16_t index;
-        if (internal_data_read_uint16(data_base, data_size, inout_data_offset, &index))
-        {
-            if (index <= INT16_MAX)
-            {
-                (*out_index) = index;
-            }
-            else
-            {
-                assert(UINT16_MAX == index);
-                (*out_index) = static_cast<uint32_t>(~static_cast<uint32_t>(0U));
-            }
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    else if (1U == index_size)
+    if (1U == index_size)
     {
         uint8_t index;
         if (internal_data_read_uint8(data_base, data_size, inout_data_offset, &index))
@@ -2023,6 +2004,27 @@ static inline bool internal_data_read_mmd_pmx_index(void const *data_base, size_
             else
             {
                 assert(UINT8_MAX == index);
+                (*out_index) = static_cast<uint32_t>(~static_cast<uint32_t>(0U));
+            }
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else if (2U == index_size)
+    {
+        uint16_t index;
+        if (internal_data_read_uint16(data_base, data_size, inout_data_offset, &index))
+        {
+            if (index <= INT16_MAX)
+            {
+                (*out_index) = index;
+            }
+            else
+            {
+                assert(UINT16_MAX == index);
                 (*out_index) = static_cast<uint32_t>(~static_cast<uint32_t>(0U));
             }
             return true;
@@ -2046,6 +2048,53 @@ static inline bool internal_data_read_mmd_pmx_index(void const *data_base, size_
                 assert(UINT32_MAX == index);
                 (*out_index) = static_cast<uint32_t>(~static_cast<uint32_t>(0U));
             }
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else
+    {
+        return false;
+    }
+}
+
+static inline bool internal_data_read_mmd_pmx_unsigned_index(void const *data_base, size_t data_size, size_t &inout_data_offset, uint8_t index_size, uint32_t *out_index)
+{
+    if (1U == index_size)
+    {
+        uint8_t index;
+        if (internal_data_read_uint8(data_base, data_size, inout_data_offset, &index))
+        {
+            (*out_index) = index;
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else if (2U == index_size)
+    {
+        uint16_t index;
+        if (internal_data_read_uint16(data_base, data_size, inout_data_offset, &index))
+        {
+            (*out_index) = index;
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else if (4U == index_size)
+    {
+        uint32_t index;
+        if (internal_data_read_uint32(data_base, data_size, inout_data_offset, &index))
+        {
+            (*out_index) = index;
             return true;
         }
         else
