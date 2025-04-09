@@ -16,8 +16,17 @@
     <Filter Include="thirdparty\DirectXMesh">
       <UniqueIdentifier>{32634405-1abd-4f3f-a9b2-8630d7cf5e37}</UniqueIdentifier>
     </Filter>
-    <Filter Include="thirdparty\DirectXMesh\DirectXMesh">
-      <UniqueIdentifier>{42b87651-6657-4aa2-97fc-73249456bb48}</UniqueIdentifier>
+    <Filter Include="thirdparty\OpenCV">
+      <UniqueIdentifier>{298d885f-77f3-45b7-9f6f-a841954325b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\OpenCV\bin">
+      <UniqueIdentifier>{6d50e01f-6bbd-4e41-a53d-8ef13e355f38}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\OpenCV\bin\x64">
+      <UniqueIdentifier>{253d2443-5b6d-4211-8906-54575b61d432}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\DirectXMesh\source">
+      <UniqueIdentifier>{98d4be8c-2ce9-4833-8079-a8df7a9cff69}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -73,10 +82,10 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\thirdparty\DirectXMesh\DirectXMesh\DirectXMesh.h">
-      <Filter>thirdparty\DirectXMesh\DirectXMesh</Filter>
+      <Filter>thirdparty\DirectXMesh\source</Filter>
     </ClInclude>
     <ClInclude Include="..\thirdparty\DirectXMesh\DirectXMesh\scoped.h">
-      <Filter>thirdparty\DirectXMesh\DirectXMesh</Filter>
+      <Filter>thirdparty\DirectXMesh\source</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -129,15 +138,23 @@
       <Filter>build-windows</Filter>
     </ClCompile>
     <ClCompile Include="..\thirdparty\DirectXMesh\DirectXMesh\DirectXMeshNormals.cpp">
-      <Filter>thirdparty\DirectXMesh\DirectXMesh</Filter>
+      <Filter>thirdparty\DirectXMesh\source</Filter>
     </ClCompile>
     <ClCompile Include="..\thirdparty\DirectXMesh\DirectXMesh\DirectXMeshTangentFrame.cpp">
-      <Filter>thirdparty\DirectXMesh\DirectXMesh</Filter>
+      <Filter>thirdparty\DirectXMesh\source</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="BRX-Asset-Import.def">
       <Filter>build-windows</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="..\..\OpenCV\build\x64\vc15\bin\opencv_ffmpeg3410_64.dll">
+      <Filter>thirdparty\OpenCV\bin\x64</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="..\..\OpenCV\build\x64\vc15\bin\opencv_world3410.dll">
+      <Filter>thirdparty\OpenCV\bin\x64</Filter>
+    </CopyFileToFolders>
   </ItemGroup>
 </Project>
