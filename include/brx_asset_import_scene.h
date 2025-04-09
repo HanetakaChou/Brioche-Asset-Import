@@ -31,8 +31,8 @@ class brx_asset_import_animation;
 
 static constexpr uint32_t const BRX_ASSET_IMPORT_UINT32_INDEX_INVALID = static_cast<uint32_t>(~static_cast<uint32_t>(0U));
 
-// [PMX TDA Miku Append](https://www.deviantart.com/xoriu/art/MMD-Facial-Expressions-Chart-341504917)
-// [PMX Mirai Akari](https://www.deviantart.com/inochi-pm/art/MMD-Facial-Expressions-Chart-V2-802048879)
+// [Miku Hatsune Append (Tda)](https://mikumikudance.fandom.com/wiki/Miku_Hatsune_Append_%28Tda%29)
+// [Miku Hatsune (Sourxuan)](https://mikumikudance.fandom.com/wiki/Miku_Hatsune_%28Sourxuan%29)
 // [ARKit](https://developer.apple.com/documentation/arkit/arfaceanchor/blendshapelocation)
 // [FACS AU](https://www.cs.cmu.edu/~face/facs.htm)
 
@@ -88,13 +88,300 @@ enum BRX_ASSET_IMPORT_MORPH_TARGET_NAME : uint32_t
     BRX_ASSET_IMPORT_MORPH_TARGET_NAME_MMD_COUNT = 20
 };
 
+// [Blender MMD Tools: Internal Dictionary](https://github.com/MMD-Blender/blender_mmd_tools/blob/main/mmd_tools/translations.py)
+// [VRM 0.0: Defined Bones](https://github.com/vrm-c/vrm-specification/blob/master/specification/0.0/README.md#defined-bones)
+// [VRM 1.0: List of Humanoid Bones](https://github.com/vrm-c/vrm-specification/blob/master/specification/VRMC_vrm-1.0/humanoid.md#list-of-humanoid-bones)
+// [VRM Addon for Blender: Human Bone Mapper MMD Mapping](https://github.com/saturday06/VRM-Addon-for-Blender/blob/main/src/io_scene_vrm/common/human_bone_mapper/mmd_mapping.py)
+
 enum BRX_ASSET_IMPORT_SKELETON_JOINT_NAME : uint32_t
 {
-    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_VRM_HIPS = 0,
-    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_COUNT = 55
+    // 操作中心
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_CONTROL_NODE = 0,
+    // 全ての親
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_PARENT_NODE = 1,
+    // センター
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_CENTER = 2,
+    // グルーブ
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_GROOVE = 3,
+    // 腰
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_WAIST = 4,
+    // 上半身
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_UPPER_BODY = 5,
+    // 上半身2
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_UPPER_BODY_2 = 6,
+    // 右胸１
+    // 右胸
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_BREAST_1 = 7,
+    // 右胸２
+    // 右胸先
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_BREAST_2 = 8,
+    // 左胸１
+    // 左胸
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_BREAST_1 = 9,
+    // 左胸２
+    // 左胸先
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_BREAST_2 = 10,
+    // 首
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_NECK = 11,
+    // 頭
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_HEAD = 12,
+    // 右目
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_EYE = 13,
+    // 右目戻
+    // 右目先
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_EYE_RETURN = 14,
+    // 左目
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_EYE = 15,
+    // 左目戻
+    // 左目先
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_EYE_RETURN = 16,
+    // 両目
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_EYES = 17,
+    // 舌１
+    // 舌1
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_TONGUE_1 = 18,
+    // 舌２
+    // 舌2
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_TONGUE_2 = 19,
+    // 舌３
+    // 舌3
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_TONGUE_3 = 20,
+    // 右肩P
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_SHOULDER_PARENT = 21,
+    // 右肩
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_SHOULDER = 22,
+    // 右肩C
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_SHOULDER_CHILD = 23,
+    // 右腕
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_ARM = 24,
+    // 右腕捩
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_ARM_TWIST = 25,
+    // 右腕捩1
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_ARM_TWIST_1 = 26,
+    // 右腕捩2
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_ARM_TWIST_2 = 27,
+    // 右腕捩3
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_ARM_TWIST_3 = 28,
+    // 右ひじ
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_ELBOW = 29,
+    // 右ひじ補助
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_ELBOW_AUX = 30,
+    // +右ひじ補助
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_PLUS_ELBOW_AUX = 31,
+    // 右手捩
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_HAND_TWIST = 32,
+    // 右手捩1
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_HAND_TWIST_1 = 33,
+    // 右手捩2
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_HAND_TWIST_2 = 34,
+    // 右手捩3
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_HAND_TWIST_3 = 35,
+    // 右手首
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_WRIST = 36,
+    // 右ダミー
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_DUMMY = 37,
+    // 右手先
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_HAND_TIP = 38,
+    // 右親指０
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_THUMB_0 = 39,
+    // 右親指１
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_THUMB_1 = 40,
+    // 右親指２
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_THUMB_2 = 41,
+    // 右親指先
+    // 右親指２先
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_THUMB_TIP = 42,
+    // 右人指１
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_INDEX_FINGER_1 = 43,
+    // 右人指２
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_INDEX_FINGER_2 = 44,
+    // 右人指３
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_INDEX_FINGER_3 = 45,
+    // 右人指先
+    // 右人指３先
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_INDEX_FINGER_TIP = 46,
+    // 右中指１
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_MIDDLE_FINGER_1 = 47,
+    // 右中指２
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_MIDDLE_FINGER_2 = 48,
+    // 右中指３
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_MIDDLE_FINGER_3 = 49,
+    // 右中指先
+    // 右中指３先
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_MIDDLE_FINGER_TIP = 50,
+    // 右薬指１
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_RING_FINGER_1 = 51,
+    // 右薬指２
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_RING_FINGER_2 = 52,
+    // 右薬指３
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_RING_FINGER_3 = 53,
+    // 右薬指先
+    // 右薬指３先
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_RING_FINGER_TIP = 54,
+    // 右小指１
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_LITTLE_FINGER_1 = 55,
+    // 右小指２
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_LITTLE_FINGER_2 = 56,
+    // 右小指３
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_LITTLE_FINGER_3 = 57,
+    // 右小指先
+    // 右小指３先
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_LITTLE_FINGER_TIP = 58,
+    // 左肩P
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_SHOULDER_PARENT = 59,
+    // 左肩
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_SHOULDER = 60,
+    // 左肩C
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_SHOULDER_CHILD = 61,
+    // 左腕
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_ARM = 62,
+    // 左腕捩
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_ARM_TWIST = 63,
+    // 左腕捩1
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_ARM_TWIST_1 = 64,
+    // 左腕捩2
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_ARM_TWIST_2 = 65,
+    // 左腕捩3
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_ARM_TWIST_3 = 66,
+    // 左ひじ
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_ELBOW = 67,
+    // 左ひじ補助
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_ELBOW_AUX = 68,
+    // +左ひじ補助
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_PLUS_ELBOW_AUX = 69,
+    // 左手捩
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_HAND_TWIST = 70,
+    // 左手捩1
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_HAND_TWIST_1 = 71,
+    // 左手捩2
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_HAND_TWIST_2 = 72,
+    // 左手捩3
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_HAND_TWIST_3 = 73,
+    // 左手首
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_WRIST = 74,
+    // 左ダミー
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_DUMMY = 75,
+    // 左手先
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_HAND_TIP = 76,
+    // 左親指０
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_THUMB_0 = 77,
+    // 左親指１
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_THUMB_1 = 78,
+    // 左親指２
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_THUMB_2 = 79,
+    // 左親指先
+    // 左親指２先
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_THUMB_TIP = 80,
+    // 左人指１
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_INDEX_FINGER_1 = 81,
+    // 左人指２
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_INDEX_FINGER_2 = 82,
+    // 左人指３
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_INDEX_FINGER_3 = 83,
+    // 左人指先
+    // 左人指３先
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_INDEX_FINGER_TIP = 84,
+    // 左中指１
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_MIDDLE_FINGER_1 = 85,
+    // 左中指２
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_MIDDLE_FINGER_2 = 86,
+    // 左中指３
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_MIDDLE_FINGER_3 = 87,
+    // 左中指先
+    // 左中指３先
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_MIDDLE_FINGER_TIP = 88,
+    // 左薬指１
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_RING_FINGER_1 = 89,
+    // 左薬指２
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_RING_FINGER_2 = 90,
+    // 左薬指３
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_RING_FINGER_3 = 91,
+    // 左薬指先
+    // 左薬指３先
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_RING_FINGER_TIP = 92,
+    // 左小指１
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_LITTLE_FINGER_1 = 93,
+    // 左小指２
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_LITTLE_FINGER_2 = 94,
+    // 左小指３
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_LITTLE_FINGER_3 = 95,
+    // 左小指先
+    // 左小指３先
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_LITTLE_FINGER_TIP = 96,
+    // 下半身
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LOWER_BODY = 97,
+    // 腰キャンセル右
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_WAIST_CANCEL = 98,
+    // 右足
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_LEG = 99,
+    // 右ひざ
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_KNEE = 100,
+    // 右足首
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_ANKLE = 101,
+    // 右つま先
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_TOE_TIP = 102,
+    // 右足D
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_LEG_DIRECTION = 103,
+    // 右ひざD
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_KNEE_DIRECTION = 104,
+    // 右足首D
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_ANKLE_DIRECTION = 105,
+    // 右足先EX
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_TOE_TIP_EX = 106,
+    // 腰キャンセル左
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_WAIST_CANCEL = 107,
+    // 左足
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_LEG = 108,
+    // 左ひざ
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_KNEE = 109,
+    // 左足首
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_ANKLE = 110,
+    // 左つま先
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_TOE_TIP = 111,
+    // 左足D
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_LEG_DIRECTION = 112,
+    // 左ひざD
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_KNEE_DIRECTION = 113,
+    // 左足首D
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_ANKLE_DIRECTION = 114,
+    // 左足先EX
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_TOE_TIP_EX = 115,
+    // 右足IK親
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_ANKLE_IK_PARENT = 116,
+    // 右足ＩＫ
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_ANKLE_IK = 117,
+    // 右つま先ＩＫ
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_RIGHT_TOE_TIP_IK = 118,
+    // 左足IK親
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_ANKLE_IK_PARENT = 119,
+    // 左足ＩＫ
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_ANKLE_IK = 120,
+    // 左つま先ＩＫ
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_LEFT_TOE_TIP_IK = 121,
+    //
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_COUNT = 122,
+    //
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_INVALID = 0X7FFFFFFF
 };
 
-enum BRX_ASSET_IMPORT_PBR_TEXTURE_NAME : uint32_t
+enum BRX_ASSET_IMPORT_SKELETON_JOINT_CONSTRAINT_NAME : uint32_t
+{
+    // 右足ＩＫ
+    BRX_ASSET_IMPORT_SKELETON_JOINT_CONSTRAINT_NAME_MMD_IK_RIGHT_ANKLE = 0,
+    // 右つま先ＩＫ
+    BRX_ASSET_IMPORT_SKELETON_JOINT_CONSTRAINT_NAME_MMD_IK_RIGHT_TOE_TIP = 1,
+    // 左足ＩＫ
+    BRX_ASSET_IMPORT_SKELETON_JOINT_CONSTRAINT_NAME_MMD_IK_LEFT_ANKLE = 2,
+    // 左つま先ＩＫ
+    BRX_ASSET_IMPORT_SKELETON_JOINT_CONSTRAINT_NAME_MMD_IK_LEFT_TOE_TIP = 3,
+    //
+    BRX_ASSET_IMPORT_SKELETON_JOINT_CONSTRAINT_NAME_MMD_COUNT = 4,
+    //
+    BRX_ASSET_IMPORT_SKELETON_JOINT_CONSTRAINT_NAME_INVALID = 0X7FFFFFFF
+
+};
+
+enum BRX_ASSET_IMPORT_TEXTURE_NAME : uint32_t
 {
     BRX_ASSET_IMPORT_TEXTURE_NAME_PBR_BASE_COLOR = 0,
     BRX_ASSET_IMPORT_TEXTURE_NAME_PBR_ROUGHNESS_METALLIC = 1,
@@ -235,7 +522,7 @@ public:
     virtual uint32_t get_surface_group_count() const = 0;
     virtual brx_asset_import_surface_group const *get_surface_group(uint32_t group_index) const = 0;
     virtual uint32_t get_animation_count() const = 0;
-    virtual brx_asset_import_animation *get_animation(uint32_t animation_index) const = 0;
+    virtual brx_asset_import_animation const *get_animation(uint32_t animation_index) const = 0;
 };
 
 class brx_asset_import_surface_group
@@ -244,52 +531,83 @@ public:
     virtual uint32_t get_surface_count() const = 0;
     virtual brx_asset_import_surface const *get_surface(uint32_t surface_index) const = 0;
 
-    // NULL: no skeleton
-    // not NULL: skin
-    virtual uint32_t const get_skeleton_joint_count() const = 0;
-    virtual uint32_t get_skeleton_joint_parent_index(uint32_t skeleton_joint_index) const = 0;
-    virtual brx_asset_import_rigid_transform const *get_skeleton_joint_bind_pose_transform_local_space(uint32_t skeleton_joint_index) const = 0;
-    virtual uint32_t get_skeleton_joint_index(BRX_ASSET_IMPORT_SKELETON_JOINT_NAME skeleton_joint_name) const = 0;
+    // 0: no skeleton
+    // greater than 0: skin
+    virtual uint32_t get_animation_skeleton_joint_count() const = 0;
+    virtual BRX_ASSET_IMPORT_SKELETON_JOINT_NAME get_animation_skeleton_joint_name(uint32_t animation_skeleton_joint_index) const = 0;
+    virtual uint32_t get_animation_skeleton_joint_parent_index(uint32_t animation_skeleton_joint_index) const = 0;
+    virtual brx_asset_import_rigid_transform const *get_animation_skeleton_bind_pose_transform_local_space(uint32_t animation_skeleton_joint_index) const = 0;
+
+    // 0: no skeleton
+    // greater than 0: skin
+    virtual uint32_t get_animation_skeleton_joint_constraint_count() const = 0;
+    virtual BRX_ASSET_IMPORT_SKELETON_JOINT_CONSTRAINT_NAME get_animation_skeleton_joint_constraint_name(uint32_t animation_skeleton_joint_constraint_index) const = 0;
+    virtual brx_asset_import_skeleton_joint_constraint const *get_animation_skeleton_joint_constraint(uint32_t animation_skeleton_joint_constraint_index) const = 0;
+
+    // 0: no skeleton
+    // greater than 0: skin
+    virtual uint32_t get_ragdoll_skeleton_rigid_body_count() const = 0;
+    virtual brx_asset_import_physics_rigid_body const *get_ragdoll_skeleton_rigid_body(uint32_t ragdoll_skeleton_rigid_body_index) const = 0;
+
+    // 0: no skeleton
+    // greater than 0: skin
+    virtual uint32_t get_ragdoll_skeleton_constraint_count() const = 0;
+    virtual brx_asset_import_physics_constraint const *get_ragdoll_skeleton_constraint(uint32_t ragdoll_skeleton_constraint_index) const = 0;
+
+    // 0: no skeleton
+    // greater than 0: skin
+    virtual uint32_t get_animation_to_ragdoll_skeleton_mapping_count() const = 0;
+    virtual brx_asset_import_ragdoll_direct_mapping const *get_animation_to_ragdoll_skeleton_mapping(uint32_t animation_to_ragdoll_skeleton_mapping_index) const = 0;
+
+    // 0: no skeleton
+    // greater than 0: skin
+    virtual uint32_t get_ragdoll_to_animation_skeleton_mapping_count() const = 0;
+    virtual brx_asset_import_ragdoll_direct_mapping const *get_ragdoll_to_animation_skeleton_mapping(uint32_t ragdoll_to_animation_skeleton_mapping_index) const = 0;
 };
 
 class brx_asset_import_surface
 {
     virtual uint32_t get_vertex_count() const = 0;
-    virtual brx_asset_import_vertex_position const *get_vertex_position() const = 0;
-    virtual brx_asset_import_vertex_varying const *get_vertex_varying() const = 0;
+    virtual brx_asset_import_vertex_position const *get_vertex_position(uint32_t vertex_index) const = 0;
+    virtual brx_asset_import_vertex_varying const *get_vertex_varying(uint32_t vertex_index) const = 0;
     // NULL: no skin (even if there is one skeleton bound to the group)
     // not NULL: skin (there must be one skeleton bound to the group)
-    virtual brx_asset_import_vertex_blending const *get_vertex_blending() const = 0;
+    virtual brx_asset_import_vertex_blending const *get_vertex_blending(uint32_t vertex_index) const = 0;
 
     // geometry
     // 0: no morph animation
     // greater than 0: morph animation
     virtual uint32_t get_morph_target_count() const = 0;
-    virtual brx_asset_import_vertex_position const *get_morph_target_vertex_positions(uint32_t morph_target_index) const = 0;
-    virtual brx_asset_import_vertex_varying const *get_morph_target_vertex_varyings(uint32_t morph_target_index) const = 0;
-    virtual uint32_t get_morph_target_name_index(BRX_ASSET_IMPORT_MORPH_TARGET_NAME morph_target_name) const = 0;
+    virtual BRX_ASSET_IMPORT_MORPH_TARGET_NAME get_morph_target_name(uint32_t morph_target_index) const = 0;
+    virtual brx_asset_import_vertex_position const *get_morph_target_vertex_position(uint32_t morph_target_index, uint32_t vertex_index) const = 0;
+    virtual brx_asset_import_vertex_varying const *get_morph_target_vertex_varying(uint32_t morph_target_index, uint32_t vertex_index) const = 0;
 
     // material
     virtual uint32_t get_texture_count() const = 0;
+    virtual BRX_ASSET_IMPORT_TEXTURE_NAME get_texture_name(uint32_t texture_index) const = 0;
+    // R8G8B8A8_UNORM
+    virtual uint32_t get_texture_factor(uint32_t texture_index) const = 0;
     // start with file:// : external file
     // start with data:// : internal data
-    virtual char const *get_texture_url(uint32_t texture_index) const = 0;
-    virtual uint32_t get_texture_index(BRX_ASSET_IMPORT_PBR_TEXTURE_NAME texture_name) const = 0;
+    virtual uint8_t const *get_texture_url(uint32_t texture_index) const = 0;
 };
 
 class brx_asset_import_animation
 {
 public:
     virtual uint32_t const get_frame_count() const = 0;
+
     virtual uint32_t const get_weight_channel_count() const = 0;
-    virtual char const *get_weight_channel_name(uint32_t channel_index) const = 0;
+    virtual BRX_ASSET_IMPORT_MORPH_TARGET_NAME get_weight_channel_name(uint32_t channel_index) const = 0;
     virtual float const get_weight(uint32_t frame_index, uint32_t channel_index) const = 0;
+
     virtual uint32_t const get_rigid_transform_channel_count() const = 0;
-    virtual char const *get_rigid_transform_channel_name(uint32_t channel_index) const = 0;
+    virtual BRX_ASSET_IMPORT_SKELETON_JOINT_NAME get_rigid_transform_channel_name(uint32_t channel_index) const = 0;
     virtual brx_asset_import_rigid_transform const *get_rigid_transform(uint32_t frame_index, uint32_t channel_index) const = 0;
-    virtual uint32_t const get_ik_switch_channel_count() const = 0;
-    virtual char const *get_ik_switch_channel_name(uint32_t channel_index) const = 0;
-    virtual bool get_ik_switch(uint32_t frame_index, uint32_t channel_index) const = 0;
+
+    virtual uint32_t const get_switch_channel_count() const = 0;
+    virtual BRX_ASSET_IMPORT_SKELETON_JOINT_CONSTRAINT_NAME get_switch_channel_name(uint32_t channel_index) const = 0;
+    virtual bool get_switch(uint32_t frame_index, uint32_t channel_index) const = 0;
 };
 
 extern "C" brx_asset_import_scene *brx_asset_import_create_scene(brx_asset_import_input_stream_factory *input_stream_factory, char const *file_name);

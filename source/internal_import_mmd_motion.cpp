@@ -63,7 +63,7 @@ struct internal_rigid_transform_key_frame_t
 
 static inline float internal_cubic_bezier(uint8_t const in_packed_k_1_x, uint8_t const in_packed_k_1_y, uint8_t const in_packed_k_2_x, uint8_t const in_packed_k_2_y, float const in_x);
 
-extern bool internal_import_mmd_motion(void const *data_base, size_t data_size, mcrt_vector<brx_asset_import_model_surface_group> &out_surface_groups)
+extern bool internal_import_mmd_motion(void const *data_base, size_t data_size, mcrt_vector<brx_asset_import_model_animation> &out_animations)
 {
     mcrt_vector<mcrt_string> weight_channel_names;
     mcrt_vector<float> weights;

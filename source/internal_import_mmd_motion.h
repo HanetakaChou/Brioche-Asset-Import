@@ -22,4 +22,6 @@
 #include <cstddef>
 #include <cstdint>
 
+extern bool internal_import_mmd_motion(void const *data_base, size_t data_size, mcrt_vector<brx_asset_import_model_animation> &out_animations);
+
 #endif

@@ -28,118 +28,157 @@ class brx_asset_import_model_surface final : public brx_asset_import_surface
     mcrt_vector<brx_asset_import_vertex_varying> m_vertex_varyings;
     mcrt_vector<brx_asset_import_vertex_blending> m_vertex_blendings;
 
-    uint32_t m_morph_target_name_indices[BRX_ASSET_IMPORT_MORPH_TARGET_NAME_MMD_COUNT];
+    mcrt_vector<uint32_t> m_indices;
+
+    mcrt_vector<BRX_ASSET_IMPORT_MORPH_TARGET_NAME> m_morph_target_names;
     mcrt_vector<mcrt_vector<brx_asset_import_vertex_position>> m_morph_targets_vertex_positions;
     mcrt_vector<mcrt_vector<brx_asset_import_vertex_varying>> m_morph_targets_vertex_varyings;
 
-    uint32_t m_texture_name_indices[BRX_ASSET_IMPORT_TEXTURE_NAME_PBR_COUNT];
+    mcrt_vector<BRX_ASSET_IMPORT_TEXTURE_NAME> m_texture_names;
+    mcrt_vector<uint32_t> m_texture_factors;
     // use vector instead of string to support data binary
-    mcrt_vector<mcrt_vector<char>> m_texture_urls;
+    mcrt_vector<mcrt_vector<uint8_t>> m_texture_urls;
 
 public:
     brx_asset_import_model_surface(
         mcrt_vector<brx_asset_import_vertex_position> &&vertex_positions,
         mcrt_vector<brx_asset_import_vertex_varying> &&vertex_varyings,
         mcrt_vector<brx_asset_import_vertex_blending> &&vertex_blendings,
-        uint32_t const *morph_target_name_indices,
+        mcrt_vector<BRX_ASSET_IMPORT_MORPH_TARGET_NAME> &&morph_target_names,
         mcrt_vector<mcrt_vector<brx_asset_import_vertex_position>> &&morph_targets_vertex_positions,
         mcrt_vector<mcrt_vector<brx_asset_import_vertex_varying>> &&morph_targets_vertex_varyings,
-        uint32_t const *texture_name_indices,
-        mcrt_vector<mcrt_vector<char>> &&texture_urls);
+        mcrt_vector<BRX_ASSET_IMPORT_TEXTURE_NAME> &&texture_names,
+        mcrt_vector<uint32_t> &&texture_factors,
+        mcrt_vector<mcrt_vector<uint8_t>> &&texture_urls);
     ~brx_asset_import_model_surface();
 
 private:
     uint32_t get_vertex_count() const override;
-    brx_asset_import_vertex_position const *get_vertex_position() const override;
-    brx_asset_import_vertex_varying const *get_vertex_varying() const override;
-    brx_asset_import_vertex_blending const *get_vertex_blending() const override;
+    brx_asset_import_vertex_position const *get_vertex_position(uint32_t vertex_index) const override;
+    brx_asset_import_vertex_varying const *get_vertex_varying(uint32_t vertex_index) const override;
+    brx_asset_import_vertex_blending const *get_vertex_blending(uint32_t vertex_index) const override;
 
     uint32_t get_morph_target_count() const override;
-    brx_asset_import_vertex_position const *get_morph_target_vertex_positions(uint32_t morph_target_index) const override;
-    brx_asset_import_vertex_varying const *get_morph_target_vertex_varyings(uint32_t morph_target_index) const override;
-    uint32_t get_morph_target_name_index(BRX_ASSET_IMPORT_MORPH_TARGET_NAME morph_target_name) const override;
+    BRX_ASSET_IMPORT_MORPH_TARGET_NAME get_morph_target_name(uint32_t morph_target_index) const override;
+    brx_asset_import_vertex_position const *get_morph_target_vertex_position(uint32_t morph_target_index, uint32_t vertex_index) const override;
+    brx_asset_import_vertex_varying const *get_morph_target_vertex_varying(uint32_t morph_target_index, uint32_t vertex_index) const override;
 
     uint32_t get_texture_count() const override;
-    char const *get_texture_url(uint32_t texture_index) const override;
-    uint32_t get_texture_index(BRX_ASSET_IMPORT_PBR_TEXTURE_NAME texture_name) const override;
-};
-
-class brx_asset_import_model_skeleton_joint
-{
-    mcrt_string m_skeleton_joint_name;
+    BRX_ASSET_IMPORT_TEXTURE_NAME get_texture_name(uint32_t texture_index) const override;
+    uint32_t get_texture_factor(uint32_t texture_index) const override;
+    uint8_t const *get_texture_url(uint32_t texture_index) const override;
 };
 
 class brx_asset_import_model_surface_group final : public brx_asset_import_surface_group
 {
     mcrt_vector<brx_asset_import_model_surface> m_surfaces;
 
-    mcrt_vector<uint32_t> m_skeleton_joint_parent_indices;
-    mcrt_vector<brx_asset_import_rigid_transform> m_skeleton_joint_bind_pose_transforms;
-    uint32_t m_skeleton_joint_name_indices[BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_COUNT];
+    mcrt_vector<BRX_ASSET_IMPORT_SKELETON_JOINT_NAME> m_animation_skeleton_joint_names;
+    mcrt_vector<uint32_t> m_animation_skeleton_joint_parent_indices;
+    mcrt_vector<brx_asset_import_rigid_transform> m_animation_skeleton_bind_pose_transforms_local_space;
+
+    mcrt_vector<BRX_ASSET_IMPORT_SKELETON_JOINT_CONSTRAINT_NAME> m_animation_skeleton_joint_constraint_names;
+    mcrt_vector<brx_asset_import_skeleton_joint_constraint> m_animation_skeleton_joint_constraints;
+    mcrt_vector<mcrt_vector<uint32_t>> m_animation_skeleton_joint_constraints_storage;
+
+    mcrt_vector<brx_asset_import_physics_rigid_body> m_ragdoll_skeleton_rigid_bodies;
+    mcrt_vector<brx_asset_import_physics_constraint> m_ragdoll_skeleton_constraints;
+
+    mcrt_vector<brx_asset_import_ragdoll_direct_mapping> m_animation_to_ragdoll_skeleton_mapping;
+    mcrt_vector<brx_asset_import_ragdoll_direct_mapping> m_ragdoll_to_animation_skeleton_mapping;
 
 public:
     brx_asset_import_model_surface_group(
         mcrt_vector<brx_asset_import_model_surface> &&surfaces,
-        mcrt_vector<uint32_t> &&skeleton_joint_parent_indices,
-        mcrt_vector<brx_asset_import_rigid_transform> &&skeleton_joint_bind_pose_transforms,
-        uint32_t const *skeleton_joint_name_indices);
+        mcrt_vector<BRX_ASSET_IMPORT_SKELETON_JOINT_NAME> &&animation_skeleton_joint_names,
+        mcrt_vector<uint32_t> &&animation_skeleton_joint_parent_indices,
+        mcrt_vector<brx_asset_import_rigid_transform> &&animation_skeleton_bind_pose_transforms_local_space,
+        mcrt_vector<BRX_ASSET_IMPORT_SKELETON_JOINT_CONSTRAINT_NAME> &&animation_skeleton_joint_constraint_names,
+        mcrt_vector<brx_asset_import_skeleton_joint_constraint> &&animation_skeleton_joint_constraints,
+        mcrt_vector<mcrt_vector<uint32_t>> &&animation_skeleton_joint_constraints_storage,
+        mcrt_vector<brx_asset_import_physics_rigid_body> &&ragdoll_skeleton_rigid_bodies,
+        mcrt_vector<brx_asset_import_physics_constraint> &&ragdoll_skeleton_constraints,
+        mcrt_vector<brx_asset_import_ragdoll_direct_mapping> &&animation_to_ragdoll_skeleton_mapping,
+        mcrt_vector<brx_asset_import_ragdoll_direct_mapping> &&ragdoll_to_animation_skeleton_mapping);
     ~brx_asset_import_model_surface_group();
 
 private:
     uint32_t get_surface_count() const override;
     brx_asset_import_surface const *get_surface(uint32_t surface_index) const override;
 
-    uint32_t const get_skeleton_joint_count() const override;
-    uint32_t get_skeleton_joint_parent_index(uint32_t skeleton_joint_index) const override;
-    brx_asset_import_rigid_transform const *get_skeleton_joint_bind_pose_transform_local_space(uint32_t skeleton_joint_index) const override;
-    uint32_t get_skeleton_joint_index(BRX_ASSET_IMPORT_SKELETON_JOINT_NAME vrm_skeleton_joint_name) const override;
+    uint32_t get_animation_skeleton_joint_count() const override;
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME get_animation_skeleton_joint_name(uint32_t animation_skeleton_joint_index) const override;
+    uint32_t get_animation_skeleton_joint_parent_index(uint32_t animation_skeleton_joint_index) const override;
+    brx_asset_import_rigid_transform const *get_animation_skeleton_bind_pose_transform_local_space(uint32_t animation_skeleton_joint_index) const override;
+
+    uint32_t get_animation_skeleton_joint_constraint_count() const override;
+    BRX_ASSET_IMPORT_SKELETON_JOINT_CONSTRAINT_NAME get_animation_skeleton_joint_constraint_name(uint32_t animation_skeleton_joint_constraint_index) const override;
+    brx_asset_import_skeleton_joint_constraint const *get_animation_skeleton_joint_constraint(uint32_t animation_skeleton_joint_constraint_index) const override;
+
+    uint32_t get_ragdoll_skeleton_rigid_body_count() const override;
+    brx_asset_import_physics_rigid_body const *get_ragdoll_skeleton_rigid_body(uint32_t ragdoll_skeleton_rigid_body_index) const override;
+
+    uint32_t get_ragdoll_skeleton_constraint_count() const override;
+    brx_asset_import_physics_constraint const *get_ragdoll_skeleton_constraint(uint32_t ragdoll_skeleton_constraint_index) const override;
+
+    uint32_t get_animation_to_ragdoll_skeleton_mapping_count() const override;
+    brx_asset_import_ragdoll_direct_mapping const *get_animation_to_ragdoll_skeleton_mapping(uint32_t animation_to_ragdoll_skeleton_mapping_index) const override;
+
+    uint32_t get_ragdoll_to_animation_skeleton_mapping_count() const override;
+    brx_asset_import_ragdoll_direct_mapping const *get_ragdoll_to_animation_skeleton_mapping(uint32_t ragdoll_to_animation_skeleton_mapping_index) const override;
 };
 
 class brx_asset_import_model_animation final : public brx_asset_import_animation
 {
-    mcrt_vector<mcrt_string> m_weight_channel_names;
+    mcrt_vector<BRX_ASSET_IMPORT_MORPH_TARGET_NAME> m_weight_channel_names;
     mcrt_vector<float> m_weights;
-    mcrt_vector<mcrt_string> m_rigid_transform_channel_names;
+    mcrt_vector<BRX_ASSET_IMPORT_SKELETON_JOINT_NAME> m_rigid_transform_channel_names;
     mcrt_vector<brx_asset_import_rigid_transform> m_rigid_transforms;
-    mcrt_vector<mcrt_string> m_ik_switch_channel_names;
-    mcrt_vector<bool> m_ik_switches;
+    mcrt_vector<BRX_ASSET_IMPORT_SKELETON_JOINT_CONSTRAINT_NAME> m_switch_channel_names;
+    mcrt_vector<bool> m_switches;
 
 public:
     brx_asset_import_model_animation(
-        mcrt_vector<mcrt_string> &&weight_channel_names,
+        mcrt_vector<BRX_ASSET_IMPORT_MORPH_TARGET_NAME> &&weight_channel_names,
         mcrt_vector<float> &&weights,
-        mcrt_vector<mcrt_string> &&rigid_transform_channel_names,
+        mcrt_vector<BRX_ASSET_IMPORT_SKELETON_JOINT_NAME> &&rigid_transform_channel_names,
         mcrt_vector<brx_asset_import_rigid_transform> &&rigid_transforms,
-        mcrt_vector<mcrt_string> &&ik_switch_channel_names,
-        mcrt_vector<bool> &&ik_switches);
+        mcrt_vector<BRX_ASSET_IMPORT_SKELETON_JOINT_CONSTRAINT_NAME> &&switch_channel_names,
+        mcrt_vector<bool> &&switches);
     ~brx_asset_import_model_animation();
 
 private:
     uint32_t const get_frame_count() const override;
+
     uint32_t const get_weight_channel_count() const override;
-    char const *get_weight_channel_name(uint32_t channel_index) const override;
+    BRX_ASSET_IMPORT_MORPH_TARGET_NAME get_weight_channel_name(uint32_t channel_index) const override;
     float const get_weight(uint32_t frame_index, uint32_t channel_index) const override;
+
     uint32_t const get_rigid_transform_channel_count() const override;
-    char const *get_rigid_transform_channel_name(uint32_t channel_index) const override;
+    BRX_ASSET_IMPORT_SKELETON_JOINT_NAME get_rigid_transform_channel_name(uint32_t channel_index) const override;
     brx_asset_import_rigid_transform const *get_rigid_transform(uint32_t frame_index, uint32_t channel_index) const override;
-    uint32_t const get_ik_switch_channel_count() const override;
-    char const *get_ik_switch_channel_name(uint32_t channel_index) const override;
-    bool get_ik_switch(uint32_t frame_index, uint32_t channel_index) const override;
+
+    uint32_t const get_switch_channel_count() const override;
+    BRX_ASSET_IMPORT_SKELETON_JOINT_CONSTRAINT_NAME get_switch_channel_name(uint32_t channel_index) const override;
+    bool get_switch(uint32_t frame_index, uint32_t channel_index) const override;
 };
 
 class brx_asset_import_model_scene final : public brx_asset_import_scene
 {
     mcrt_vector<brx_asset_import_model_surface_group> m_surface_groups;
+    mcrt_vector<brx_asset_import_model_animation> m_animations;
 
 public:
-    brx_asset_import_model_scene(mcrt_vector<brx_asset_import_model_surface_group> &&surface_groups);
+    brx_asset_import_model_scene(
+        mcrt_vector<brx_asset_import_model_surface_group> &&surface_groups,
+        mcrt_vector<brx_asset_import_model_animation> &&animations);
     ~brx_asset_import_model_scene();
 
 private:
     uint32_t get_surface_group_count() const override;
     brx_asset_import_surface_group const *get_surface_group(uint32_t group_index) const override;
     uint32_t get_animation_count() const override;
-    brx_asset_import_animation *get_animation(uint32_t skeleton_animation_index) const override;
+    brx_asset_import_animation const *get_animation(uint32_t skeleton_animation_index) const override;
 };
 
 #endif

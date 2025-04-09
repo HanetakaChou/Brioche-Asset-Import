@@ -22,4 +22,6 @@
 #include <cstddef>
 #include <cstdint>
 
+extern bool internal_import_mmd_model(void const *data_base, size_t data_size, mcrt_vector<brx_asset_import_model_surface_group> &out_surface_groups);
+
 #endif

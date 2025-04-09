@@ -29,10 +29,8 @@
 #include <algorithm>
 #include <assert.h>
 #include "brx_asset_import_model_scene.h"
-
-extern bool internal_import_mmd_motion(void const *data_base, size_t data_size, mcrt_vector<brx_asset_import_model_surface_group> &out_surface_groups);
-
-extern bool internal_import_mmd_model(void const *data_base, size_t data_size, mcrt_vector<brx_asset_import_model_surface_group> &out_surface_groups);
+#include "internal_import_mmd_model.h"
+#include "internal_import_mmd_motion.h"
 
 extern bool import_gltf_scene_asset(mcrt_vector<scene_mesh_data> &out_total_mesh_data, float frame_rate, brx_asset_import_input_stream_factory *input_stream_factory, char const *input_stream_name)
 {
@@ -73,9 +71,9 @@ extern bool import_gltf_scene_asset(mcrt_vector<scene_mesh_data> &out_total_mesh
         }
     }
     assert(!input_stream_data.empty());
-
-    mcrt_vector<brx_asset_import_model_surface_group> surface_groups;
-    internal_import_mmd_motion(input_stream_data.data(), input_stream_data.size(), surface_groups);
+    
+    mcrt_vector<brx_asset_import_model_animation> animations;
+    internal_import_mmd_motion(input_stream_data.data(), input_stream_data.size(), animations);
 
     return true;
 }

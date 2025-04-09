@@ -85,7 +85,7 @@ extern bool internal_import_gltf_scene(brx_asset_import_input_stream_factory *in
     mcrt_vector<mcrt_string> skeleton_joint_names;
     mcrt_vector<uint32_t> skeleton_joint_parent_indices;
     mcrt_vector<brx_asset_import_rigid_transform> skeleton_bind_pose_joint_transforms;
-    uint32_t vrm_skeleton_joint_indices[BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_COUNT];
+    uint32_t vrm_skeleton_joint_indices[BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_COUNT];
     mcrt_vector<uint32_t> internal_node_index_to_skeleton_joint_index;
     internal_import_skeleton(data, internal_node_world_transforms, internal_mesh_instances, internal_node_index_to_skeleton_joint_index, skeleton_joint_names, skeleton_joint_parent_indices, skeleton_bind_pose_joint_transforms, &vrm_skeleton_joint_indices[0]);
 
@@ -100,7 +100,7 @@ extern void internal_import_skeleton(cgltf_data const *data, mcrt_vector<DirectX
 {
     // TODO: support
     static_assert(-1 == static_cast<int32_t>(BRX_ASSET_IMPORT_UINT32_INDEX_INVALID), "");
-    std::memset(out_vrm_skeleton_joint_names, 0XFF, sizeof(uint32_t) * BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_COUNT);
+    std::memset(out_vrm_skeleton_joint_names, 0XFF, sizeof(uint32_t) * BRX_ASSET_IMPORT_SKELETON_JOINT_NAME_MMD_COUNT);
 
     assert(out_internal_node_world_transforms.empty());
     assert(out_internal_mesh_instance_nodes.empty());
