@@ -16,17 +16,8 @@
 //
 
 #include "brx_asset_import_model_scene.h"
-#include "internal_import_scene.h"
 #include <cstring>
 #include <cassert>
-
-extern "C" brx_asset_import_scene *brx_asset_import_create_scene(brx_asset_import_input_stream_factory *input_stream_factory, char const *file_name)
-{
-    mcrt_vector<brx_asset_import_model_surface_group> surface_groups;
-    internal_import_scene(input_stream_factory, file_name, surface_groups);
-
-    return NULL;
-}
 
 brx_asset_import_model_surface::brx_asset_import_model_surface(
     mcrt_vector<brx_asset_import_vertex_position> &&vertex_positions,
@@ -35,8 +26,9 @@ brx_asset_import_model_surface::brx_asset_import_model_surface(
     mcrt_vector<BRX_ASSET_IMPORT_MORPH_TARGET_NAME> &&morph_target_names,
     mcrt_vector<mcrt_vector<brx_asset_import_vertex_position>> &&morph_targets_vertex_positions,
     mcrt_vector<mcrt_vector<brx_asset_import_vertex_varying>> &&morph_targets_vertex_varyings,
+    mcrt_vector<uint32_t> &&indices,
     mcrt_vector<BRX_ASSET_IMPORT_TEXTURE_NAME> &&texture_names,
-    mcrt_vector<uint32_t> &&texture_factors,
+    mcrt_vector<brx_asset_import_texture_factor> &&texture_factors,
     mcrt_vector<mcrt_vector<uint8_t>> &&texture_urls)
     : m_vertex_positions(std::move(vertex_positions)),
       m_vertex_varyings(std::move(vertex_varyings)),
@@ -44,6 +36,7 @@ brx_asset_import_model_surface::brx_asset_import_model_surface(
       m_morph_target_names(std::move(morph_target_names)),
       m_morph_targets_vertex_positions(std::move(morph_targets_vertex_positions)),
       m_morph_targets_vertex_varyings(std::move(morph_targets_vertex_varyings)),
+      m_indices(std::move(indices)),
       m_texture_names(std::move(texture_names)),
       m_texture_factors(std::move(texture_factors)),
       m_texture_urls(std::move(texture_urls))
@@ -59,6 +52,17 @@ uint32_t brx_asset_import_model_surface::get_vertex_count() const
     uint32_t const vertex_count = this->m_vertex_positions.size();
     assert(this->m_vertex_varyings.size() == vertex_count);
     assert(this->m_vertex_blendings.empty() || this->m_vertex_blendings.size() == vertex_count);
+#ifndef NDEBUG
+    for (mcrt_vector<brx_asset_import_vertex_position> const &morph_target_vertex_positions : this->m_morph_targets_vertex_positions)
+    {
+        assert(morph_target_vertex_positions.size() == vertex_count);
+    }
+
+    for (mcrt_vector<brx_asset_import_vertex_varying> const &morph_target_vertex_varyings : this->m_morph_targets_vertex_varyings)
+    {
+        assert(morph_target_vertex_varyings.size() == vertex_count);
+    }
+#endif
     return vertex_count;
 }
 
@@ -79,7 +83,10 @@ brx_asset_import_vertex_blending const *brx_asset_import_model_surface::get_vert
 
 uint32_t brx_asset_import_model_surface::get_morph_target_count() const
 {
-    return this->m_morph_targets_vertex_positions.size();
+    uint32_t const morph_target_count = this->m_morph_target_names.size();
+    assert(this->m_morph_targets_vertex_positions.size() == morph_target_count);
+    assert(this->m_morph_targets_vertex_varyings.size() == morph_target_count);
+    return morph_target_count;
 }
 
 BRX_ASSET_IMPORT_MORPH_TARGET_NAME brx_asset_import_model_surface::get_morph_target_name(uint32_t morph_target_index) const
@@ -97,9 +104,22 @@ brx_asset_import_vertex_varying const *brx_asset_import_model_surface::get_morph
     return &this->m_morph_targets_vertex_varyings[morph_target_index][vertex_index];
 }
 
+uint32_t brx_asset_import_model_surface::get_index_count() const
+{
+    return this->m_indices.size();
+}
+
+uint32_t brx_asset_import_model_surface::get_index(uint32_t index_index) const
+{
+    return this->m_indices[index_index];
+}
+
 uint32_t brx_asset_import_model_surface::get_texture_count() const
 {
-    return this->m_texture_urls.size();
+    uint32_t const _texture_count = this->m_texture_names.size();
+    assert(this->m_texture_factors.size() == _texture_count);
+    assert(this->m_texture_urls.size() == _texture_count);
+    return _texture_count;
 }
 
 BRX_ASSET_IMPORT_TEXTURE_NAME brx_asset_import_model_surface::get_texture_name(uint32_t texture_index) const
@@ -107,21 +127,21 @@ BRX_ASSET_IMPORT_TEXTURE_NAME brx_asset_import_model_surface::get_texture_name(u
     return this->m_texture_names[texture_index];
 }
 
-uint32_t brx_asset_import_model_surface::get_texture_factor(uint32_t texture_index) const
+brx_asset_import_texture_factor const *brx_asset_import_model_surface::get_texture_factor(uint32_t texture_index) const
 {
-    return this->m_texture_factors[texture_index];
+    return &this->m_texture_factors[texture_index];
 }
 
-uint8_t const *brx_asset_import_model_surface::get_texture_url(uint32_t texture_index) const
+void const *brx_asset_import_model_surface::get_texture_url(uint32_t texture_index) const
 {
-    return this->m_texture_urls[texture_index].data();
+    return ((!this->m_texture_urls[texture_index].empty()) ? this->m_texture_urls[texture_index].data() : NULL);
 }
 
 brx_asset_import_model_surface_group::brx_asset_import_model_surface_group(
     mcrt_vector<brx_asset_import_model_surface> &&surfaces,
     mcrt_vector<BRX_ASSET_IMPORT_SKELETON_JOINT_NAME> &&animation_skeleton_joint_names,
     mcrt_vector<uint32_t> &&animation_skeleton_joint_parent_indices,
-    mcrt_vector<brx_asset_import_rigid_transform> &&animation_skeleton_bind_pose_transforms_local_space,
+    mcrt_vector<brx_asset_import_rigid_transform> &&animation_skeleton_joint_transforms_bind_pose_local_space,
     mcrt_vector<BRX_ASSET_IMPORT_SKELETON_JOINT_CONSTRAINT_NAME> &&animation_skeleton_joint_constraint_names,
     mcrt_vector<brx_asset_import_skeleton_joint_constraint> &&animation_skeleton_joint_constraints,
     mcrt_vector<mcrt_vector<uint32_t>> &&animation_skeleton_joint_constraints_storage,
@@ -132,7 +152,7 @@ brx_asset_import_model_surface_group::brx_asset_import_model_surface_group(
     : m_surfaces(std::move(surfaces)),
       m_animation_skeleton_joint_names(std::move(animation_skeleton_joint_names)),
       m_animation_skeleton_joint_parent_indices(std::move(animation_skeleton_joint_parent_indices)),
-      m_animation_skeleton_bind_pose_transforms_local_space(std::move(animation_skeleton_bind_pose_transforms_local_space)),
+      m_animation_skeleton_joint_transforms_bind_pose_local_space(std::move(animation_skeleton_joint_transforms_bind_pose_local_space)),
       m_animation_skeleton_joint_constraint_names(std::move(animation_skeleton_joint_constraint_names)),
       m_animation_skeleton_joint_constraints(std::move(animation_skeleton_joint_constraints)),
       m_animation_skeleton_joint_constraints_storage(std::move(animation_skeleton_joint_constraints_storage)),
@@ -179,7 +199,7 @@ uint32_t brx_asset_import_model_surface_group::get_animation_skeleton_joint_coun
 {
     uint32_t const animation_skeleton_joint_count = this->m_animation_skeleton_joint_names.size();
     assert(this->m_animation_skeleton_joint_parent_indices.size() == animation_skeleton_joint_count);
-    assert(this->m_animation_skeleton_bind_pose_transforms_local_space.size() == animation_skeleton_joint_count);
+    assert(this->m_animation_skeleton_joint_transforms_bind_pose_local_space.size() == animation_skeleton_joint_count);
     return animation_skeleton_joint_count;
 }
 
@@ -193,9 +213,9 @@ uint32_t brx_asset_import_model_surface_group::get_animation_skeleton_joint_pare
     return this->m_animation_skeleton_joint_parent_indices[animation_skeleton_joint_index];
 }
 
-brx_asset_import_rigid_transform const *brx_asset_import_model_surface_group::get_animation_skeleton_bind_pose_transform_local_space(uint32_t animation_skeleton_joint_index) const
+brx_asset_import_rigid_transform const *brx_asset_import_model_surface_group::get_animation_skeleton_joint_transform_bind_pose_transform_local_space(uint32_t animation_skeleton_joint_index) const
 {
-    return &this->m_animation_skeleton_bind_pose_transforms_local_space[animation_skeleton_joint_index];
+    return &this->m_animation_skeleton_joint_transforms_bind_pose_local_space[animation_skeleton_joint_index];
 }
 
 uint32_t brx_asset_import_model_surface_group::get_animation_skeleton_joint_constraint_count() const

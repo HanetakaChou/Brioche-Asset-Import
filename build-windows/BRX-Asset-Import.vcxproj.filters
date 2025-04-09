@@ -69,7 +69,7 @@
     <ClInclude Include="..\include\brx_asset_import_scene.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\source\brx_asset_import_rgb_image.h">
+    <ClInclude Include="..\source\brx_asset_import_albedo_image.h">
       <Filter>source</Filter>
     </ClInclude>
     <ClInclude Include="..\source\brx_asset_import_model_scene.h">
@@ -134,7 +134,7 @@
     <ClCompile Include="..\source\internal_import_webp_image.cpp">
       <Filter>source</Filter>
     </ClCompile>
-    <ClCompile Include="..\source\brx_asset_import_rgb_image.cpp">
+    <ClCompile Include="..\source\brx_asset_import_albedo_image.cpp">
       <Filter>source</Filter>
     </ClCompile>
     <ClCompile Include="..\source\brx_asset_import_model_scene.cpp">
@@ -162,6 +162,9 @@
       <Filter>source</Filter>
     </ClCompile>
     <ClCompile Include="..\source\internal_mmd_name.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\brx_asset_import_scene.cpp">
       <Filter>source</Filter>
     </ClCompile>
   </ItemGroup>

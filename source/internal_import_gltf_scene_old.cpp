@@ -795,7 +795,7 @@ static inline void import_gltf_scene_mesh_asset(scene_mesh_data *out_mesh_data, 
                             out_subset_data->m_normal_texture_image_uri = normal_texture_image->uri;
                             cgltf_decode_uri(&out_subset_data->m_normal_texture_image_uri[0]);
                             size_t null_terminator_pos = out_subset_data->m_normal_texture_image_uri.find('\0');
-                            if (std::string::npos != null_terminator_pos)
+                            if (mcrt_string::npos != null_terminator_pos)
                             {
                                 out_subset_data->m_normal_texture_image_uri.resize(null_terminator_pos);
                             }
@@ -826,7 +826,7 @@ static inline void import_gltf_scene_mesh_asset(scene_mesh_data *out_mesh_data, 
                             out_subset_data->m_emissive_texture_image_uri = emissive_texture_image->uri;
                             cgltf_decode_uri(&out_subset_data->m_emissive_texture_image_uri[0]);
                             size_t null_terminator_pos = out_subset_data->m_emissive_texture_image_uri.find('\0');
-                            if (std::string::npos != null_terminator_pos)
+                            if (mcrt_string::npos != null_terminator_pos)
                             {
                                 out_subset_data->m_emissive_texture_image_uri.resize(null_terminator_pos);
                             }
@@ -846,7 +846,7 @@ static inline void import_gltf_scene_mesh_asset(scene_mesh_data *out_mesh_data, 
                                 out_subset_data->m_base_color_texture_image_uri = base_color_texture_image->uri;
                                 cgltf_decode_uri(&out_subset_data->m_base_color_texture_image_uri[0]);
                                 size_t null_terminator_pos = out_subset_data->m_base_color_texture_image_uri.find('\0');
-                                if (std::string::npos != null_terminator_pos)
+                                if (mcrt_string::npos != null_terminator_pos)
                                 {
                                     out_subset_data->m_base_color_texture_image_uri.resize(null_terminator_pos);
                                 }
@@ -866,7 +866,7 @@ static inline void import_gltf_scene_mesh_asset(scene_mesh_data *out_mesh_data, 
                                 out_subset_data->m_metallic_roughness_texture_image_uri = metallic_roughness_texture_image->uri;
                                 cgltf_decode_uri(&out_subset_data->m_metallic_roughness_texture_image_uri[0]);
                                 size_t null_terminator_pos = out_subset_data->m_metallic_roughness_texture_image_uri.find('\0');
-                                if (std::string::npos != null_terminator_pos)
+                                if (mcrt_string::npos != null_terminator_pos)
                                 {
                                     out_subset_data->m_metallic_roughness_texture_image_uri.resize(null_terminator_pos);
                                 }

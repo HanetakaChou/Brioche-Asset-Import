@@ -15,24 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "../include/import_scene_asset.h"
-#if defined(__GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunknown-pragmas"
-#endif
-#include <DirectXMath.h>
-#include <DirectXPackedVector.h>
-#if defined(__GNUC__)
-#pragma GCC diagnostic pop
-#endif
-#include <algorithm>
-#include <cmath>
-#include <cassert>
 #include "brx_asset_import_model_scene.h"
-#include "internal_import_mmd_model.h"
-#include "internal_import_mmd_motion.h"
+#include "internal_import_scene.h"
+#include <cassert>
 
-extern bool import_gltf_scene_asset(mcrt_vector<scene_mesh_data> &out_total_mesh_data, float frame_rate, brx_asset_import_input_stream_factory *input_stream_factory, char const *input_stream_name)
+extern "C" brx_asset_import_scene *brx_asset_import_create_scene_from_input_stream(brx_asset_import_input_stream_factory *input_stream_factory, char const *input_stream_name)
 {
     mcrt_vector<uint8_t> input_stream_data;
     {
@@ -72,11 +59,34 @@ extern bool import_gltf_scene_asset(mcrt_vector<scene_mesh_data> &out_total_mesh
     }
     assert(!input_stream_data.empty());
 
+    return brx_asset_import_create_scene_from_memory(input_stream_data.data(), input_stream_data.size());
+}
+
+extern "C" brx_asset_import_scene *brx_asset_import_create_scene_from_memory(void const *data_base, size_t data_size)
+{
+    void *new_unwrapped_model_scene_base = mcrt_malloc(sizeof(brx_asset_import_model_scene), alignof(brx_asset_import_model_scene));
+    assert(NULL != new_unwrapped_model_scene_base);
+
     mcrt_vector<brx_asset_import_model_surface_group> surface_groups;
-    internal_import_mmd_model(input_stream_data.data(), input_stream_data.size(), surface_groups);
-
     mcrt_vector<brx_asset_import_model_animation> animations;
-    internal_import_mmd_motion(input_stream_data.data(), input_stream_data.size(), animations);
+    if (internal_import_model_scene(data_base, data_size, surface_groups, animations))
+    {
+        brx_asset_import_model_scene *new_unwrapped_model_scene = new (new_unwrapped_model_scene_base) brx_asset_import_model_scene{std::move(surface_groups), std::move(animations)};
+        return new_unwrapped_model_scene;
+    }
+    else
+    {
+        mcrt_free(new_unwrapped_model_scene_base);
+        return NULL;
+    }
+}
 
-    return true;
+extern "C" void brx_asset_import_destory_scene(brx_asset_import_scene *wrapped_scene)
+{
+    assert(NULL != wrapped_scene);
+    brx_asset_import_model_scene *delete_unwrapped_scene = static_cast<brx_asset_import_model_scene *>(wrapped_scene);
+
+    delete_unwrapped_scene->~brx_asset_import_model_scene();
+
+    mcrt_free(delete_unwrapped_scene);
 }

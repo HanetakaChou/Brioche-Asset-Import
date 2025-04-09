@@ -15,8 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef _BRX_ASSET_IMPORT_RGB_IMAGE_H_
-#define _BRX_ASSET_IMPORT_RGB_IMAGE_H_ 1
+#ifndef _BRX_ASSET_IMPORT_ALBEDO_IMAGE_H_
+#define _BRX_ASSET_IMPORT_ALBEDO_IMAGE_H_ 1
 
 #include "../include/brx_asset_import_image.h"
 #include "../../McRT-Malloc/include/mcrt_vector.h"

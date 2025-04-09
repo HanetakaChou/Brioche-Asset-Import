@@ -27,7 +27,7 @@
     <ClInclude Include="..\source\brx_asset_import_file_input_stream.h" />
     <ClInclude Include="..\source\brx_asset_import_memory_input_stream.h" />
     <ClInclude Include="..\source\brx_asset_import_model_scene.h" />
-    <ClInclude Include="..\source\brx_asset_import_rgb_image.h" />
+    <ClInclude Include="..\source\brx_asset_import_albedo_image.h" />
     <ClInclude Include="..\source\internal_import_gltf_scene.h" />
     <ClInclude Include="..\source\internal_import_image.h" />
     <ClInclude Include="..\source\internal_import_jpeg_image.h" />
@@ -44,7 +44,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\source\brx_asset_import_model_scene.cpp" />
-    <ClCompile Include="..\source\brx_asset_import_rgb_image.cpp" />
+    <ClCompile Include="..\source\brx_asset_import_albedo_image.cpp" />
+    <ClCompile Include="..\source\brx_asset_import_scene.cpp" />
     <ClCompile Include="..\source\internal_import_gltf_scene.cpp" />
     <ClCompile Include="..\source\internal_import_image.cpp" />
     <ClCompile Include="..\source\internal_import_jpeg_image.cpp" />

@@ -15,12 +15,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "brx_asset_import_rgb_image.h"
+#include "brx_asset_import_albedo_image.h"
 #include "internal_import_image.h"
 
 extern "C" brx_asset_import_image *brx_asset_import_create_image_from_input_stream(brx_asset_import_input_stream_factory *input_stream_factory, char const *input_stream_name)
 {
-    std::vector<uint8_t> input_stream_data;
+    mcrt_vector<uint8_t> input_stream_data;
     {
         brx_asset_import_input_stream *input_stream;
         if (NULL == (input_stream = input_stream_factory->create_instance(input_stream_name)))

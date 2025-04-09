@@ -28,14 +28,14 @@ class brx_asset_import_model_surface final : public brx_asset_import_surface
     mcrt_vector<brx_asset_import_vertex_varying> m_vertex_varyings;
     mcrt_vector<brx_asset_import_vertex_blending> m_vertex_blendings;
 
-    mcrt_vector<uint32_t> m_indices;
-
     mcrt_vector<BRX_ASSET_IMPORT_MORPH_TARGET_NAME> m_morph_target_names;
     mcrt_vector<mcrt_vector<brx_asset_import_vertex_position>> m_morph_targets_vertex_positions;
     mcrt_vector<mcrt_vector<brx_asset_import_vertex_varying>> m_morph_targets_vertex_varyings;
 
+    mcrt_vector<uint32_t> m_indices;
+
     mcrt_vector<BRX_ASSET_IMPORT_TEXTURE_NAME> m_texture_names;
-    mcrt_vector<uint32_t> m_texture_factors;
+    mcrt_vector<brx_asset_import_texture_factor> m_texture_factors;
     // use vector instead of string to support data binary
     mcrt_vector<mcrt_vector<uint8_t>> m_texture_urls;
 
@@ -47,8 +47,9 @@ public:
         mcrt_vector<BRX_ASSET_IMPORT_MORPH_TARGET_NAME> &&morph_target_names,
         mcrt_vector<mcrt_vector<brx_asset_import_vertex_position>> &&morph_targets_vertex_positions,
         mcrt_vector<mcrt_vector<brx_asset_import_vertex_varying>> &&morph_targets_vertex_varyings,
+        mcrt_vector<uint32_t> &&indices,
         mcrt_vector<BRX_ASSET_IMPORT_TEXTURE_NAME> &&texture_names,
-        mcrt_vector<uint32_t> &&texture_factors,
+        mcrt_vector<brx_asset_import_texture_factor> &&texture_factors,
         mcrt_vector<mcrt_vector<uint8_t>> &&texture_urls);
     ~brx_asset_import_model_surface();
 
@@ -63,10 +64,13 @@ private:
     brx_asset_import_vertex_position const *get_morph_target_vertex_position(uint32_t morph_target_index, uint32_t vertex_index) const override;
     brx_asset_import_vertex_varying const *get_morph_target_vertex_varying(uint32_t morph_target_index, uint32_t vertex_index) const override;
 
+    uint32_t get_index_count() const override;
+    uint32_t get_index(uint32_t index_index) const override;
+
     uint32_t get_texture_count() const override;
     BRX_ASSET_IMPORT_TEXTURE_NAME get_texture_name(uint32_t texture_index) const override;
-    uint32_t get_texture_factor(uint32_t texture_index) const override;
-    uint8_t const *get_texture_url(uint32_t texture_index) const override;
+    brx_asset_import_texture_factor const *get_texture_factor(uint32_t texture_index) const override;
+    void const *get_texture_url(uint32_t texture_index) const override;
 };
 
 class brx_asset_import_model_surface_group final : public brx_asset_import_surface_group
@@ -75,7 +79,7 @@ class brx_asset_import_model_surface_group final : public brx_asset_import_surfa
 
     mcrt_vector<BRX_ASSET_IMPORT_SKELETON_JOINT_NAME> m_animation_skeleton_joint_names;
     mcrt_vector<uint32_t> m_animation_skeleton_joint_parent_indices;
-    mcrt_vector<brx_asset_import_rigid_transform> m_animation_skeleton_bind_pose_transforms_local_space;
+    mcrt_vector<brx_asset_import_rigid_transform> m_animation_skeleton_joint_transforms_bind_pose_local_space;
 
     mcrt_vector<BRX_ASSET_IMPORT_SKELETON_JOINT_CONSTRAINT_NAME> m_animation_skeleton_joint_constraint_names;
     mcrt_vector<brx_asset_import_skeleton_joint_constraint> m_animation_skeleton_joint_constraints;
@@ -92,7 +96,7 @@ public:
         mcrt_vector<brx_asset_import_model_surface> &&surfaces,
         mcrt_vector<BRX_ASSET_IMPORT_SKELETON_JOINT_NAME> &&animation_skeleton_joint_names,
         mcrt_vector<uint32_t> &&animation_skeleton_joint_parent_indices,
-        mcrt_vector<brx_asset_import_rigid_transform> &&animation_skeleton_bind_pose_transforms_local_space,
+        mcrt_vector<brx_asset_import_rigid_transform> &&animation_skeleton_joint_transforms_bind_pose_local_space,
         mcrt_vector<BRX_ASSET_IMPORT_SKELETON_JOINT_CONSTRAINT_NAME> &&animation_skeleton_joint_constraint_names,
         mcrt_vector<brx_asset_import_skeleton_joint_constraint> &&animation_skeleton_joint_constraints,
         mcrt_vector<mcrt_vector<uint32_t>> &&animation_skeleton_joint_constraints_storage,
@@ -109,7 +113,7 @@ private:
     uint32_t get_animation_skeleton_joint_count() const override;
     BRX_ASSET_IMPORT_SKELETON_JOINT_NAME get_animation_skeleton_joint_name(uint32_t animation_skeleton_joint_index) const override;
     uint32_t get_animation_skeleton_joint_parent_index(uint32_t animation_skeleton_joint_index) const override;
-    brx_asset_import_rigid_transform const *get_animation_skeleton_bind_pose_transform_local_space(uint32_t animation_skeleton_joint_index) const override;
+    brx_asset_import_rigid_transform const *get_animation_skeleton_joint_transform_bind_pose_transform_local_space(uint32_t animation_skeleton_joint_index) const override;
 
     uint32_t get_animation_skeleton_joint_constraint_count() const override;
     BRX_ASSET_IMPORT_SKELETON_JOINT_CONSTRAINT_NAME get_animation_skeleton_joint_constraint_name(uint32_t animation_skeleton_joint_constraint_index) const override;

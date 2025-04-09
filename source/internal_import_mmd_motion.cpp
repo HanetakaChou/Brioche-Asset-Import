@@ -25,12 +25,10 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunknown-pragmas"
 #include <DirectXMath.h>
-#include <DirectXCollision.h>
 #pragma GCC diagnostic pop
 #elif defined(_MSC_VER)
 // MSVC or CLANG-CL
 #include <DirectXMath.h>
-#include <DirectXCollision.h>
 #else
 #error Unknown Compiler
 #endif
@@ -451,6 +449,8 @@ extern bool internal_import_mmd_motion(void const *data_base, size_t data_size, 
 
     assert(out_animations.empty());
     out_animations = {};
+
+    out_animations.reserve(1U);
 
     out_animations.emplace_back(std::move(weight_channel_names), std::move(weights), std::move(rigid_transform_channel_names), std::move(rigid_transforms), std::move(switch_channel_names), std::move(switches));
 

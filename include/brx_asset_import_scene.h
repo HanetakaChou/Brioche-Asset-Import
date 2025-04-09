@@ -421,28 +421,25 @@ enum BRX_ASSET_IMPORT_PHYSICS_CONSTRAINT_TYPE : uint32_t
 
 struct brx_asset_import_vertex_position
 {
-    // R32G32B32_FLOAT
     float m_position[3];
 };
 
 struct brx_asset_import_vertex_varying
 {
-    // R16G16_SNORM (octahedron map)
-    uint32_t m_normal;
-    // R15G15B2_SNORM (octahedron map + tangent w)
-    uint32_t m_tangent;
-    // R16G16_UNORM
-    uint32_t m_texcoord;
+    float m_normal[3];
+    float m_tangent[4];
+    float m_texcoord[2];
 };
 
 struct brx_asset_import_vertex_blending
 {
-    // R16G16B16A16_UINT (xy)
-    uint32_t m_indices_xy;
-    // R16G16B16A16_UINT (wz)
-    uint32_t m_indices_wz;
-    // R8G8B8A8_UNORM
-    uint32_t m_weights;
+    uint32_t m_indices[4];
+    float m_weights[4];
+};
+
+struct brx_asset_import_texture_factor
+{
+    float m_rgba[4];
 };
 
 struct brx_asset_import_rigid_transform
@@ -536,7 +533,7 @@ public:
     virtual uint32_t get_animation_skeleton_joint_count() const = 0;
     virtual BRX_ASSET_IMPORT_SKELETON_JOINT_NAME get_animation_skeleton_joint_name(uint32_t animation_skeleton_joint_index) const = 0;
     virtual uint32_t get_animation_skeleton_joint_parent_index(uint32_t animation_skeleton_joint_index) const = 0;
-    virtual brx_asset_import_rigid_transform const *get_animation_skeleton_bind_pose_transform_local_space(uint32_t animation_skeleton_joint_index) const = 0;
+    virtual brx_asset_import_rigid_transform const *get_animation_skeleton_joint_transform_bind_pose_transform_local_space(uint32_t animation_skeleton_joint_index) const = 0;
 
     // 0: no skeleton
     // greater than 0: skin
@@ -582,14 +579,17 @@ class brx_asset_import_surface
     virtual brx_asset_import_vertex_position const *get_morph_target_vertex_position(uint32_t morph_target_index, uint32_t vertex_index) const = 0;
     virtual brx_asset_import_vertex_varying const *get_morph_target_vertex_varying(uint32_t morph_target_index, uint32_t vertex_index) const = 0;
 
+    virtual uint32_t get_index_count() const = 0;
+    virtual uint32_t get_index(uint32_t index_index) const = 0;
+
     // material
     virtual uint32_t get_texture_count() const = 0;
     virtual BRX_ASSET_IMPORT_TEXTURE_NAME get_texture_name(uint32_t texture_index) const = 0;
     // R8G8B8A8_UNORM
-    virtual uint32_t get_texture_factor(uint32_t texture_index) const = 0;
+    virtual brx_asset_import_texture_factor const *get_texture_factor(uint32_t texture_index) const = 0;
     // start with file:// : external file
     // start with data:// : internal data
-    virtual uint8_t const *get_texture_url(uint32_t texture_index) const = 0;
+    virtual void const *get_texture_url(uint32_t texture_index) const = 0;
 };
 
 class brx_asset_import_animation
@@ -610,6 +610,8 @@ public:
     virtual bool get_switch(uint32_t frame_index, uint32_t channel_index) const = 0;
 };
 
-extern "C" brx_asset_import_scene *brx_asset_import_create_scene(brx_asset_import_input_stream_factory *input_stream_factory, char const *file_name);
+extern "C" brx_asset_import_scene *brx_asset_import_create_scene_from_input_stream(brx_asset_import_input_stream_factory *input_stream_factory, char const *input_stream_name);
+extern "C" brx_asset_import_scene *brx_asset_import_create_scene_from_memory(void const *data_base, size_t data_size);
+extern "C" void brx_asset_import_destory_scene(brx_asset_import_scene *scene);
 
 #endif
