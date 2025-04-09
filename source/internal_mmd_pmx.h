@@ -72,8 +72,8 @@ struct mmd_pmx_texture_t
 struct mmd_pmx_material_t
 {
     mcrt_string m_name;
-    mmd_pmx_vec4_t m_diffuse;
     bool m_is_double_sided;
+    mmd_pmx_vec4_t m_diffuse;
     uint32_t m_texture_index;
     uint32_t m_face_count;
 };

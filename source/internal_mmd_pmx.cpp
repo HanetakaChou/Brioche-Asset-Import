@@ -1082,7 +1082,6 @@ static inline bool internal_data_read_mmd_pmx_morphs(void const *data_base, size
             else if (3U == morph_type)
             {
                 // vertex uv morph
-                assert(false);
                 out_morphs[morph_index].m_morph_type = 2U;
 
                 out_morphs[morph_index].m_offsets.resize(offset_count);

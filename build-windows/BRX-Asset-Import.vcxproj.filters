@@ -93,6 +93,9 @@
     <ClInclude Include="..\source\internal_import_mmd_motion.h">
       <Filter>source</Filter>
     </ClInclude>
+    <ClInclude Include="..\source\internal_mmd_name.h">
+      <Filter>source</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\source\brx_asset_import_file_input_stream.cpp">
@@ -156,6 +159,9 @@
       <Filter>source</Filter>
     </ClCompile>
     <ClCompile Include="..\source\internal_import_mmd_motion.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\internal_mmd_name.cpp">
       <Filter>source</Filter>
     </ClCompile>
   </ItemGroup>
