@@ -1,87 +1,57 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="include">
-      <UniqueIdentifier>{df644262-f578-4952-a6b0-a2b75ad21e44}</UniqueIdentifier>
-    </Filter>
     <Filter Include="source">
-      <UniqueIdentifier>{349cdf46-1f63-4741-9481-73e48c7c3295}</UniqueIdentifier>
+      <UniqueIdentifier>{008e19da-3158-4200-bf02-38aaaf2a1467}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include">
+      <UniqueIdentifier>{67ab57b5-63c6-405b-8b1a-0333a329de59}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="build-windows">
+      <UniqueIdentifier>{db2b715e-5360-4a3f-916d-9f7d52ef63e7}</UniqueIdentifier>
     </Filter>
     <Filter Include="thirdparty">
-      <UniqueIdentifier>{257c03c2-1307-4c5e-8d81-f954ee95c54b}</UniqueIdentifier>
+      <UniqueIdentifier>{b6f56bd7-9841-4787-9773-c1e3fc7f287c}</UniqueIdentifier>
     </Filter>
     <Filter Include="thirdparty\DirectXMesh">
-      <UniqueIdentifier>{61f2fadd-15aa-4d7a-9481-6430dd1096c3}</UniqueIdentifier>
+      <UniqueIdentifier>{32634405-1abd-4f3f-a9b2-8630d7cf5e37}</UniqueIdentifier>
     </Filter>
-    <Filter Include="thirdparty\DirectXMesh\DirectXmesh">
-      <UniqueIdentifier>{487ec675-16b5-4061-a69f-f840f15a4afd}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="thirdparty\OpenCV">
-      <UniqueIdentifier>{d0aed924-1f1e-46db-b90b-020be69997ad}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="thirdparty\OpenCV\bin">
-      <UniqueIdentifier>{3bab80e7-371e-44a4-b2bf-7e0428186092}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="thirdparty\OpenCV\bin\x64">
-      <UniqueIdentifier>{4459101e-357f-4c55-9692-975a5f072528}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="thirdparty\mmd">
-      <UniqueIdentifier>{85622f8d-1d5b-418e-965d-5237794fbf91}</UniqueIdentifier>
+    <Filter Include="thirdparty\DirectXMesh\DirectXMesh">
+      <UniqueIdentifier>{42b87651-6657-4aa2-97fc-73249456bb48}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\brx_asset_import_input_stream.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\import_image_asset.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\import_scene_asset.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="..\source\brx_asset_import_file_input_stream.h">
       <Filter>source</Filter>
     </ClInclude>
     <ClInclude Include="..\source\brx_asset_import_memory_input_stream.h">
       <Filter>source</Filter>
     </ClInclude>
-    <ClInclude Include="..\thirdparty\DirectXMesh\DirectXMesh\DirectXMesh.h">
-      <Filter>thirdparty\DirectXMesh\DirectXmesh</Filter>
-    </ClInclude>
-    <ClInclude Include="..\thirdparty\DirectXMesh\DirectXMesh\scoped.h">
-      <Filter>thirdparty\DirectXMesh\DirectXmesh</Filter>
-    </ClInclude>
-    <ClInclude Include="..\source\internal_import_png_image.h">
-      <Filter>source</Filter>
-    </ClInclude>
-    <ClInclude Include="..\source\internal_import_jpeg_image.h">
+    <ClInclude Include="..\source\brx_asset_import_model_scene.h">
       <Filter>source</Filter>
     </ClInclude>
     <ClInclude Include="..\source\internal_import_image.h">
       <Filter>source</Filter>
     </ClInclude>
-    <ClInclude Include="..\source\internal_import_webp_image.h">
+    <ClInclude Include="..\source\internal_import_jpeg_image.h">
       <Filter>source</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\brx_asset_import_image.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\brx_asset_import_scene.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\source\brx_asset_import_albedo_image.h">
+    <ClInclude Include="..\source\internal_import_mmd_model.h">
       <Filter>source</Filter>
     </ClInclude>
-    <ClInclude Include="..\source\brx_asset_import_model_scene.h">
+    <ClInclude Include="..\source\internal_import_mmd_motion.h">
       <Filter>source</Filter>
     </ClInclude>
-    <ClInclude Include="..\source\internal_import_gltf_scene.h">
+    <ClInclude Include="..\source\internal_import_png_image.h">
       <Filter>source</Filter>
     </ClInclude>
     <ClInclude Include="..\source\internal_import_scene.h">
       <Filter>source</Filter>
     </ClInclude>
-    <ClInclude Include="..\source\internal_import_mmd_model.h">
+    <ClInclude Include="..\source\internal_import_webp_image.h">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\internal_mmd_name.h">
       <Filter>source</Filter>
     </ClInclude>
     <ClInclude Include="..\source\internal_mmd_pmx.h">
@@ -90,66 +60,57 @@
     <ClInclude Include="..\source\internal_mmd_vmd.h">
       <Filter>source</Filter>
     </ClInclude>
-    <ClInclude Include="..\source\internal_import_mmd_motion.h">
+    <ClInclude Include="..\source\brx_asset_import_albedo_image.h">
       <Filter>source</Filter>
     </ClInclude>
-    <ClInclude Include="..\source\internal_mmd_name.h">
-      <Filter>source</Filter>
+    <ClInclude Include="..\include\brx_asset_import_image.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\brx_asset_import_input_stream.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\brx_asset_import_scene.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\DirectXMesh\DirectXMesh\DirectXMesh.h">
+      <Filter>thirdparty\DirectXMesh\DirectXMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\DirectXMesh\DirectXMesh\scoped.h">
+      <Filter>thirdparty\DirectXMesh\DirectXMesh</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\source\brx_asset_import_file_input_stream.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
     <ClCompile Include="..\source\brx_asset_import_memory_input_stream.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\source\import_dds_image_asset.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\source\internal_import_gltf_scene_old.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\source\internal_import_gltf_scene_cgltf.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\source\import_pvr_image_asset.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\thirdparty\DirectXMesh\DirectXMesh\DirectXMeshNormals.cpp">
-      <Filter>thirdparty\DirectXMesh\DirectXmesh</Filter>
-    </ClCompile>
-    <ClCompile Include="..\thirdparty\DirectXMesh\DirectXMesh\DirectXMeshTangentFrame.cpp">
-      <Filter>thirdparty\DirectXMesh\DirectXmesh</Filter>
-    </ClCompile>
-    <ClCompile Include="..\source\internal_import_png_image.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\source\internal_import_jpeg_image.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\source\internal_import_image.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\source\internal_import_webp_image.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\source\brx_asset_import_albedo_image.cpp">
       <Filter>source</Filter>
     </ClCompile>
     <ClCompile Include="..\source\brx_asset_import_model_scene.cpp">
       <Filter>source</Filter>
     </ClCompile>
-    <ClCompile Include="..\source\internal_import_gltf_scene.cpp">
+    <ClCompile Include="..\source\brx_asset_import_scene.cpp">
       <Filter>source</Filter>
     </ClCompile>
-    <ClCompile Include="..\source\internal_import_scene.cpp">
+    <ClCompile Include="..\source\internal_import_image.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\internal_import_jpeg_image.cpp">
       <Filter>source</Filter>
     </ClCompile>
     <ClCompile Include="..\source\internal_import_mmd_model.cpp">
       <Filter>source</Filter>
     </ClCompile>
-    <ClCompile Include="..\source\test_old.cpp">
+    <ClCompile Include="..\source\internal_import_mmd_motion.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\internal_import_png_image.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\internal_import_scene.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\internal_import_webp_image.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\internal_mmd_name.cpp">
       <Filter>source</Filter>
     </ClCompile>
     <ClCompile Include="..\source\internal_mmd_pmx.cpp">
@@ -158,30 +119,25 @@
     <ClCompile Include="..\source\internal_mmd_vmd.cpp">
       <Filter>source</Filter>
     </ClCompile>
-    <ClCompile Include="..\source\internal_import_mmd_motion.cpp">
+    <ClCompile Include="..\source\brx_asset_import_albedo_image.cpp">
       <Filter>source</Filter>
     </ClCompile>
-    <ClCompile Include="..\source\internal_mmd_name.cpp">
+    <ClCompile Include="..\source\brx_asset_import_file_input_stream.cpp">
       <Filter>source</Filter>
     </ClCompile>
-    <ClCompile Include="..\source\brx_asset_import_scene.cpp">
-      <Filter>source</Filter>
+    <ClCompile Include="dllmain.cpp">
+      <Filter>build-windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\thirdparty\DirectXMesh\DirectXMesh\DirectXMeshNormals.cpp">
+      <Filter>thirdparty\DirectXMesh\DirectXMesh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\thirdparty\DirectXMesh\DirectXMesh\DirectXMeshTangentFrame.cpp">
+      <Filter>thirdparty\DirectXMesh\DirectXMesh</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <CopyFileToFolders Include="..\..\OpenCV\build\x64\vc15\bin\opencv_world3410.dll">
-      <Filter>thirdparty\OpenCV\bin\x64</Filter>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="..\..\OpenCV\build\x64\vc15\bin\opencv_ffmpeg3410_64.dll">
-      <Filter>thirdparty\OpenCV\bin\x64</Filter>
-    </CopyFileToFolders>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\thirdparty\mmd\mmd_pmx.ksy">
-      <Filter>thirdparty\mmd</Filter>
-    </None>
-    <None Include="..\thirdparty\mmd\mmd_vmd.ksy">
-      <Filter>thirdparty\mmd</Filter>
+    <None Include="BRX-Asset-Import.def">
+      <Filter>build-windows</Filter>
     </None>
   </ItemGroup>
 </Project>

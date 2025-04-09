@@ -31,13 +31,13 @@ enum
 	BRX_ASSET_IMPORT_INPUT_STREAM_SEEK_END = 2
 };
 
-extern brx_asset_import_input_stream_factory *brx_asset_import_create_file_input_stream_factory();
+extern "C" brx_asset_import_input_stream_factory *brx_asset_import_create_file_input_stream_factory();
 
-extern void brx_asset_import_destroy_file_input_stream_factory(brx_asset_import_input_stream_factory *input_stream_factory);
+extern "C" void brx_asset_import_destroy_file_input_stream_factory(brx_asset_import_input_stream_factory *input_stream_factory);
 
-extern brx_asset_import_input_stream_factory *brx_asset_import_create_memory_input_stream_factory(size_t input_stream_count, char const *const *input_stream_file_names, void const *const *input_stream_memory_range_bases, size_t const *input_stream_memory_range_sizes);
+extern "C" brx_asset_import_input_stream_factory *brx_asset_import_create_memory_input_stream_factory(size_t input_stream_count, char const *const *input_stream_file_names, void const *const *input_stream_memory_range_bases, size_t const *input_stream_memory_range_sizes);
 
-extern void brx_asset_import_destroy_memory_input_stream_factory(brx_asset_import_input_stream_factory *input_stream_factory);
+extern "C" void brx_asset_import_destroy_memory_input_stream_factory(brx_asset_import_input_stream_factory *input_stream_factory);
 
 class brx_asset_import_input_stream_factory
 {

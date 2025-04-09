@@ -35,7 +35,7 @@
 #error Unknown Architecture
 #endif
 
-extern brx_asset_import_input_stream_factory *brx_asset_import_create_file_input_stream_factory()
+extern "C" brx_asset_import_input_stream_factory *brx_asset_import_create_file_input_stream_factory()
 {
 	void *new_unwrapped_input_stream_factory_base = mcrt_malloc(sizeof(brx_asset_import_file_input_stream_factory), alignof(brx_asset_import_file_input_stream_factory));
 	assert(NULL != new_unwrapped_input_stream_factory_base);
@@ -45,7 +45,7 @@ extern brx_asset_import_input_stream_factory *brx_asset_import_create_file_input
 	return new_unwrapped_input_stream_factory;
 }
 
-extern void brx_asset_import_destroy_file_input_stream_factory(brx_asset_import_input_stream_factory *wrapped_input_stream_factory)
+extern "C" void brx_asset_import_destroy_file_input_stream_factory(brx_asset_import_input_stream_factory *wrapped_input_stream_factory)
 {
 	assert(NULL != wrapped_input_stream_factory);
 	brx_asset_import_file_input_stream_factory *delete_unwrapped_input_stream_factory = static_cast<brx_asset_import_file_input_stream_factory *>(wrapped_input_stream_factory);
@@ -196,7 +196,7 @@ int64_t brx_asset_import_file_input_stream::seek(int64_t offset, int wrapped_whe
 #include "../../libiconv/include/iconv.h"
 #include "../../McRT-Malloc/include/mcrt_string.h"
 
-extern brx_asset_import_input_stream_factory *brx_asset_import_create_file_input_stream_factory()
+extern "C" brx_asset_import_input_stream_factory *brx_asset_import_create_file_input_stream_factory()
 {
 	void *new_unwrapped_input_stream_factory_base = mcrt_malloc(sizeof(brx_asset_import_file_input_stream_factory), alignof(brx_asset_import_file_input_stream_factory));
 	assert(NULL != new_unwrapped_input_stream_factory_base);
@@ -206,7 +206,7 @@ extern brx_asset_import_input_stream_factory *brx_asset_import_create_file_input
 	return new_unwrapped_input_stream_factory;
 }
 
-extern void brx_asset_import_destroy_file_input_stream_factory(brx_asset_import_input_stream_factory *wrapped_input_stream_factory)
+extern "C" void brx_asset_import_destroy_file_input_stream_factory(brx_asset_import_input_stream_factory *wrapped_input_stream_factory)
 {
 	assert(NULL != wrapped_input_stream_factory);
 	brx_asset_import_file_input_stream_factory *delete_unwrapped_input_stream_factory = static_cast<brx_asset_import_file_input_stream_factory *>(wrapped_input_stream_factory);

@@ -21,7 +21,7 @@
 #include <cstring>
 #include <assert.h>
 
-extern brx_asset_import_input_stream_factory *brx_asset_import_create_memory_input_stream_factory(size_t input_stream_count, char const *const *input_stream_file_names, void const *const *input_stream_memory_range_bases, size_t const *input_stream_memory_range_sizes)
+extern "C" brx_asset_import_input_stream_factory *brx_asset_import_create_memory_input_stream_factory(size_t input_stream_count, char const *const *input_stream_file_names, void const *const *input_stream_memory_range_bases, size_t const *input_stream_memory_range_sizes)
 {
 	void *new_unwrapped_input_stream_factory_base = mcrt_malloc(sizeof(brx_asset_import_memory_input_stream_factory), alignof(brx_asset_import_memory_input_stream_factory));
 	assert(NULL != new_unwrapped_input_stream_factory_base);
@@ -31,7 +31,7 @@ extern brx_asset_import_input_stream_factory *brx_asset_import_create_memory_inp
 	return new_unwrapped_input_stream_factory;
 }
 
-extern void brx_asset_import_destroy_memory_input_stream_factory(brx_asset_import_input_stream_factory *wrapped_input_stream_factory)
+extern "C" void brx_asset_import_destroy_memory_input_stream_factory(brx_asset_import_input_stream_factory *wrapped_input_stream_factory)
 {
 	assert(NULL != wrapped_input_stream_factory);
 	brx_asset_import_memory_input_stream_factory *delete_unwrapped_input_stream_factory = static_cast<brx_asset_import_memory_input_stream_factory *>(wrapped_input_stream_factory);
