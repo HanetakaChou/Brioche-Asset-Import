@@ -564,6 +564,7 @@ public:
 
 class brx_asset_import_surface
 {
+public:
     virtual uint32_t get_vertex_count() const = 0;
     virtual brx_asset_import_vertex_position const *get_vertex_position(uint32_t vertex_index) const = 0;
     virtual brx_asset_import_vertex_varying const *get_vertex_varying(uint32_t vertex_index) const = 0;

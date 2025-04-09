@@ -337,13 +337,13 @@ extern bool internal_import_mmd_model(void const *data_base, size_t data_size, m
 					texture_names.emplace_back(BRX_ASSET_IMPORT_TEXTURE_NAME_PBR_BASE_COLOR);
 
 					texture_factors.emplace_back(brx_asset_import_texture_factor{mesh_section.m_diffuse[0], mesh_section.m_diffuse[1], mesh_section.m_diffuse[2], mesh_section.m_diffuse[3]});
-				
+
 					{
 						mcrt_string texture_url;
 						texture_url += "file://";
 						texture_url += mesh_section.m_texture_path;
 
-						static_assert(sizeof(decltype(texture_url[0]))==sizeof(decltype(texture_urls.back()[0])), "");
+						static_assert(sizeof(decltype(texture_url[0])) == sizeof(decltype(texture_urls.back()[0])), "");
 						texture_urls.emplace_back();
 						texture_urls.back().resize(texture_url.length() + 1U);
 						std::memcpy(texture_urls.back().data(), texture_url.data(), texture_url.length());
@@ -351,7 +351,7 @@ extern bool internal_import_mmd_model(void const *data_base, size_t data_size, m
 					}
 				}
 
-				surfaces.emplace_back(std::move(vertex_positions), std::move(vertex_varyings), std::move(vertex_blendings), std::move(morph_target_names), std::move(morph_targets_vertex_positions), std::move(morph_targets_vertex_varyings), std::move(indices), std::move(texture_names), std::move(texture_factors), std::move(texture_urls));
+				surfaces.emplace_back(std::move(vertex_positions), std::move(vertex_varyings), std::move(vertex_blendings), morph_target_names, std::move(morph_targets_vertex_positions), std::move(morph_targets_vertex_varyings), std::move(indices), std::move(texture_names), std::move(texture_factors), std::move(texture_urls));
 			}
 
 			assert(surfaces.size() == mesh_sections.size());
