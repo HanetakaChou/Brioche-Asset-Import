@@ -102,7 +102,7 @@ static inline void internal_import_morph_targets(mcrt_vector<mmd_pmx_vertex_t> c
 
 static inline void internal_import_animation_skeleton(mcrt_vector<mmd_pmx_bone_t> const &in_mmd_model_nodes, mcrt_vector<BRX_ASSET_IMPORT_SKELETON_JOINT_NAME> &out_animation_skeleton_joint_names, mcrt_vector<uint32_t> &out_animation_skeleton_joint_parent_indices, mcrt_vector<uint32_t> &out_model_node_to_animation_skeleton_joint_map, mcrt_vector<uint32_t> &out_animation_skeleton_joint_to_model_node_map, mcrt_vector<DirectX::XMFLOAT4X4> &out_animation_skeleton_bind_pose_local_space, mcrt_vector<DirectX::XMFLOAT4X4> &out_animation_skeleton_bind_pose_model_space, mcrt_vector<BRX_ASSET_IMPORT_SKELETON_JOINT_CONSTRAINT_NAME> &out_animation_skeleton_joint_constraint_names, mcrt_vector<brx_asset_import_skeleton_joint_constraint> &out_animation_skeleton_joint_constraints, mcrt_vector<mcrt_vector<uint32_t>> &out_animation_skeleton_joint_constraints_storage);
 
-static inline void internal_import_ragdoll_physics(mcrt_vector<mmd_pmx_rigid_body_t> const &in_mmd_rigid_bodies, mcrt_vector<mmd_pmx_constraint_t> const &in_mmd_constraints, mcrt_vector<uint32_t> const &in_model_node_to_animation_skeleton_joint_map, mcrt_vector<DirectX::XMFLOAT4X4> const &in_animation_skeleton_bind_pose_model_space, mcrt_vector<brx_asset_import_physics_rigid_body> &out_ragdoll_skeleton_rigid_bodies, mcrt_vector<brx_asset_import_physics_constraint> &out_ragdoll_skeleton_constraints, mcrt_vector<uint32_t> &out_ragdoll_skeleton_joint_parent_indices, mcrt_vector<brx_asset_import_ragdoll_direct_mapping> &out_animation_to_ragdoll_skeleton_mapping, mcrt_vector<brx_asset_import_ragdoll_direct_mapping> &out_ragdoll_to_animation_skeleton_mapping);
+static inline void internal_import_ragdoll_physics(mcrt_vector<mmd_pmx_rigid_body_t> const &in_mmd_rigid_bodies, mcrt_vector<mmd_pmx_constraint_t> const &in_mmd_constraints, mcrt_vector<uint32_t> const &in_model_node_to_animation_skeleton_joint_map, mcrt_vector<DirectX::XMFLOAT4X4> const &in_animation_skeleton_bind_pose_model_space, mcrt_vector<brx_asset_import_physics_rigid_body> &out_ragdoll_skeleton_rigid_bodies, mcrt_vector<brx_asset_import_physics_constraint> &out_ragdoll_skeleton_constraints, mcrt_vector<uint32_t> &out_ragdoll_skeleton_joint_parent_indices, mcrt_vector<brx_asset_import_ragdoll_direct_mapping> &out_animation_to_ragdoll_direct_mapping, mcrt_vector<brx_asset_import_ragdoll_direct_mapping> &out_ragdoll_to_animation_direct_mapping);
 
 static inline void internal_import_mesh_sections(mcrt_vector<mmd_pmx_vertex_t> const &in_vertices, mcrt_vector<mmd_pmx_face_t> const &in_faces, mcrt_vector<mmd_pmx_texture_t> const &in_textures, mcrt_vector<mmd_pmx_material_t> const &in_materials, mcrt_vector<mcrt_map<uint32_t, internal_mmd_morph_target_vertex_t>> const &in_morph_targets_vertices, mcrt_vector<uint32_t> const &in_model_node_to_animation_skeleton_joint_map, mcrt_vector<internal_mmd_mesh_section_t> &out_mesh_sections);
 
@@ -121,8 +121,8 @@ extern bool internal_import_mmd_model(void const *data_base, size_t data_size, m
 	mcrt_vector<brx_asset_import_physics_rigid_body> ragdoll_skeleton_rigid_bodies;
 	mcrt_vector<brx_asset_import_physics_constraint> ragdoll_skeleton_constraints;
 
-	mcrt_vector<brx_asset_import_ragdoll_direct_mapping> animation_to_ragdoll_skeleton_mapping;
-	mcrt_vector<brx_asset_import_ragdoll_direct_mapping> ragdoll_to_animation_skeleton_mapping;
+	mcrt_vector<brx_asset_import_ragdoll_direct_mapping> animation_to_ragdoll_direct_mapping;
+	mcrt_vector<brx_asset_import_ragdoll_direct_mapping> ragdoll_to_animation_direct_mapping;
 
 	{
 		mmd_pmx_t mmd_pmx;
@@ -165,7 +165,7 @@ extern bool internal_import_mmd_model(void const *data_base, size_t data_size, m
 		}
 
 		mcrt_vector<uint32_t> ragdoll_skeleton_joint_parent_indices;
-		internal_import_ragdoll_physics(mmd_pmx.m_rigid_bodies, mmd_pmx.m_constraints, model_node_to_animation_skeleton_joint_map, animation_skeleton_bind_pose_model_space_matrix, ragdoll_skeleton_rigid_bodies, ragdoll_skeleton_constraints, ragdoll_skeleton_joint_parent_indices, animation_to_ragdoll_skeleton_mapping, ragdoll_to_animation_skeleton_mapping);
+		internal_import_ragdoll_physics(mmd_pmx.m_rigid_bodies, mmd_pmx.m_constraints, model_node_to_animation_skeleton_joint_map, animation_skeleton_bind_pose_model_space_matrix, ragdoll_skeleton_rigid_bodies, ragdoll_skeleton_constraints, ragdoll_skeleton_joint_parent_indices, animation_to_ragdoll_direct_mapping, ragdoll_to_animation_direct_mapping);
 
 		mcrt_vector<BRX_ASSET_IMPORT_MORPH_TARGET_NAME> morph_target_names;
 		mcrt_vector<mcrt_map<uint32_t, internal_mmd_morph_target_vertex_t>> morph_targets_vertices;
@@ -186,6 +186,7 @@ extern bool internal_import_mmd_model(void const *data_base, size_t data_size, m
 				mcrt_vector<mcrt_vector<brx_asset_import_vertex_position>> morph_targets_vertex_positions;
 				mcrt_vector<mcrt_vector<brx_asset_import_vertex_varying>> morph_targets_vertex_varyings;
 				mcrt_vector<uint32_t> indices;
+				bool is_double_sided;
 				mcrt_vector<BRX_ASSET_IMPORT_TEXTURE_NAME> texture_names;
 				mcrt_vector<brx_asset_import_texture_factor> texture_factors;
 				mcrt_vector<mcrt_vector<uint8_t>> texture_urls;
@@ -346,6 +347,8 @@ extern bool internal_import_mmd_model(void const *data_base, size_t data_size, m
 						}
 					}
 
+					is_double_sided = mesh_section.m_is_double_sided;
+
 					texture_names.emplace_back(BRX_ASSET_IMPORT_TEXTURE_NAME_PBR_BASE_COLOR);
 
 					texture_factors.emplace_back(brx_asset_import_texture_factor{mesh_section.m_diffuse[0], mesh_section.m_diffuse[1], mesh_section.m_diffuse[2], mesh_section.m_diffuse[3]});
@@ -363,7 +366,7 @@ extern bool internal_import_mmd_model(void const *data_base, size_t data_size, m
 					}
 				}
 
-				surfaces.emplace_back(std::move(vertex_positions), std::move(vertex_varyings), std::move(vertex_blendings), std::move(mesh_section_morph_target_names), std::move(morph_targets_vertex_positions), std::move(morph_targets_vertex_varyings), std::move(indices), std::move(texture_names), std::move(texture_factors), std::move(texture_urls));
+				surfaces.emplace_back(std::move(vertex_positions), std::move(vertex_varyings), std::move(vertex_blendings), std::move(mesh_section_morph_target_names), std::move(morph_targets_vertex_positions), std::move(morph_targets_vertex_varyings), std::move(indices), is_double_sided, std::move(texture_names), std::move(texture_factors), std::move(texture_urls));
 			}
 
 			assert(surfaces.size() == mesh_sections.size());
@@ -375,7 +378,7 @@ extern bool internal_import_mmd_model(void const *data_base, size_t data_size, m
 
 	out_surface_groups.reserve(1U);
 
-	out_surface_groups.emplace_back(std::move(surfaces), std::move(animation_skeleton_joint_names), std::move(animation_skeleton_joint_parent_indices), std::move(animation_skeleton_joint_transforms_bind_pose_local_space), std::move(animation_skeleton_joint_constraint_names), std::move(animation_skeleton_joint_constraints), std::move(animation_skeleton_joint_constraints_storage), std::move(ragdoll_skeleton_rigid_bodies), std::move(ragdoll_skeleton_constraints), std::move(animation_to_ragdoll_skeleton_mapping), std::move(ragdoll_to_animation_skeleton_mapping));
+	out_surface_groups.emplace_back(std::move(surfaces), std::move(animation_skeleton_joint_names), std::move(animation_skeleton_joint_parent_indices), std::move(animation_skeleton_joint_transforms_bind_pose_local_space), std::move(animation_skeleton_joint_constraint_names), std::move(animation_skeleton_joint_constraints), std::move(animation_skeleton_joint_constraints_storage), std::move(ragdoll_skeleton_rigid_bodies), std::move(ragdoll_skeleton_constraints), std::move(animation_to_ragdoll_direct_mapping), std::move(ragdoll_to_animation_direct_mapping));
 
 	return true;
 }
@@ -1196,7 +1199,7 @@ static inline void internal_import_animation_skeleton(mcrt_vector<mmd_pmx_bone_t
 	}
 }
 
-static inline void internal_import_ragdoll_physics(mcrt_vector<mmd_pmx_rigid_body_t> const &in_mmd_rigid_bodies, mcrt_vector<mmd_pmx_constraint_t> const &in_mmd_constraints, mcrt_vector<uint32_t> const &in_model_node_to_animation_skeleton_joint_map, mcrt_vector<DirectX::XMFLOAT4X4> const &in_animation_skeleton_bind_pose_model_space, mcrt_vector<brx_asset_import_physics_rigid_body> &out_ragdoll_skeleton_rigid_bodies, mcrt_vector<brx_asset_import_physics_constraint> &out_ragdoll_skeleton_constraints, mcrt_vector<uint32_t> &out_ragdoll_skeleton_joint_parent_indices, mcrt_vector<brx_asset_import_ragdoll_direct_mapping> &out_animation_to_ragdoll_skeleton_mapping, mcrt_vector<brx_asset_import_ragdoll_direct_mapping> &out_ragdoll_to_animation_skeleton_mapping)
+static inline void internal_import_ragdoll_physics(mcrt_vector<mmd_pmx_rigid_body_t> const &in_mmd_rigid_bodies, mcrt_vector<mmd_pmx_constraint_t> const &in_mmd_constraints, mcrt_vector<uint32_t> const &in_model_node_to_animation_skeleton_joint_map, mcrt_vector<DirectX::XMFLOAT4X4> const &in_animation_skeleton_bind_pose_model_space, mcrt_vector<brx_asset_import_physics_rigid_body> &out_ragdoll_skeleton_rigid_bodies, mcrt_vector<brx_asset_import_physics_constraint> &out_ragdoll_skeleton_constraints, mcrt_vector<uint32_t> &out_ragdoll_skeleton_joint_parent_indices, mcrt_vector<brx_asset_import_ragdoll_direct_mapping> &out_animation_to_ragdoll_direct_mapping, mcrt_vector<brx_asset_import_ragdoll_direct_mapping> &out_ragdoll_to_animation_direct_mapping)
 {
 	uint32_t const rigid_body_count = in_mmd_rigid_bodies.size();
 
@@ -1298,11 +1301,11 @@ static inline void internal_import_ragdoll_physics(mcrt_vector<mmd_pmx_rigid_bod
 		assert(out_ragdoll_skeleton_rigid_bodies.empty());
 		out_ragdoll_skeleton_rigid_bodies = {};
 
-		assert(out_animation_to_ragdoll_skeleton_mapping.empty());
-		out_animation_to_ragdoll_skeleton_mapping = {};
+		assert(out_animation_to_ragdoll_direct_mapping.empty());
+		out_animation_to_ragdoll_direct_mapping = {};
 
-		assert(out_ragdoll_to_animation_skeleton_mapping.empty());
-		out_ragdoll_to_animation_skeleton_mapping = {};
+		assert(out_ragdoll_to_animation_direct_mapping.empty());
+		out_ragdoll_to_animation_direct_mapping = {};
 
 		for (uint32_t ragdoll_skeleton_joint_index = 0U; ragdoll_skeleton_joint_index < rigid_body_count; ++ragdoll_skeleton_joint_index)
 		{
@@ -1373,7 +1376,7 @@ static inline void internal_import_ragdoll_physics(mcrt_vector<mmd_pmx_rigid_bod
 					}
 					animation_to_ragdoll_transform_model_space.m[3][3] = 1.0F;
 
-					out_animation_to_ragdoll_skeleton_mapping.push_back(
+					out_animation_to_ragdoll_direct_mapping.push_back(
 						brx_asset_import_ragdoll_direct_mapping{
 							animation_skeleton_joint_index,
 							ragdoll_skeleton_joint_index,
@@ -1413,7 +1416,7 @@ static inline void internal_import_ragdoll_physics(mcrt_vector<mmd_pmx_rigid_bod
 					}
 					ragdoll_to_animation_transform_model_space.m[3][3] = 1.0F;
 
-					out_ragdoll_to_animation_skeleton_mapping.push_back(
+					out_ragdoll_to_animation_direct_mapping.push_back(
 						brx_asset_import_ragdoll_direct_mapping{
 							ragdoll_skeleton_joint_index,
 							animation_skeleton_joint_index,
@@ -2222,7 +2225,7 @@ static inline void internal_import_mesh_sections(mcrt_vector<mmd_pmx_vertex_t> c
 							}
 							else
 							{
-								assert(false);
+								// assert(false);
 
 								// Y-Up
 								new_normal.x = 0.0F;

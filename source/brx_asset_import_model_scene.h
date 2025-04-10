@@ -34,6 +34,8 @@ class brx_asset_import_model_surface final : public brx_asset_import_surface
 
     mcrt_vector<uint32_t> m_indices;
 
+    bool m_is_double_sided;
+
     mcrt_vector<BRX_ASSET_IMPORT_TEXTURE_NAME> m_texture_names;
     mcrt_vector<brx_asset_import_texture_factor> m_texture_factors;
     // use vector instead of string to support data binary
@@ -48,6 +50,7 @@ public:
         mcrt_vector<mcrt_vector<brx_asset_import_vertex_position>> &&morph_targets_vertex_positions,
         mcrt_vector<mcrt_vector<brx_asset_import_vertex_varying>> &&morph_targets_vertex_varyings,
         mcrt_vector<uint32_t> &&indices,
+        bool is_double_sided,
         mcrt_vector<BRX_ASSET_IMPORT_TEXTURE_NAME> &&texture_names,
         mcrt_vector<brx_asset_import_texture_factor> &&texture_factors,
         mcrt_vector<mcrt_vector<uint8_t>> &&texture_urls);
@@ -66,6 +69,8 @@ private:
 
     uint32_t get_index_count() const override;
     uint32_t get_index(uint32_t index_index) const override;
+
+    bool is_double_sided() const override;
 
     uint32_t get_texture_count() const override;
     BRX_ASSET_IMPORT_TEXTURE_NAME get_texture_name(uint32_t texture_index) const override;
@@ -88,8 +93,8 @@ class brx_asset_import_model_surface_group final : public brx_asset_import_surfa
     mcrt_vector<brx_asset_import_physics_rigid_body> m_ragdoll_skeleton_rigid_bodies;
     mcrt_vector<brx_asset_import_physics_constraint> m_ragdoll_skeleton_constraints;
 
-    mcrt_vector<brx_asset_import_ragdoll_direct_mapping> m_animation_to_ragdoll_skeleton_mapping;
-    mcrt_vector<brx_asset_import_ragdoll_direct_mapping> m_ragdoll_to_animation_skeleton_mapping;
+    mcrt_vector<brx_asset_import_ragdoll_direct_mapping> m_animation_to_ragdoll_direct_mapping;
+    mcrt_vector<brx_asset_import_ragdoll_direct_mapping> m_ragdoll_to_animation_direct_mapping;
 
 public:
     brx_asset_import_model_surface_group(
@@ -102,8 +107,8 @@ public:
         mcrt_vector<mcrt_vector<uint32_t>> &&animation_skeleton_joint_constraints_storage,
         mcrt_vector<brx_asset_import_physics_rigid_body> &&ragdoll_skeleton_rigid_bodies,
         mcrt_vector<brx_asset_import_physics_constraint> &&ragdoll_skeleton_constraints,
-        mcrt_vector<brx_asset_import_ragdoll_direct_mapping> &&animation_to_ragdoll_skeleton_mapping,
-        mcrt_vector<brx_asset_import_ragdoll_direct_mapping> &&ragdoll_to_animation_skeleton_mapping);
+        mcrt_vector<brx_asset_import_ragdoll_direct_mapping> &&animation_to_ragdoll_direct_mapping,
+        mcrt_vector<brx_asset_import_ragdoll_direct_mapping> &&ragdoll_to_animation_direct_mapping);
     ~brx_asset_import_model_surface_group();
 
 private:
@@ -113,7 +118,7 @@ private:
     uint32_t get_animation_skeleton_joint_count() const override;
     BRX_ASSET_IMPORT_SKELETON_JOINT_NAME get_animation_skeleton_joint_name(uint32_t animation_skeleton_joint_index) const override;
     uint32_t get_animation_skeleton_joint_parent_index(uint32_t animation_skeleton_joint_index) const override;
-    brx_asset_import_rigid_transform const *get_animation_skeleton_joint_transform_bind_pose_transform_local_space(uint32_t animation_skeleton_joint_index) const override;
+    brx_asset_import_rigid_transform const *get_animation_skeleton_joint_transform_bind_pose_local_space(uint32_t animation_skeleton_joint_index) const override;
 
     uint32_t get_animation_skeleton_joint_constraint_count() const override;
     BRX_ASSET_IMPORT_SKELETON_JOINT_CONSTRAINT_NAME get_animation_skeleton_joint_constraint_name(uint32_t animation_skeleton_joint_constraint_index) const override;
@@ -125,11 +130,11 @@ private:
     uint32_t get_ragdoll_skeleton_constraint_count() const override;
     brx_asset_import_physics_constraint const *get_ragdoll_skeleton_constraint(uint32_t ragdoll_skeleton_constraint_index) const override;
 
-    uint32_t get_animation_to_ragdoll_skeleton_mapping_count() const override;
-    brx_asset_import_ragdoll_direct_mapping const *get_animation_to_ragdoll_skeleton_mapping(uint32_t animation_to_ragdoll_skeleton_mapping_index) const override;
+    uint32_t get_animation_to_ragdoll_direct_mapping_count() const override;
+    brx_asset_import_ragdoll_direct_mapping const *get_animation_to_ragdoll_direct_mapping(uint32_t animation_to_ragdoll_direct_mapping_index) const override;
 
-    uint32_t get_ragdoll_to_animation_skeleton_mapping_count() const override;
-    brx_asset_import_ragdoll_direct_mapping const *get_ragdoll_to_animation_skeleton_mapping(uint32_t ragdoll_to_animation_skeleton_mapping_index) const override;
+    uint32_t get_ragdoll_to_animation_direct_mapping_count() const override;
+    brx_asset_import_ragdoll_direct_mapping const *get_ragdoll_to_animation_direct_mapping(uint32_t ragdoll_to_animation_direct_mapping_index) const override;
 };
 
 class brx_asset_import_model_animation final : public brx_asset_import_animation

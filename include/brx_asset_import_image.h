@@ -19,14 +19,18 @@
 #define _BRX_ASSET_IMPORT_IMAGE_H_ 1
 
 #include "brx_asset_import_input_stream.h"
-#include "../../Brioche/include/brx_sampled_asset_image_format.h"
 #include <cstddef>
 #include <cstdint>
+
+enum BRX_ASSET_IMPORT_IMAGE_FORMAT
+{
+    BRX_ASSET_IMPORT_IMAGE_FORMAT_R8G8B8A8 = 0
+};
 
 class brx_asset_import_image
 {
 public:
-    virtual BRX_SAMPLED_ASSET_IMAGE_FORMAT get_format(bool force_srgb) const = 0;
+    virtual BRX_ASSET_IMPORT_IMAGE_FORMAT get_format() const = 0;
     virtual uint32_t get_mip_level_count() const = 0;
     virtual uint32_t get_row_pitch(uint32_t mip_level_index) const = 0;
     virtual uint32_t get_row_size(uint32_t mip_level_index) const = 0;

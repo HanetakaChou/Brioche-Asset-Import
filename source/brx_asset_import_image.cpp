@@ -15,11 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "brx_asset_import_model_scene.h"
-#include "internal_import_scene.h"
+#include "brx_asset_import_rgba_image.h"
+#include "internal_import_image.h"
 #include <cassert>
 
-extern "C" brx_asset_import_scene *brx_asset_import_create_scene_from_input_stream(brx_asset_import_input_stream_factory *input_stream_factory, char const *input_stream_name)
+extern "C" brx_asset_import_image *brx_asset_import_create_image_from_input_stream(brx_asset_import_input_stream_factory *input_stream_factory, char const *input_stream_name)
 {
     mcrt_vector<uint8_t> input_stream_data;
     {
@@ -36,7 +36,7 @@ extern "C" brx_asset_import_scene *brx_asset_import_create_scene_from_input_stre
             return NULL;
         }
 
-        if ((length <= 0) || (length >= static_cast<int64_t>(INTPTR_MAX)))
+        if ((length <= 0) || (length >= static_cast<int64_t>(static_cast<int64_t>(1) << static_cast<int64_t>(24))))
         {
             input_stream_factory->destory_instance(input_stream);
             return NULL;
@@ -59,33 +59,45 @@ extern "C" brx_asset_import_scene *brx_asset_import_create_scene_from_input_stre
     }
     assert(!input_stream_data.empty());
 
-    return brx_asset_import_create_scene_from_memory(input_stream_data.data(), input_stream_data.size());
+    return brx_asset_import_create_image_from_memory(input_stream_data.data(), input_stream_data.size());
 }
 
-extern "C" brx_asset_import_scene *brx_asset_import_create_scene_from_memory(void const *data_base, size_t data_size)
+extern "C" brx_asset_import_image *brx_asset_import_create_image_from_memory(void const *data_base, size_t data_size)
 {
-    mcrt_vector<brx_asset_import_model_surface_group> surface_groups;
-    mcrt_vector<brx_asset_import_model_animation> animations;
-    if (internal_import_model_scene(data_base, data_size, surface_groups, animations))
+    switch (internal_import_image_type(data_base, data_size))
     {
-        void *new_unwrapped_model_scene_base = mcrt_malloc(sizeof(brx_asset_import_model_scene), alignof(brx_asset_import_model_scene));
-        assert(NULL != new_unwrapped_model_scene_base);
+    case BRX_IMAGE_TYPE_ALBEDO:
+    {
+        mcrt_vector<mcrt_vector<uint32_t>> pixel_data;
+        uint32_t width;
+        uint32_t height;
+        if (internal_import_albedo_image(data_base, data_size, pixel_data, &width, &height))
+        {
+            void *new_unwrapped_image_base = mcrt_malloc(sizeof(brx_asset_import_rgba_image), alignof(brx_asset_import_rgba_image));
+            assert(NULL != new_unwrapped_image_base);
 
-        brx_asset_import_model_scene *new_unwrapped_model_scene = new (new_unwrapped_model_scene_base) brx_asset_import_model_scene{std::move(surface_groups), std::move(animations)};
-        return new_unwrapped_model_scene;
+            brx_asset_import_rgba_image *new_unwrapped_image = new (new_unwrapped_image_base) brx_asset_import_rgba_image{std::move(pixel_data), width, height};
+            return new_unwrapped_image;
+        }
+        else
+        {
+            return NULL;
+        }
     }
-    else
+    break;
+    case BRX_IMAGE_TYPE_UNKNOWN:
+    default:
     {
         return NULL;
     }
+    }
 }
 
-extern "C" void brx_asset_import_destory_scene(brx_asset_import_scene *wrapped_scene)
+extern "C" void brx_asset_import_destory_image(brx_asset_import_image *wrapped_image)
 {
-    assert(NULL != wrapped_scene);
-    brx_asset_import_model_scene *delete_unwrapped_scene = static_cast<brx_asset_import_model_scene *>(wrapped_scene);
+    assert(NULL != wrapped_image);
+    brx_asset_import_rgba_image *delete_unwrapped_image = static_cast<brx_asset_import_rgba_image *>(wrapped_image);
 
-    delete_unwrapped_scene->~brx_asset_import_model_scene();
-
-    mcrt_free(delete_unwrapped_scene);
+    delete_unwrapped_image->~brx_asset_import_rgba_image();
+    mcrt_free(delete_unwrapped_image);
 }

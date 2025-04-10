@@ -69,7 +69,7 @@
     <ClInclude Include="..\source\internal_mmd_vmd.h">
       <Filter>source</Filter>
     </ClInclude>
-    <ClInclude Include="..\source\brx_asset_import_albedo_image.h">
+    <ClInclude Include="..\source\brx_asset_import_rgba_image.h">
       <Filter>source</Filter>
     </ClInclude>
     <ClInclude Include="..\include\brx_asset_import_image.h">
@@ -128,7 +128,7 @@
     <ClCompile Include="..\source\internal_mmd_vmd.cpp">
       <Filter>source</Filter>
     </ClCompile>
-    <ClCompile Include="..\source\brx_asset_import_albedo_image.cpp">
+    <ClCompile Include="..\source\brx_asset_import_rgba_image.cpp">
       <Filter>source</Filter>
     </ClCompile>
     <ClCompile Include="..\source\brx_asset_import_file_input_stream.cpp">
@@ -142,6 +142,9 @@
     </ClCompile>
     <ClCompile Include="..\thirdparty\DirectXMesh\DirectXMesh\DirectXMeshTangentFrame.cpp">
       <Filter>thirdparty\DirectXMesh\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\brx_asset_import_image.cpp">
+      <Filter>source</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

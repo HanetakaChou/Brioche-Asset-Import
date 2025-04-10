@@ -15,26 +15,24 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef _BRX_ASSET_IMPORT_ALBEDO_IMAGE_H_
-#define _BRX_ASSET_IMPORT_ALBEDO_IMAGE_H_ 1
+#ifndef _BRX_ASSET_IMPORT_RGBA_IMAGE_H_
+#define _BRX_ASSET_IMPORT_RGBA_IMAGE_H_ 1
 
 #include "../include/brx_asset_import_image.h"
 #include "../../McRT-Malloc/include/mcrt_vector.h"
 
-class brx_asset_import_albedo_image final : public brx_asset_import_image
+class brx_asset_import_rgba_image final : public brx_asset_import_image
 {
     mcrt_vector<mcrt_vector<uint32_t>> m_pixel_data;
     uint32_t m_width;
     uint32_t m_height;
 
 public:
-    brx_asset_import_albedo_image();
-    ~brx_asset_import_albedo_image();
-    bool init(void const *data_base, size_t data_size);
-    void uninit();
+    brx_asset_import_rgba_image(mcrt_vector<mcrt_vector<uint32_t>> &&pixel_data, uint32_t width, uint32_t height);
+    ~brx_asset_import_rgba_image();
 
 private:
-    BRX_SAMPLED_ASSET_IMAGE_FORMAT get_format(bool force_srgb) const override;
+    BRX_ASSET_IMPORT_IMAGE_FORMAT get_format() const override;
     uint32_t get_mip_level_count() const override;
     uint32_t get_row_pitch(uint32_t mip_level_index) const override;
     uint32_t get_row_size(uint32_t mip_level_index) const override;

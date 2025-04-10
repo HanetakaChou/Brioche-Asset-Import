@@ -22,7 +22,7 @@
     <ClInclude Include="..\include\brx_asset_import_image.h" />
     <ClInclude Include="..\include\brx_asset_import_input_stream.h" />
     <ClInclude Include="..\include\brx_asset_import_scene.h" />
-    <ClInclude Include="..\source\brx_asset_import_albedo_image.h" />
+    <ClInclude Include="..\source\brx_asset_import_rgba_image.h" />
     <ClInclude Include="..\source\brx_asset_import_file_input_stream.h" />
     <ClInclude Include="..\source\brx_asset_import_memory_input_stream.h" />
     <ClInclude Include="..\source\brx_asset_import_model_scene.h" />
@@ -40,8 +40,9 @@
     <ClInclude Include="..\thirdparty\DirectXMesh\DirectXMesh\scoped.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\source\brx_asset_import_albedo_image.cpp" />
+    <ClCompile Include="..\source\brx_asset_import_rgba_image.cpp" />
     <ClCompile Include="..\source\brx_asset_import_file_input_stream.cpp" />
+    <ClCompile Include="..\source\brx_asset_import_image.cpp" />
     <ClCompile Include="..\source\brx_asset_import_memory_input_stream.cpp" />
     <ClCompile Include="..\source\brx_asset_import_model_scene.cpp" />
     <ClCompile Include="..\source\brx_asset_import_scene.cpp" />

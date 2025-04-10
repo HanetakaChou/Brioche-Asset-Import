@@ -533,7 +533,7 @@ public:
     virtual uint32_t get_animation_skeleton_joint_count() const = 0;
     virtual BRX_ASSET_IMPORT_SKELETON_JOINT_NAME get_animation_skeleton_joint_name(uint32_t animation_skeleton_joint_index) const = 0;
     virtual uint32_t get_animation_skeleton_joint_parent_index(uint32_t animation_skeleton_joint_index) const = 0;
-    virtual brx_asset_import_rigid_transform const *get_animation_skeleton_joint_transform_bind_pose_transform_local_space(uint32_t animation_skeleton_joint_index) const = 0;
+    virtual brx_asset_import_rigid_transform const *get_animation_skeleton_joint_transform_bind_pose_local_space(uint32_t animation_skeleton_joint_index) const = 0;
 
     // 0: no skeleton
     // greater than 0: skin
@@ -553,13 +553,13 @@ public:
 
     // 0: no skeleton
     // greater than 0: skin
-    virtual uint32_t get_animation_to_ragdoll_skeleton_mapping_count() const = 0;
-    virtual brx_asset_import_ragdoll_direct_mapping const *get_animation_to_ragdoll_skeleton_mapping(uint32_t animation_to_ragdoll_skeleton_mapping_index) const = 0;
+    virtual uint32_t get_animation_to_ragdoll_direct_mapping_count() const = 0;
+    virtual brx_asset_import_ragdoll_direct_mapping const *get_animation_to_ragdoll_direct_mapping(uint32_t animation_to_ragdoll_direct_mapping_index) const = 0;
 
     // 0: no skeleton
     // greater than 0: skin
-    virtual uint32_t get_ragdoll_to_animation_skeleton_mapping_count() const = 0;
-    virtual brx_asset_import_ragdoll_direct_mapping const *get_ragdoll_to_animation_skeleton_mapping(uint32_t ragdoll_to_animation_skeleton_mapping_index) const = 0;
+    virtual uint32_t get_ragdoll_to_animation_direct_mapping_count() const = 0;
+    virtual brx_asset_import_ragdoll_direct_mapping const *get_ragdoll_to_animation_direct_mapping(uint32_t ragdoll_to_animation_direct_mapping_index) const = 0;
 };
 
 class brx_asset_import_surface
@@ -584,6 +584,8 @@ public:
     virtual uint32_t get_index(uint32_t index_index) const = 0;
 
     // material
+    virtual bool is_double_sided() const = 0;
+
     virtual uint32_t get_texture_count() const = 0;
     virtual BRX_ASSET_IMPORT_TEXTURE_NAME get_texture_name(uint32_t texture_index) const = 0;
     // R8G8B8A8_UNORM
