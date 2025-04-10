@@ -151,7 +151,7 @@ brx_asset_import_model_surface_group::brx_asset_import_model_surface_group(
     mcrt_vector<brx_asset_import_rigid_transform> &&animation_skeleton_joint_transforms_bind_pose_local_space,
     mcrt_vector<BRX_ASSET_IMPORT_SKELETON_JOINT_CONSTRAINT_NAME> &&animation_skeleton_joint_constraint_names,
     mcrt_vector<brx_asset_import_skeleton_joint_constraint> &&animation_skeleton_joint_constraints,
-    mcrt_vector<mcrt_vector<uint32_t>> &&animation_skeleton_joint_constraints_storage,
+    mcrt_vector<mcrt_vector<uint32_t>> &&animation_skeleton_joint_constraints_storages,
     mcrt_vector<brx_asset_import_physics_rigid_body> &&ragdoll_skeleton_rigid_bodies,
     mcrt_vector<brx_asset_import_physics_constraint> &&ragdoll_skeleton_constraints,
     mcrt_vector<brx_asset_import_ragdoll_direct_mapping> &&animation_to_ragdoll_direct_mappings,
@@ -162,7 +162,7 @@ brx_asset_import_model_surface_group::brx_asset_import_model_surface_group(
       m_animation_skeleton_joint_transforms_bind_pose_local_space(std::move(animation_skeleton_joint_transforms_bind_pose_local_space)),
       m_animation_skeleton_joint_constraint_names(std::move(animation_skeleton_joint_constraint_names)),
       m_animation_skeleton_joint_constraints(std::move(animation_skeleton_joint_constraints)),
-      m_animation_skeleton_joint_constraints_storage(std::move(animation_skeleton_joint_constraints_storage)),
+      m_animation_skeleton_joint_constraints_storages(std::move(animation_skeleton_joint_constraints_storages)),
       m_ragdoll_skeleton_rigid_bodies(std::move(ragdoll_skeleton_rigid_bodies)),
       m_ragdoll_skeleton_constraints(std::move(ragdoll_skeleton_constraints)),
       m_animation_to_ragdoll_direct_mappings(std::move(animation_to_ragdoll_direct_mappings)),
@@ -170,20 +170,25 @@ brx_asset_import_model_surface_group::brx_asset_import_model_surface_group(
 {
     uint32_t const animation_skeleton_joint_constraint_count = this->m_animation_skeleton_joint_constraint_names.size();
     assert(this->m_animation_skeleton_joint_constraints.size() == animation_skeleton_joint_constraint_count);
-    assert(this->m_animation_skeleton_joint_constraints_storage.size() == animation_skeleton_joint_constraint_count);
+    assert(this->m_animation_skeleton_joint_constraints_storages.size() == animation_skeleton_joint_constraint_count);
 
     for (uint32_t animation_skeleton_joint_constraint_index = 0; animation_skeleton_joint_constraint_index < animation_skeleton_joint_constraint_count; ++animation_skeleton_joint_constraint_index)
     {
         if (BRX_ASSET_IMPORT_SKELETON_JOINT_CONSTRAINT_COPY_TRANSFORM == this->m_animation_skeleton_joint_constraints[animation_skeleton_joint_constraint_index].m_constraint_type)
         {
-            assert(reinterpret_cast<uintptr_t>(this->m_animation_skeleton_joint_constraints[animation_skeleton_joint_constraint_index].m_copy_transform.m_source_weights) == reinterpret_cast<uintptr_t>(this->m_animation_skeleton_joint_constraints_storage[animation_skeleton_joint_constraint_index].data()));
-            this->m_animation_skeleton_joint_constraints[animation_skeleton_joint_constraint_index].m_copy_transform.m_source_weights = reinterpret_cast<float *>(this->m_animation_skeleton_joint_constraints_storage[animation_skeleton_joint_constraint_index].data());
+            assert(this->m_animation_skeleton_joint_constraints[animation_skeleton_joint_constraint_index].m_copy_transform.m_source_weight_count == this->m_animation_skeleton_joint_constraints_storages[animation_skeleton_joint_constraint_index].size());
+
+            assert(reinterpret_cast<uintptr_t>(this->m_animation_skeleton_joint_constraints[animation_skeleton_joint_constraint_index].m_copy_transform.m_source_weights) == reinterpret_cast<uintptr_t>(this->m_animation_skeleton_joint_constraints_storages[animation_skeleton_joint_constraint_index].data()));
+            this->m_animation_skeleton_joint_constraints[animation_skeleton_joint_constraint_index].m_copy_transform.m_source_weights = reinterpret_cast<float *>(this->m_animation_skeleton_joint_constraints_storages[animation_skeleton_joint_constraint_index].data());
         }
         else
         {
             assert(BRX_ASSET_IMPORT_SKELETON_JOINT_CONSTRAINT_INVERSE_KINEMATICS == this->m_animation_skeleton_joint_constraints[animation_skeleton_joint_constraint_index].m_constraint_type);
-            assert(reinterpret_cast<uintptr_t>(this->m_animation_skeleton_joint_constraints[animation_skeleton_joint_constraint_index].m_inverse_kinematics.m_ik_joint_indices) == reinterpret_cast<uintptr_t>(this->m_animation_skeleton_joint_constraints_storage[animation_skeleton_joint_constraint_index].data()));
-            this->m_animation_skeleton_joint_constraints[animation_skeleton_joint_constraint_index].m_inverse_kinematics.m_ik_joint_indices = this->m_animation_skeleton_joint_constraints_storage[animation_skeleton_joint_constraint_index].data();
+
+            assert(this->m_animation_skeleton_joint_constraints[animation_skeleton_joint_constraint_index].m_inverse_kinematics.m_ik_joint_count == this->m_animation_skeleton_joint_constraints_storages[animation_skeleton_joint_constraint_index].size());
+
+            assert(reinterpret_cast<uintptr_t>(this->m_animation_skeleton_joint_constraints[animation_skeleton_joint_constraint_index].m_inverse_kinematics.m_ik_joint_indices) == reinterpret_cast<uintptr_t>(this->m_animation_skeleton_joint_constraints_storages[animation_skeleton_joint_constraint_index].data()));
+            this->m_animation_skeleton_joint_constraints[animation_skeleton_joint_constraint_index].m_inverse_kinematics.m_ik_joint_indices = this->m_animation_skeleton_joint_constraints_storages[animation_skeleton_joint_constraint_index].data();
         }
     }
 }
@@ -229,7 +234,7 @@ uint32_t brx_asset_import_model_surface_group::get_animation_skeleton_joint_cons
 {
     uint32_t const animation_skeleton_joint_constraint_count = this->m_animation_skeleton_joint_constraint_names.size();
     assert(this->m_animation_skeleton_joint_constraints.size() == animation_skeleton_joint_constraint_count);
-    assert(this->m_animation_skeleton_joint_constraints_storage.size() == animation_skeleton_joint_constraint_count);
+    assert(this->m_animation_skeleton_joint_constraints_storages.size() == animation_skeleton_joint_constraint_count);
     return animation_skeleton_joint_constraint_count;
 }
 
@@ -240,6 +245,25 @@ BRX_ASSET_IMPORT_SKELETON_JOINT_CONSTRAINT_NAME brx_asset_import_model_surface_g
 
 brx_asset_import_skeleton_joint_constraint const *brx_asset_import_model_surface_group::get_animation_skeleton_joint_constraint(uint32_t animation_skeleton_joint_constraint_index) const
 {
+#ifndef NDEBUG
+    assert(this->m_animation_skeleton_joint_constraints.size() == this->m_animation_skeleton_joint_constraints_storages.size());
+
+    if (BRX_ASSET_IMPORT_SKELETON_JOINT_CONSTRAINT_COPY_TRANSFORM == this->m_animation_skeleton_joint_constraints[animation_skeleton_joint_constraint_index].m_constraint_type)
+    {
+        assert(this->m_animation_skeleton_joint_constraints[animation_skeleton_joint_constraint_index].m_copy_transform.m_source_weight_count == this->m_animation_skeleton_joint_constraints_storages[animation_skeleton_joint_constraint_index].size());
+
+        assert(reinterpret_cast<uintptr_t>(this->m_animation_skeleton_joint_constraints[animation_skeleton_joint_constraint_index].m_copy_transform.m_source_weights) == reinterpret_cast<uintptr_t>(this->m_animation_skeleton_joint_constraints_storages[animation_skeleton_joint_constraint_index].data()));
+    }
+    else
+    {
+        assert(BRX_ASSET_IMPORT_SKELETON_JOINT_CONSTRAINT_INVERSE_KINEMATICS == this->m_animation_skeleton_joint_constraints[animation_skeleton_joint_constraint_index].m_constraint_type);
+
+        assert(this->m_animation_skeleton_joint_constraints[animation_skeleton_joint_constraint_index].m_inverse_kinematics.m_ik_joint_count == this->m_animation_skeleton_joint_constraints_storages[animation_skeleton_joint_constraint_index].size());
+
+        assert(reinterpret_cast<uintptr_t>(this->m_animation_skeleton_joint_constraints[animation_skeleton_joint_constraint_index].m_inverse_kinematics.m_ik_joint_indices) == reinterpret_cast<uintptr_t>(this->m_animation_skeleton_joint_constraints_storages[animation_skeleton_joint_constraint_index].data()));
+    }
+#endif
+
     return &this->m_animation_skeleton_joint_constraints[animation_skeleton_joint_constraint_index];
 }
 

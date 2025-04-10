@@ -100,7 +100,7 @@ static inline float internal_asin(float y, float z);
 
 static inline void internal_import_morph_targets(mcrt_vector<mmd_pmx_vertex_t> const &in_vertices, mcrt_vector<mmd_pmx_face_t> const &in_faces, mcrt_vector<mmd_pmx_material_t> const &in_materials, mcrt_vector<mmd_pmx_morph_t> const &in_mmd_morphs, mcrt_vector<BRX_ASSET_IMPORT_MORPH_TARGET_NAME> &out_morph_target_names, mcrt_vector<mcrt_map<uint32_t, internal_mmd_morph_target_vertex_t>> &out_morph_targets_vertices);
 
-static inline void internal_import_animation_skeleton(mcrt_vector<mmd_pmx_bone_t> const &in_mmd_model_nodes, mcrt_vector<BRX_ASSET_IMPORT_SKELETON_JOINT_NAME> &out_animation_skeleton_joint_names, mcrt_vector<uint32_t> &out_animation_skeleton_joint_parent_indices, mcrt_vector<uint32_t> &out_model_node_to_animation_skeleton_joint_map, mcrt_vector<uint32_t> &out_animation_skeleton_joint_to_model_node_map, mcrt_vector<DirectX::XMFLOAT4X4> &out_animation_skeleton_bind_pose_local_space, mcrt_vector<DirectX::XMFLOAT4X4> &out_animation_skeleton_bind_pose_model_space, mcrt_vector<BRX_ASSET_IMPORT_SKELETON_JOINT_CONSTRAINT_NAME> &out_animation_skeleton_joint_constraint_names, mcrt_vector<brx_asset_import_skeleton_joint_constraint> &out_animation_skeleton_joint_constraints, mcrt_vector<mcrt_vector<uint32_t>> &out_animation_skeleton_joint_constraints_storage);
+static inline void internal_import_animation_skeleton(mcrt_vector<mmd_pmx_bone_t> const &in_mmd_model_nodes, mcrt_vector<BRX_ASSET_IMPORT_SKELETON_JOINT_NAME> &out_animation_skeleton_joint_names, mcrt_vector<uint32_t> &out_animation_skeleton_joint_parent_indices, mcrt_vector<uint32_t> &out_model_node_to_animation_skeleton_joint_map, mcrt_vector<uint32_t> &out_animation_skeleton_joint_to_model_node_map, mcrt_vector<DirectX::XMFLOAT4X4> &out_animation_skeleton_bind_pose_local_space, mcrt_vector<DirectX::XMFLOAT4X4> &out_animation_skeleton_bind_pose_model_space, mcrt_vector<BRX_ASSET_IMPORT_SKELETON_JOINT_CONSTRAINT_NAME> &out_animation_skeleton_joint_constraint_names, mcrt_vector<brx_asset_import_skeleton_joint_constraint> &out_animation_skeleton_joint_constraints, mcrt_vector<mcrt_vector<uint32_t>> &out_animation_skeleton_joint_constraints_storages);
 
 static inline void internal_import_ragdoll_physics(mcrt_vector<mmd_pmx_rigid_body_t> const &in_mmd_rigid_bodies, mcrt_vector<mmd_pmx_constraint_t> const &in_mmd_constraints, mcrt_vector<uint32_t> const &in_model_node_to_animation_skeleton_joint_map, mcrt_vector<DirectX::XMFLOAT4X4> const &in_animation_skeleton_bind_pose_model_space, mcrt_vector<brx_asset_import_physics_rigid_body> &out_ragdoll_skeleton_rigid_bodies, mcrt_vector<brx_asset_import_physics_constraint> &out_ragdoll_skeleton_constraints, mcrt_vector<uint32_t> &out_ragdoll_skeleton_joint_parent_indices, mcrt_vector<brx_asset_import_ragdoll_direct_mapping> &out_animation_to_ragdoll_direct_mapping, mcrt_vector<brx_asset_import_ragdoll_direct_mapping> &out_ragdoll_to_animation_direct_mapping);
 
@@ -116,7 +116,7 @@ extern bool internal_import_mmd_model(void const *data_base, size_t data_size, m
 
 	mcrt_vector<BRX_ASSET_IMPORT_SKELETON_JOINT_CONSTRAINT_NAME> animation_skeleton_joint_constraint_names;
 	mcrt_vector<brx_asset_import_skeleton_joint_constraint> animation_skeleton_joint_constraints;
-	mcrt_vector<mcrt_vector<uint32_t>> animation_skeleton_joint_constraints_storage;
+	mcrt_vector<mcrt_vector<uint32_t>> animation_skeleton_joint_constraints_storages;
 
 	mcrt_vector<brx_asset_import_physics_rigid_body> ragdoll_skeleton_rigid_bodies;
 	mcrt_vector<brx_asset_import_physics_constraint> ragdoll_skeleton_constraints;
@@ -135,7 +135,7 @@ extern bool internal_import_mmd_model(void const *data_base, size_t data_size, m
 		mcrt_vector<uint32_t> animation_skeleton_joint_to_model_node_map;
 		mcrt_vector<DirectX::XMFLOAT4X4> animation_skeleton_bind_pose_local_space_matrix;
 		mcrt_vector<DirectX::XMFLOAT4X4> animation_skeleton_bind_pose_model_space_matrix;
-		internal_import_animation_skeleton(mmd_pmx.m_bones, animation_skeleton_joint_names, animation_skeleton_joint_parent_indices, model_node_to_animation_skeleton_joint_map, animation_skeleton_joint_to_model_node_map, animation_skeleton_bind_pose_local_space_matrix, animation_skeleton_bind_pose_model_space_matrix, animation_skeleton_joint_constraint_names, animation_skeleton_joint_constraints, animation_skeleton_joint_constraints_storage);
+		internal_import_animation_skeleton(mmd_pmx.m_bones, animation_skeleton_joint_names, animation_skeleton_joint_parent_indices, model_node_to_animation_skeleton_joint_map, animation_skeleton_joint_to_model_node_map, animation_skeleton_bind_pose_local_space_matrix, animation_skeleton_bind_pose_model_space_matrix, animation_skeleton_joint_constraint_names, animation_skeleton_joint_constraints, animation_skeleton_joint_constraints_storages);
 
 		{
 			uint32_t const animation_skeleton_joint_count = animation_skeleton_bind_pose_local_space_matrix.size();
@@ -378,7 +378,7 @@ extern bool internal_import_mmd_model(void const *data_base, size_t data_size, m
 
 	out_surface_groups.reserve(1U);
 
-	out_surface_groups.emplace_back(std::move(surfaces), std::move(animation_skeleton_joint_names), std::move(animation_skeleton_joint_parent_indices), std::move(animation_skeleton_joint_transforms_bind_pose_local_space), std::move(animation_skeleton_joint_constraint_names), std::move(animation_skeleton_joint_constraints), std::move(animation_skeleton_joint_constraints_storage), std::move(ragdoll_skeleton_rigid_bodies), std::move(ragdoll_skeleton_constraints), std::move(animation_to_ragdoll_direct_mappings), std::move(ragdoll_to_animation_direct_mappings));
+	out_surface_groups.emplace_back(std::move(surfaces), std::move(animation_skeleton_joint_names), std::move(animation_skeleton_joint_parent_indices), std::move(animation_skeleton_joint_transforms_bind_pose_local_space), std::move(animation_skeleton_joint_constraint_names), std::move(animation_skeleton_joint_constraints), std::move(animation_skeleton_joint_constraints_storages), std::move(ragdoll_skeleton_rigid_bodies), std::move(ragdoll_skeleton_constraints), std::move(animation_to_ragdoll_direct_mappings), std::move(ragdoll_to_animation_direct_mappings));
 
 	return true;
 }
@@ -674,7 +674,7 @@ static inline void internal_import_morph_targets(mcrt_vector<mmd_pmx_vertex_t> c
 	}
 }
 
-static inline void internal_import_animation_skeleton(mcrt_vector<mmd_pmx_bone_t> const &in_mmd_model_nodes, mcrt_vector<BRX_ASSET_IMPORT_SKELETON_JOINT_NAME> &out_animation_skeleton_joint_names, mcrt_vector<uint32_t> &out_animation_skeleton_joint_parent_indices, mcrt_vector<uint32_t> &out_model_node_to_animation_skeleton_joint_map, mcrt_vector<uint32_t> &out_animation_skeleton_joint_to_model_node_map, mcrt_vector<DirectX::XMFLOAT4X4> &out_animation_skeleton_bind_pose_local_space, mcrt_vector<DirectX::XMFLOAT4X4> &out_animation_skeleton_bind_pose_model_space, mcrt_vector<BRX_ASSET_IMPORT_SKELETON_JOINT_CONSTRAINT_NAME> &out_animation_skeleton_joint_constraint_names, mcrt_vector<brx_asset_import_skeleton_joint_constraint> &out_animation_skeleton_joint_constraints, mcrt_vector<mcrt_vector<uint32_t>> &out_animation_skeleton_joint_constraints_storage)
+static inline void internal_import_animation_skeleton(mcrt_vector<mmd_pmx_bone_t> const &in_mmd_model_nodes, mcrt_vector<BRX_ASSET_IMPORT_SKELETON_JOINT_NAME> &out_animation_skeleton_joint_names, mcrt_vector<uint32_t> &out_animation_skeleton_joint_parent_indices, mcrt_vector<uint32_t> &out_model_node_to_animation_skeleton_joint_map, mcrt_vector<uint32_t> &out_animation_skeleton_joint_to_model_node_map, mcrt_vector<DirectX::XMFLOAT4X4> &out_animation_skeleton_bind_pose_local_space, mcrt_vector<DirectX::XMFLOAT4X4> &out_animation_skeleton_bind_pose_model_space, mcrt_vector<BRX_ASSET_IMPORT_SKELETON_JOINT_CONSTRAINT_NAME> &out_animation_skeleton_joint_constraint_names, mcrt_vector<brx_asset_import_skeleton_joint_constraint> &out_animation_skeleton_joint_constraints, mcrt_vector<mcrt_vector<uint32_t>> &out_animation_skeleton_joint_constraints_storages)
 {
 	uint32_t const model_node_count = in_mmd_model_nodes.size();
 
@@ -833,8 +833,8 @@ static inline void internal_import_animation_skeleton(mcrt_vector<mmd_pmx_bone_t
 	out_animation_skeleton_joint_constraint_names = {};
 	assert(out_animation_skeleton_joint_constraints.empty());
 	out_animation_skeleton_joint_constraints = {};
-	assert(out_animation_skeleton_joint_constraints_storage.empty());
-	out_animation_skeleton_joint_constraints_storage = {};
+	assert(out_animation_skeleton_joint_constraints_storages.empty());
+	out_animation_skeleton_joint_constraints_storages = {};
 	{
 		mcrt_vector<uint32_t> sorted_model_node_indices(static_cast<size_t>(model_node_count));
 		for (uint32_t model_node_index = 0U; model_node_index < model_node_count; ++model_node_index)
@@ -901,11 +901,11 @@ static inline void internal_import_animation_skeleton(mcrt_vector<mmd_pmx_bone_t
 
 						animation_skeleton_joint_copy_transform_constraint.m_copy_transform.m_source_weight_count = ancestors.size();
 
-						out_animation_skeleton_joint_constraints_storage.emplace_back();
-						out_animation_skeleton_joint_constraints_storage.back().resize(animation_skeleton_joint_copy_transform_constraint.m_copy_transform.m_source_weight_count);
+						out_animation_skeleton_joint_constraints_storages.emplace_back();
+						out_animation_skeleton_joint_constraints_storages.back().resize(animation_skeleton_joint_copy_transform_constraint.m_copy_transform.m_source_weight_count);
 						static_assert(sizeof(float) == sizeof(uint32_t), "");
 						static_assert(alignof(float) == alignof(uint32_t), "");
-						animation_skeleton_joint_copy_transform_constraint.m_copy_transform.m_source_weights = reinterpret_cast<float *>(out_animation_skeleton_joint_constraints_storage.back().data());
+						animation_skeleton_joint_copy_transform_constraint.m_copy_transform.m_source_weights = reinterpret_cast<float *>(out_animation_skeleton_joint_constraints_storages.back().data());
 
 						for (uint32_t source_weight_index = 0U; !ancestors.empty(); ++source_weight_index)
 						{
@@ -918,11 +918,11 @@ static inline void internal_import_animation_skeleton(mcrt_vector<mmd_pmx_bone_t
 						animation_skeleton_joint_copy_transform_constraint.m_copy_transform.m_source_joint_index = out_model_node_to_animation_skeleton_joint_map[in_mmd_model_nodes[model_node_index].m_append_parent_index];
 						animation_skeleton_joint_copy_transform_constraint.m_copy_transform.m_source_weight_count = 1U;
 
-						out_animation_skeleton_joint_constraints_storage.emplace_back();
-						out_animation_skeleton_joint_constraints_storage.back().resize(animation_skeleton_joint_copy_transform_constraint.m_copy_transform.m_source_weight_count);
+						out_animation_skeleton_joint_constraints_storages.emplace_back();
+						out_animation_skeleton_joint_constraints_storages.back().resize(animation_skeleton_joint_copy_transform_constraint.m_copy_transform.m_source_weight_count);
 						static_assert(sizeof(float) == sizeof(uint32_t), "");
 						static_assert(alignof(float) == alignof(uint32_t), "");
-						animation_skeleton_joint_copy_transform_constraint.m_copy_transform.m_source_weights = reinterpret_cast<float *>(out_animation_skeleton_joint_constraints_storage.back().data());
+						animation_skeleton_joint_copy_transform_constraint.m_copy_transform.m_source_weights = reinterpret_cast<float *>(out_animation_skeleton_joint_constraints_storages.back().data());
 
 						animation_skeleton_joint_copy_transform_constraint.m_copy_transform.m_source_weights[0] = in_mmd_model_nodes[model_node_index].m_append_rate;
 					}
@@ -962,9 +962,9 @@ static inline void internal_import_animation_skeleton(mcrt_vector<mmd_pmx_bone_t
 					animation_skeleton_joint_inverse_kinematics_constraint.m_inverse_kinematics.m_ik_end_effector_index = out_model_node_to_animation_skeleton_joint_map[in_mmd_model_nodes[model_node_index].m_ik_end_effector_index];
 					animation_skeleton_joint_inverse_kinematics_constraint.m_inverse_kinematics.m_ik_joint_count = in_mmd_model_nodes[model_node_index].m_ik_link_indices.size();
 
-					out_animation_skeleton_joint_constraints_storage.emplace_back();
-					out_animation_skeleton_joint_constraints_storage.back().resize(animation_skeleton_joint_inverse_kinematics_constraint.m_inverse_kinematics.m_ik_joint_count);
-					animation_skeleton_joint_inverse_kinematics_constraint.m_inverse_kinematics.m_ik_joint_indices = out_animation_skeleton_joint_constraints_storage.back().data();
+					out_animation_skeleton_joint_constraints_storages.emplace_back();
+					out_animation_skeleton_joint_constraints_storages.back().resize(animation_skeleton_joint_inverse_kinematics_constraint.m_inverse_kinematics.m_ik_joint_count);
+					animation_skeleton_joint_inverse_kinematics_constraint.m_inverse_kinematics.m_ik_joint_indices = out_animation_skeleton_joint_constraints_storages.back().data();
 
 					for (uint32_t ik_joint_index = 0U; ik_joint_index < animation_skeleton_joint_inverse_kinematics_constraint.m_inverse_kinematics.m_ik_joint_count; ++ik_joint_index)
 					{

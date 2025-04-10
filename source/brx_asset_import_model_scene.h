@@ -88,7 +88,7 @@ class brx_asset_import_model_surface_group final : public brx_asset_import_surfa
 
     mcrt_vector<BRX_ASSET_IMPORT_SKELETON_JOINT_CONSTRAINT_NAME> m_animation_skeleton_joint_constraint_names;
     mcrt_vector<brx_asset_import_skeleton_joint_constraint> m_animation_skeleton_joint_constraints;
-    mcrt_vector<mcrt_vector<uint32_t>> m_animation_skeleton_joint_constraints_storage;
+    mcrt_vector<mcrt_vector<uint32_t>> m_animation_skeleton_joint_constraints_storages;
 
     mcrt_vector<brx_asset_import_physics_rigid_body> m_ragdoll_skeleton_rigid_bodies;
     mcrt_vector<brx_asset_import_physics_constraint> m_ragdoll_skeleton_constraints;
@@ -104,7 +104,7 @@ public:
         mcrt_vector<brx_asset_import_rigid_transform> &&animation_skeleton_joint_transforms_bind_pose_local_space,
         mcrt_vector<BRX_ASSET_IMPORT_SKELETON_JOINT_CONSTRAINT_NAME> &&animation_skeleton_joint_constraint_names,
         mcrt_vector<brx_asset_import_skeleton_joint_constraint> &&animation_skeleton_joint_constraints,
-        mcrt_vector<mcrt_vector<uint32_t>> &&animation_skeleton_joint_constraints_storage,
+        mcrt_vector<mcrt_vector<uint32_t>> &&animation_skeleton_joint_constraints_storages,
         mcrt_vector<brx_asset_import_physics_rigid_body> &&ragdoll_skeleton_rigid_bodies,
         mcrt_vector<brx_asset_import_physics_constraint> &&ragdoll_skeleton_constraints,
         mcrt_vector<brx_asset_import_ragdoll_direct_mapping> &&animation_to_ragdoll_direct_mappings,
