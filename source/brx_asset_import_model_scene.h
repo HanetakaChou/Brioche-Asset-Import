@@ -93,8 +93,8 @@ class brx_asset_import_model_surface_group final : public brx_asset_import_surfa
     mcrt_vector<brx_asset_import_physics_rigid_body> m_ragdoll_skeleton_rigid_bodies;
     mcrt_vector<brx_asset_import_physics_constraint> m_ragdoll_skeleton_constraints;
 
-    mcrt_vector<brx_asset_import_ragdoll_direct_mapping> m_animation_to_ragdoll_direct_mapping;
-    mcrt_vector<brx_asset_import_ragdoll_direct_mapping> m_ragdoll_to_animation_direct_mapping;
+    mcrt_vector<brx_asset_import_ragdoll_direct_mapping> m_animation_to_ragdoll_direct_mappings;
+    mcrt_vector<brx_asset_import_ragdoll_direct_mapping> m_ragdoll_to_animation_direct_mappings;
 
 public:
     brx_asset_import_model_surface_group(
@@ -107,8 +107,8 @@ public:
         mcrt_vector<mcrt_vector<uint32_t>> &&animation_skeleton_joint_constraints_storage,
         mcrt_vector<brx_asset_import_physics_rigid_body> &&ragdoll_skeleton_rigid_bodies,
         mcrt_vector<brx_asset_import_physics_constraint> &&ragdoll_skeleton_constraints,
-        mcrt_vector<brx_asset_import_ragdoll_direct_mapping> &&animation_to_ragdoll_direct_mapping,
-        mcrt_vector<brx_asset_import_ragdoll_direct_mapping> &&ragdoll_to_animation_direct_mapping);
+        mcrt_vector<brx_asset_import_ragdoll_direct_mapping> &&animation_to_ragdoll_direct_mappings,
+        mcrt_vector<brx_asset_import_ragdoll_direct_mapping> &&ragdoll_to_animation_direct_mappings);
     ~brx_asset_import_model_surface_group();
 
 private:

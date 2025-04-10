@@ -154,8 +154,8 @@ brx_asset_import_model_surface_group::brx_asset_import_model_surface_group(
     mcrt_vector<mcrt_vector<uint32_t>> &&animation_skeleton_joint_constraints_storage,
     mcrt_vector<brx_asset_import_physics_rigid_body> &&ragdoll_skeleton_rigid_bodies,
     mcrt_vector<brx_asset_import_physics_constraint> &&ragdoll_skeleton_constraints,
-    mcrt_vector<brx_asset_import_ragdoll_direct_mapping> &&animation_to_ragdoll_direct_mapping,
-    mcrt_vector<brx_asset_import_ragdoll_direct_mapping> &&ragdoll_to_animation_direct_mapping)
+    mcrt_vector<brx_asset_import_ragdoll_direct_mapping> &&animation_to_ragdoll_direct_mappings,
+    mcrt_vector<brx_asset_import_ragdoll_direct_mapping> &&ragdoll_to_animation_direct_mappings)
     : m_surfaces(std::move(surfaces)),
       m_animation_skeleton_joint_names(std::move(animation_skeleton_joint_names)),
       m_animation_skeleton_joint_parent_indices(std::move(animation_skeleton_joint_parent_indices)),
@@ -165,8 +165,8 @@ brx_asset_import_model_surface_group::brx_asset_import_model_surface_group(
       m_animation_skeleton_joint_constraints_storage(std::move(animation_skeleton_joint_constraints_storage)),
       m_ragdoll_skeleton_rigid_bodies(std::move(ragdoll_skeleton_rigid_bodies)),
       m_ragdoll_skeleton_constraints(std::move(ragdoll_skeleton_constraints)),
-      m_animation_to_ragdoll_direct_mapping(std::move(animation_to_ragdoll_direct_mapping)),
-      m_ragdoll_to_animation_direct_mapping(std::move(ragdoll_to_animation_direct_mapping))
+      m_animation_to_ragdoll_direct_mappings(std::move(animation_to_ragdoll_direct_mappings)),
+      m_ragdoll_to_animation_direct_mappings(std::move(ragdoll_to_animation_direct_mappings))
 {
     uint32_t const animation_skeleton_joint_constraint_count = this->m_animation_skeleton_joint_constraint_names.size();
     assert(this->m_animation_skeleton_joint_constraints.size() == animation_skeleton_joint_constraint_count);
@@ -265,22 +265,22 @@ brx_asset_import_physics_constraint const *brx_asset_import_model_surface_group:
 
 uint32_t brx_asset_import_model_surface_group::get_animation_to_ragdoll_direct_mapping_count() const
 {
-    return this->m_animation_to_ragdoll_direct_mapping.size();
+    return this->m_animation_to_ragdoll_direct_mappings.size();
 }
 
 brx_asset_import_ragdoll_direct_mapping const *brx_asset_import_model_surface_group::get_animation_to_ragdoll_direct_mapping(uint32_t animation_to_ragdoll_direct_mapping_index) const
 {
-    return &this->m_animation_to_ragdoll_direct_mapping[animation_to_ragdoll_direct_mapping_index];
+    return &this->m_animation_to_ragdoll_direct_mappings[animation_to_ragdoll_direct_mapping_index];
 }
 
 uint32_t brx_asset_import_model_surface_group::get_ragdoll_to_animation_direct_mapping_count() const
 {
-    return this->m_ragdoll_to_animation_direct_mapping.size();
+    return this->m_ragdoll_to_animation_direct_mappings.size();
 }
 
 brx_asset_import_ragdoll_direct_mapping const *brx_asset_import_model_surface_group::get_ragdoll_to_animation_direct_mapping(uint32_t ragdoll_to_animation_direct_mapping_index) const
 {
-    return &this->m_ragdoll_to_animation_direct_mapping[ragdoll_to_animation_direct_mapping_index];
+    return &this->m_ragdoll_to_animation_direct_mappings[ragdoll_to_animation_direct_mapping_index];
 }
 
 brx_asset_import_model_animation::brx_asset_import_model_animation(
