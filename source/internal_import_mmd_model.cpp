@@ -182,6 +182,7 @@ extern bool internal_import_mmd_model(void const *data_base, size_t data_size, m
 				mcrt_vector<brx_asset_import_vertex_position> vertex_positions;
 				mcrt_vector<brx_asset_import_vertex_varying> vertex_varyings;
 				mcrt_vector<brx_asset_import_vertex_blending> vertex_blendings;
+				mcrt_vector<BRX_ASSET_IMPORT_MORPH_TARGET_NAME> mesh_section_morph_target_names;
 				mcrt_vector<mcrt_vector<brx_asset_import_vertex_position>> morph_targets_vertex_positions;
 				mcrt_vector<mcrt_vector<brx_asset_import_vertex_varying>> morph_targets_vertex_varyings;
 				mcrt_vector<uint32_t> indices;
@@ -274,55 +275,66 @@ extern bool internal_import_mmd_model(void const *data_base, size_t data_size, m
 					uint32_t const morph_target_count = mesh_section.m_morph_targets_vertices.size();
 					assert(0U == morph_target_count || morph_target_names.size() == morph_target_count);
 
-					morph_targets_vertex_positions.resize(morph_target_count);
-					morph_targets_vertex_varyings.resize(morph_target_count);
-
-					for (uint32_t morph_target_index = 0U; morph_target_index < morph_target_count; ++morph_target_index)
+					if (morph_target_count > 0U)
 					{
-						mcrt_vector<internal_mmd_morph_target_vertex_t> const &morph_target_vertices = mesh_section.m_morph_targets_vertices[morph_target_index];
-						assert(vertex_count == morph_target_vertices.size());
+						mesh_section_morph_target_names = morph_target_names;
 
-						mcrt_vector<DirectX::XMFLOAT3> morph_target_raw_positions(static_cast<size_t>(vertex_count));
-						mcrt_vector<DirectX::XMFLOAT2> morph_target_raw_texcoords(static_cast<size_t>(vertex_count));
-						for (uint32_t vertex_index = 0U; vertex_index < vertex_count; ++vertex_index)
+						morph_targets_vertex_positions.resize(morph_target_count);
+						morph_targets_vertex_varyings.resize(morph_target_count);
+
+						for (uint32_t morph_target_index = 0U; morph_target_index < morph_target_count; ++morph_target_index)
 						{
-							internal_mmd_morph_target_vertex_t const &morph_target_vertex = morph_target_vertices[vertex_index];
+							mcrt_vector<internal_mmd_morph_target_vertex_t> const &morph_target_vertices = mesh_section.m_morph_targets_vertices[morph_target_index];
+							assert(vertex_count == morph_target_vertices.size());
 
-							morph_target_raw_positions[vertex_index] = DirectX::XMFLOAT3(morph_target_vertex.m_position[0], morph_target_vertex.m_position[1], morph_target_vertex.m_position[2]);
-							morph_target_raw_texcoords[vertex_index] = DirectX::XMFLOAT2(morph_target_vertex.m_texcoord[0], morph_target_vertex.m_texcoord[1]);
-						}
-
-						{
-							mcrt_vector<brx_asset_import_vertex_position> &morph_target_vertex_positions = morph_targets_vertex_positions[morph_target_index];
-							morph_target_vertex_positions.resize(vertex_count);
-
+							mcrt_vector<DirectX::XMFLOAT3> morph_target_raw_positions(static_cast<size_t>(vertex_count));
+							mcrt_vector<DirectX::XMFLOAT2> morph_target_raw_texcoords(static_cast<size_t>(vertex_count));
 							for (uint32_t vertex_index = 0U; vertex_index < vertex_count; ++vertex_index)
 							{
-								morph_target_vertex_positions[vertex_index].m_position[0] = morph_target_raw_positions[vertex_index].x;
-								morph_target_vertex_positions[vertex_index].m_position[1] = morph_target_raw_positions[vertex_index].y;
-								morph_target_vertex_positions[vertex_index].m_position[2] = morph_target_raw_positions[vertex_index].z;
+								internal_mmd_morph_target_vertex_t const &morph_target_vertex = morph_target_vertices[vertex_index];
+
+								morph_target_raw_positions[vertex_index] = DirectX::XMFLOAT3(morph_target_vertex.m_position[0], morph_target_vertex.m_position[1], morph_target_vertex.m_position[2]);
+								morph_target_raw_texcoords[vertex_index] = DirectX::XMFLOAT2(morph_target_vertex.m_texcoord[0], morph_target_vertex.m_texcoord[1]);
 							}
-						}
 
-						{
-							mcrt_vector<brx_asset_import_vertex_varying> &morph_target_vertex_varyings = morph_targets_vertex_varyings[morph_target_index];
-							morph_target_vertex_varyings.resize(vertex_count);
-
-							for (uint32_t vertex_index = 0U; vertex_index < vertex_count; ++vertex_index)
 							{
-								morph_target_vertex_varyings[vertex_index].m_normal[0] = 0.0F;
-								morph_target_vertex_varyings[vertex_index].m_normal[1] = 0.0F;
-								morph_target_vertex_varyings[vertex_index].m_normal[2] = 0.0F;
+								mcrt_vector<brx_asset_import_vertex_position> &morph_target_vertex_positions = morph_targets_vertex_positions[morph_target_index];
+								morph_target_vertex_positions.resize(vertex_count);
 
-								morph_target_vertex_varyings[vertex_index].m_tangent[0] = 0.0F;
-								morph_target_vertex_varyings[vertex_index].m_tangent[1] = 0.0F;
-								morph_target_vertex_varyings[vertex_index].m_tangent[2] = 0.0F;
-								morph_target_vertex_varyings[vertex_index].m_tangent[3] = 0.0F;
+								for (uint32_t vertex_index = 0U; vertex_index < vertex_count; ++vertex_index)
+								{
+									morph_target_vertex_positions[vertex_index].m_position[0] = morph_target_raw_positions[vertex_index].x;
+									morph_target_vertex_positions[vertex_index].m_position[1] = morph_target_raw_positions[vertex_index].y;
+									morph_target_vertex_positions[vertex_index].m_position[2] = morph_target_raw_positions[vertex_index].z;
+								}
+							}
 
-								morph_target_vertex_varyings[vertex_index].m_texcoord[0] = morph_target_raw_texcoords[vertex_index].x;
-								morph_target_vertex_varyings[vertex_index].m_texcoord[1] = morph_target_raw_texcoords[vertex_index].y;
+							{
+								mcrt_vector<brx_asset_import_vertex_varying> &morph_target_vertex_varyings = morph_targets_vertex_varyings[morph_target_index];
+								morph_target_vertex_varyings.resize(vertex_count);
+
+								for (uint32_t vertex_index = 0U; vertex_index < vertex_count; ++vertex_index)
+								{
+									morph_target_vertex_varyings[vertex_index].m_normal[0] = 0.0F;
+									morph_target_vertex_varyings[vertex_index].m_normal[1] = 0.0F;
+									morph_target_vertex_varyings[vertex_index].m_normal[2] = 0.0F;
+
+									morph_target_vertex_varyings[vertex_index].m_tangent[0] = 0.0F;
+									morph_target_vertex_varyings[vertex_index].m_tangent[1] = 0.0F;
+									morph_target_vertex_varyings[vertex_index].m_tangent[2] = 0.0F;
+									morph_target_vertex_varyings[vertex_index].m_tangent[3] = 0.0F;
+
+									morph_target_vertex_varyings[vertex_index].m_texcoord[0] = morph_target_raw_texcoords[vertex_index].x;
+									morph_target_vertex_varyings[vertex_index].m_texcoord[1] = morph_target_raw_texcoords[vertex_index].y;
+								}
 							}
 						}
+					}
+					else
+					{
+						assert(mesh_section_morph_target_names.empty());
+						assert(morph_targets_vertex_positions.empty());
+						assert(morph_targets_vertex_varyings.empty());
 					}
 
 					{
@@ -351,7 +363,7 @@ extern bool internal_import_mmd_model(void const *data_base, size_t data_size, m
 					}
 				}
 
-				surfaces.emplace_back(std::move(vertex_positions), std::move(vertex_varyings), std::move(vertex_blendings), morph_target_names, std::move(morph_targets_vertex_positions), std::move(morph_targets_vertex_varyings), std::move(indices), std::move(texture_names), std::move(texture_factors), std::move(texture_urls));
+				surfaces.emplace_back(std::move(vertex_positions), std::move(vertex_varyings), std::move(vertex_blendings), std::move(mesh_section_morph_target_names), std::move(morph_targets_vertex_positions), std::move(morph_targets_vertex_varyings), std::move(indices), std::move(texture_names), std::move(texture_factors), std::move(texture_urls));
 			}
 
 			assert(surfaces.size() == mesh_sections.size());
