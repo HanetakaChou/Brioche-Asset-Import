@@ -11,22 +11,13 @@
       <UniqueIdentifier>{db2b715e-5360-4a3f-916d-9f7d52ef63e7}</UniqueIdentifier>
     </Filter>
     <Filter Include="thirdparty">
-      <UniqueIdentifier>{b6f56bd7-9841-4787-9773-c1e3fc7f287c}</UniqueIdentifier>
+      <UniqueIdentifier>{c30c1198-cfd2-4a31-8638-c8afc0d872f2}</UniqueIdentifier>
     </Filter>
     <Filter Include="thirdparty\DirectXMesh">
-      <UniqueIdentifier>{32634405-1abd-4f3f-a9b2-8630d7cf5e37}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="thirdparty\OpenCV">
-      <UniqueIdentifier>{298d885f-77f3-45b7-9f6f-a841954325b5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="thirdparty\OpenCV\bin">
-      <UniqueIdentifier>{6d50e01f-6bbd-4e41-a53d-8ef13e355f38}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="thirdparty\OpenCV\bin\x64">
-      <UniqueIdentifier>{253d2443-5b6d-4211-8906-54575b61d432}</UniqueIdentifier>
+      <UniqueIdentifier>{dae7f1d5-ecb5-4c4f-a108-ce7bdccf5971}</UniqueIdentifier>
     </Filter>
     <Filter Include="thirdparty\DirectXMesh\source">
-      <UniqueIdentifier>{98d4be8c-2ce9-4833-8079-a8df7a9cff69}</UniqueIdentifier>
+      <UniqueIdentifier>{3f5d288e-1548-44cb-b830-297952c49e1a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -137,27 +128,19 @@
     <ClCompile Include="dllmain.cpp">
       <Filter>build-windows</Filter>
     </ClCompile>
+    <ClCompile Include="..\source\brx_asset_import_image.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
     <ClCompile Include="..\thirdparty\DirectXMesh\DirectXMesh\DirectXMeshNormals.cpp">
       <Filter>thirdparty\DirectXMesh\source</Filter>
     </ClCompile>
     <ClCompile Include="..\thirdparty\DirectXMesh\DirectXMesh\DirectXMeshTangentFrame.cpp">
       <Filter>thirdparty\DirectXMesh\source</Filter>
     </ClCompile>
-    <ClCompile Include="..\source\brx_asset_import_image.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="BRX-Asset-Import.def">
       <Filter>build-windows</Filter>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <CopyFileToFolders Include="..\..\OpenCV\build\x64\vc15\bin\opencv_ffmpeg3410_64.dll">
-      <Filter>thirdparty\OpenCV\bin\x64</Filter>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="..\..\OpenCV\build\x64\vc15\bin\opencv_world3410.dll">
-      <Filter>thirdparty\OpenCV\bin\x64</Filter>
-    </CopyFileToFolders>
   </ItemGroup>
 </Project>

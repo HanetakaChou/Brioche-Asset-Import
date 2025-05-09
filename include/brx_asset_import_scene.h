@@ -18,7 +18,6 @@
 #ifndef _BRX_ASSET_IMPORT_SCENE_H_
 #define _BRX_ASSET_IMPORT_SCENE_H_ 1
 
-#include "brx_asset_import_input_stream.h"
 #include <cstddef>
 #include <cstdint>
 
@@ -613,7 +612,6 @@ public:
     virtual uint8_t const *get_switches() const = 0;
 };
 
-extern "C" brx_asset_import_scene *brx_asset_import_create_scene_from_input_stream(brx_asset_import_input_stream_factory *input_stream_factory, char const *input_stream_name);
 extern "C" brx_asset_import_scene *brx_asset_import_create_scene_from_memory(void const *data_base, size_t data_size);
 extern "C" void brx_asset_import_destroy_scene(brx_asset_import_scene *scene);
 

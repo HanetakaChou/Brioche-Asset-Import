@@ -40,6 +40,6 @@ static constexpr int const k_albedo_image_num_channels = 4U;
 
 extern BRX_IMAGE_TYPE internal_import_image_type(void const *data_base, size_t data_size);
 
-extern bool internal_import_albedo_image(void const *data_base, size_t data_size, mcrt_vector<mcrt_vector<uint32_t>> &out_pixel_data, uint32_t *out_width, uint32_t *out_height);
+extern bool internal_import_albedo_image(void const *data_base, size_t data_size, mcrt_vector<uint32_t> &out_pixel_data, uint32_t *out_width, uint32_t *out_height);
 
 #endif

@@ -23,20 +23,16 @@
 
 class brx_asset_import_rgba_image final : public brx_asset_import_image
 {
-    mcrt_vector<mcrt_vector<uint32_t>> m_pixel_data;
+    mcrt_vector<uint32_t> m_pixel_data;
     uint32_t m_width;
     uint32_t m_height;
 
 public:
-    brx_asset_import_rgba_image(mcrt_vector<mcrt_vector<uint32_t>> &&pixel_data, uint32_t width, uint32_t height);
+    brx_asset_import_rgba_image(mcrt_vector<uint32_t> &&pixel_data, uint32_t width, uint32_t height);
     ~brx_asset_import_rgba_image();
 
 private:
     BRX_ASSET_IMPORT_IMAGE_FORMAT get_format() const override;
-    uint32_t get_mip_level_count() const override;
-    uint32_t get_row_pitch(uint32_t mip_level_index) const override;
-    uint32_t get_row_size(uint32_t mip_level_index) const override;
-    uint32_t get_row_count(uint32_t mip_level_index) const override;
     uint32_t get_width(uint32_t mip_level_index) const override;
     uint32_t get_height(uint32_t mip_level_index) const override;
     void const *get_pixel_data(uint32_t mip_level_index) const override;
