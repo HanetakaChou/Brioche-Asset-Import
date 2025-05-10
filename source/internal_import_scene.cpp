@@ -19,7 +19,7 @@
 #include "internal_import_mmd_model.h"
 #include "internal_import_mmd_motion.h"
 
-extern bool internal_import_model_scene(void const *data_base, size_t data_size, mcrt_vector<brx_asset_import_model_surface_group> &out_surface_groups, mcrt_vector<brx_asset_import_model_animation> &out_animations)
+extern bool internal_import_model_scene(void const *data_base, size_t data_size, mcrt_vector<brx_asset_import_mesh_surface_group> &out_surface_groups, mcrt_vector<brx_asset_import_mesh_animation> &out_animations)
 {
     bool status_internal_import_scene;
     if (data_size >= 8U && (80U == reinterpret_cast<uint8_t const *>(data_base)[0]) && (77U == reinterpret_cast<uint8_t const *>(data_base)[1]) && (88U == reinterpret_cast<uint8_t const *>(data_base)[2]) && (32U == reinterpret_cast<uint8_t const *>(data_base)[3]) && (((0U == reinterpret_cast<uint8_t const *>(data_base)[4]) && (0U == reinterpret_cast<uint8_t const *>(data_base)[5]) && (0U == reinterpret_cast<uint8_t const *>(data_base)[6]) && (64U == reinterpret_cast<uint8_t const *>(data_base)[7])) || ((102U == reinterpret_cast<uint8_t const *>(data_base)[4]) && (102U == reinterpret_cast<uint8_t const *>(data_base)[5]) && (6U == reinterpret_cast<uint8_t const *>(data_base)[6]) && (64U == reinterpret_cast<uint8_t const *>(data_base)[7]))))

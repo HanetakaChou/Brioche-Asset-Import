@@ -15,11 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "brx_asset_import_model_scene.h"
+#include "brx_asset_import_mesh_scene.h"
 #include <cstring>
 #include <cassert>
 
-brx_asset_import_model_surface::brx_asset_import_model_surface(
+brx_asset_import_mesh_surface::brx_asset_import_mesh_surface(
     mcrt_vector<brx_asset_import_vertex_position> &&vertex_positions,
     mcrt_vector<brx_asset_import_vertex_varying> &&vertex_varyings,
     mcrt_vector<brx_asset_import_vertex_blending> &&vertex_blendings,
@@ -45,11 +45,11 @@ brx_asset_import_model_surface::brx_asset_import_model_surface(
 {
 }
 
-brx_asset_import_model_surface::~brx_asset_import_model_surface()
+brx_asset_import_mesh_surface::~brx_asset_import_mesh_surface()
 {
 }
 
-uint32_t brx_asset_import_model_surface::get_vertex_count() const
+uint32_t brx_asset_import_mesh_surface::get_vertex_count() const
 {
     uint32_t const vertex_count = this->m_vertex_positions.size();
     assert(this->m_vertex_varyings.size() == vertex_count);
@@ -68,22 +68,22 @@ uint32_t brx_asset_import_model_surface::get_vertex_count() const
     return vertex_count;
 }
 
-brx_asset_import_vertex_position const *brx_asset_import_model_surface::get_vertex_position(uint32_t vertex_index) const
+brx_asset_import_vertex_position const *brx_asset_import_mesh_surface::get_vertex_position(uint32_t vertex_index) const
 {
     return &this->m_vertex_positions[vertex_index];
 }
 
-brx_asset_import_vertex_varying const *brx_asset_import_model_surface::get_vertex_varying(uint32_t vertex_index) const
+brx_asset_import_vertex_varying const *brx_asset_import_mesh_surface::get_vertex_varying(uint32_t vertex_index) const
 {
     return &this->m_vertex_varyings[vertex_index];
 }
 
-brx_asset_import_vertex_blending const *brx_asset_import_model_surface::get_vertex_blending(uint32_t vertex_index) const
+brx_asset_import_vertex_blending const *brx_asset_import_mesh_surface::get_vertex_blending(uint32_t vertex_index) const
 {
     return (!this->m_vertex_blendings.empty()) ? &this->m_vertex_blendings[vertex_index] : NULL;
 }
 
-uint32_t brx_asset_import_model_surface::get_morph_target_count() const
+uint32_t brx_asset_import_mesh_surface::get_morph_target_count() const
 {
     uint32_t const morph_target_count = this->m_morph_target_names.size();
     assert(this->m_morph_targets_vertex_positions.size() == morph_target_count);
@@ -91,37 +91,37 @@ uint32_t brx_asset_import_model_surface::get_morph_target_count() const
     return morph_target_count;
 }
 
-BRX_ASSET_IMPORT_MORPH_TARGET_NAME brx_asset_import_model_surface::get_morph_target_name(uint32_t morph_target_index) const
+BRX_ASSET_IMPORT_MORPH_TARGET_NAME brx_asset_import_mesh_surface::get_morph_target_name(uint32_t morph_target_index) const
 {
     return this->m_morph_target_names[morph_target_index];
 }
 
-brx_asset_import_vertex_position const *brx_asset_import_model_surface::get_morph_target_vertex_position(uint32_t morph_target_index, uint32_t vertex_index) const
+brx_asset_import_vertex_position const *brx_asset_import_mesh_surface::get_morph_target_vertex_position(uint32_t morph_target_index, uint32_t vertex_index) const
 {
     return &this->m_morph_targets_vertex_positions[morph_target_index][vertex_index];
 }
 
-brx_asset_import_vertex_varying const *brx_asset_import_model_surface::get_morph_target_vertex_varying(uint32_t morph_target_index, uint32_t vertex_index) const
+brx_asset_import_vertex_varying const *brx_asset_import_mesh_surface::get_morph_target_vertex_varying(uint32_t morph_target_index, uint32_t vertex_index) const
 {
     return &this->m_morph_targets_vertex_varyings[morph_target_index][vertex_index];
 }
 
-uint32_t brx_asset_import_model_surface::get_index_count() const
+uint32_t brx_asset_import_mesh_surface::get_index_count() const
 {
     return this->m_indices.size();
 }
 
-uint32_t brx_asset_import_model_surface::get_index(uint32_t index_index) const
+uint32_t brx_asset_import_mesh_surface::get_index(uint32_t index_index) const
 {
     return this->m_indices[index_index];
 }
 
-bool brx_asset_import_model_surface::is_double_sided() const
+bool brx_asset_import_mesh_surface::is_double_sided() const
 {
     return this->m_is_double_sided;
 }
 
-uint32_t brx_asset_import_model_surface::get_texture_count() const
+uint32_t brx_asset_import_mesh_surface::get_texture_count() const
 {
     uint32_t const _texture_count = this->m_texture_names.size();
     assert(this->m_texture_factors.size() == _texture_count);
@@ -129,23 +129,23 @@ uint32_t brx_asset_import_model_surface::get_texture_count() const
     return _texture_count;
 }
 
-BRX_ASSET_IMPORT_TEXTURE_NAME brx_asset_import_model_surface::get_texture_name(uint32_t texture_index) const
+BRX_ASSET_IMPORT_TEXTURE_NAME brx_asset_import_mesh_surface::get_texture_name(uint32_t texture_index) const
 {
     return this->m_texture_names[texture_index];
 }
 
-brx_asset_import_texture_factor const *brx_asset_import_model_surface::get_texture_factor(uint32_t texture_index) const
+brx_asset_import_texture_factor const *brx_asset_import_mesh_surface::get_texture_factor(uint32_t texture_index) const
 {
     return &this->m_texture_factors[texture_index];
 }
 
-void const *brx_asset_import_model_surface::get_texture_url(uint32_t texture_index) const
+void const *brx_asset_import_mesh_surface::get_texture_url(uint32_t texture_index) const
 {
     return ((!this->m_texture_urls[texture_index].empty()) ? this->m_texture_urls[texture_index].data() : NULL);
 }
 
-brx_asset_import_model_surface_group::brx_asset_import_model_surface_group(
-    mcrt_vector<brx_asset_import_model_surface> &&surfaces,
+brx_asset_import_mesh_surface_group::brx_asset_import_mesh_surface_group(
+    mcrt_vector<brx_asset_import_mesh_surface> &&surfaces,
     mcrt_vector<BRX_ASSET_IMPORT_SKELETON_JOINT_NAME> &&animation_skeleton_joint_names,
     mcrt_vector<uint32_t> &&animation_skeleton_joint_parent_indices,
     mcrt_vector<brx_asset_import_rigid_transform> &&animation_skeleton_joint_transforms_bind_pose_local_space,
@@ -193,21 +193,21 @@ brx_asset_import_model_surface_group::brx_asset_import_model_surface_group(
     }
 }
 
-brx_asset_import_model_surface_group::~brx_asset_import_model_surface_group()
+brx_asset_import_mesh_surface_group::~brx_asset_import_mesh_surface_group()
 {
 }
 
-uint32_t brx_asset_import_model_surface_group::get_surface_count() const
+uint32_t brx_asset_import_mesh_surface_group::get_surface_count() const
 {
     return this->m_surfaces.size();
 }
 
-brx_asset_import_surface const *brx_asset_import_model_surface_group::get_surface(uint32_t surface_index) const
+brx_asset_import_surface const *brx_asset_import_mesh_surface_group::get_surface(uint32_t surface_index) const
 {
     return &this->m_surfaces[surface_index];
 }
 
-uint32_t brx_asset_import_model_surface_group::get_animation_skeleton_joint_count() const
+uint32_t brx_asset_import_mesh_surface_group::get_animation_skeleton_joint_count() const
 {
     uint32_t const animation_skeleton_joint_count = this->m_animation_skeleton_joint_names.size();
     assert(this->m_animation_skeleton_joint_parent_indices.size() == animation_skeleton_joint_count);
@@ -215,22 +215,22 @@ uint32_t brx_asset_import_model_surface_group::get_animation_skeleton_joint_coun
     return animation_skeleton_joint_count;
 }
 
-BRX_ASSET_IMPORT_SKELETON_JOINT_NAME const *brx_asset_import_model_surface_group::get_animation_skeleton_joint_names() const
+BRX_ASSET_IMPORT_SKELETON_JOINT_NAME const *brx_asset_import_mesh_surface_group::get_animation_skeleton_joint_names() const
 {
     return this->m_animation_skeleton_joint_names.data();
 }
 
-uint32_t const *brx_asset_import_model_surface_group::get_animation_skeleton_joint_parent_indices() const
+uint32_t const *brx_asset_import_mesh_surface_group::get_animation_skeleton_joint_parent_indices() const
 {
     return this->m_animation_skeleton_joint_parent_indices.data();
 }
 
-brx_asset_import_rigid_transform const *brx_asset_import_model_surface_group::get_animation_skeleton_joint_transforms_bind_pose_local_space() const
+brx_asset_import_rigid_transform const *brx_asset_import_mesh_surface_group::get_animation_skeleton_joint_transforms_bind_pose_local_space() const
 {
     return this->m_animation_skeleton_joint_transforms_bind_pose_local_space.data();
 }
 
-uint32_t brx_asset_import_model_surface_group::get_animation_skeleton_joint_constraint_count() const
+uint32_t brx_asset_import_mesh_surface_group::get_animation_skeleton_joint_constraint_count() const
 {
     uint32_t const animation_skeleton_joint_constraint_count = this->m_animation_skeleton_joint_constraint_names.size();
     assert(this->m_animation_skeleton_joint_constraints.size() == animation_skeleton_joint_constraint_count);
@@ -238,57 +238,57 @@ uint32_t brx_asset_import_model_surface_group::get_animation_skeleton_joint_cons
     return animation_skeleton_joint_constraint_count;
 }
 
-BRX_ASSET_IMPORT_SKELETON_JOINT_CONSTRAINT_NAME const *brx_asset_import_model_surface_group::get_animation_skeleton_joint_constraint_names() const
+BRX_ASSET_IMPORT_SKELETON_JOINT_CONSTRAINT_NAME const *brx_asset_import_mesh_surface_group::get_animation_skeleton_joint_constraint_names() const
 {
     return this->m_animation_skeleton_joint_constraint_names.data();
 }
 
-brx_asset_import_skeleton_joint_constraint const *brx_asset_import_model_surface_group::get_animation_skeleton_joint_constraints() const
+brx_asset_import_skeleton_joint_constraint const *brx_asset_import_mesh_surface_group::get_animation_skeleton_joint_constraints() const
 {
     return this->m_animation_skeleton_joint_constraints.data();
 }
 
-uint32_t brx_asset_import_model_surface_group::get_ragdoll_skeleton_rigid_body_count() const
+uint32_t brx_asset_import_mesh_surface_group::get_ragdoll_skeleton_rigid_body_count() const
 {
     return this->m_ragdoll_skeleton_rigid_bodies.size();
 }
 
-brx_asset_import_physics_rigid_body const *brx_asset_import_model_surface_group::get_ragdoll_skeleton_rigid_bodies() const
+brx_asset_import_physics_rigid_body const *brx_asset_import_mesh_surface_group::get_ragdoll_skeleton_rigid_bodies() const
 {
     return this->m_ragdoll_skeleton_rigid_bodies.data();
 }
 
-uint32_t brx_asset_import_model_surface_group::get_ragdoll_skeleton_constraint_count() const
+uint32_t brx_asset_import_mesh_surface_group::get_ragdoll_skeleton_constraint_count() const
 {
     return this->m_ragdoll_skeleton_constraints.size();
 }
 
-brx_asset_import_physics_constraint const *brx_asset_import_model_surface_group::get_ragdoll_skeleton_constraints() const
+brx_asset_import_physics_constraint const *brx_asset_import_mesh_surface_group::get_ragdoll_skeleton_constraints() const
 {
     return this->m_ragdoll_skeleton_constraints.data();
 }
 
-uint32_t brx_asset_import_model_surface_group::get_animation_to_ragdoll_direct_mapping_count() const
+uint32_t brx_asset_import_mesh_surface_group::get_animation_to_ragdoll_direct_mapping_count() const
 {
     return this->m_animation_to_ragdoll_direct_mappings.size();
 }
 
-brx_asset_import_ragdoll_direct_mapping const *brx_asset_import_model_surface_group::get_animation_to_ragdoll_direct_mappings() const
+brx_asset_import_ragdoll_direct_mapping const *brx_asset_import_mesh_surface_group::get_animation_to_ragdoll_direct_mappings() const
 {
     return this->m_animation_to_ragdoll_direct_mappings.data();
 }
 
-uint32_t brx_asset_import_model_surface_group::get_ragdoll_to_animation_direct_mapping_count() const
+uint32_t brx_asset_import_mesh_surface_group::get_ragdoll_to_animation_direct_mapping_count() const
 {
     return this->m_ragdoll_to_animation_direct_mappings.size();
 }
 
-brx_asset_import_ragdoll_direct_mapping const *brx_asset_import_model_surface_group::get_ragdoll_to_animation_direct_mappings() const
+brx_asset_import_ragdoll_direct_mapping const *brx_asset_import_mesh_surface_group::get_ragdoll_to_animation_direct_mappings() const
 {
     return this->m_ragdoll_to_animation_direct_mappings.data();
 }
 
-brx_asset_import_model_animation::brx_asset_import_model_animation(
+brx_asset_import_mesh_animation::brx_asset_import_mesh_animation(
     mcrt_vector<BRX_ASSET_IMPORT_MORPH_TARGET_NAME> &&weight_channel_names,
     mcrt_vector<float> &&weights,
     mcrt_vector<BRX_ASSET_IMPORT_SKELETON_JOINT_NAME> &&rigid_transform_channel_names,
@@ -305,11 +305,11 @@ brx_asset_import_model_animation::brx_asset_import_model_animation(
 {
 }
 
-brx_asset_import_model_animation::~brx_asset_import_model_animation()
+brx_asset_import_mesh_animation::~brx_asset_import_mesh_animation()
 {
 }
 
-uint32_t const brx_asset_import_model_animation::get_frame_count() const
+uint32_t const brx_asset_import_mesh_animation::get_frame_count() const
 {
     if ((!this->m_weight_channel_names.empty()) && (!this->m_rigid_transform_channel_names.empty()) && (!this->m_switch_channel_names.empty()))
     {
@@ -412,79 +412,79 @@ uint32_t const brx_asset_import_model_animation::get_frame_count() const
     }
 }
 
-uint32_t const brx_asset_import_model_animation::get_weight_channel_count() const
+uint32_t const brx_asset_import_mesh_animation::get_weight_channel_count() const
 {
     return this->m_weight_channel_names.size();
 }
 
-BRX_ASSET_IMPORT_MORPH_TARGET_NAME const *brx_asset_import_model_animation::get_weight_channel_names() const
+BRX_ASSET_IMPORT_MORPH_TARGET_NAME const *brx_asset_import_mesh_animation::get_weight_channel_names() const
 {
     return this->m_weight_channel_names.data();
 }
 
-float const *brx_asset_import_model_animation::get_weights() const
+float const *brx_asset_import_mesh_animation::get_weights() const
 {
     return this->m_weights.data();
 }
 
-uint32_t const brx_asset_import_model_animation::get_rigid_transform_channel_count() const
+uint32_t const brx_asset_import_mesh_animation::get_rigid_transform_channel_count() const
 {
     return this->m_rigid_transform_channel_names.size();
 }
 
-BRX_ASSET_IMPORT_SKELETON_JOINT_NAME const *brx_asset_import_model_animation::get_rigid_transform_channel_names() const
+BRX_ASSET_IMPORT_SKELETON_JOINT_NAME const *brx_asset_import_mesh_animation::get_rigid_transform_channel_names() const
 {
     return this->m_rigid_transform_channel_names.data();
 }
 
-brx_asset_import_rigid_transform const *brx_asset_import_model_animation::get_rigid_transforms() const
+brx_asset_import_rigid_transform const *brx_asset_import_mesh_animation::get_rigid_transforms() const
 {
     return this->m_rigid_transforms.data();
 }
 
-uint32_t const brx_asset_import_model_animation::get_switch_channel_count() const
+uint32_t const brx_asset_import_mesh_animation::get_switch_channel_count() const
 {
     return this->m_switch_channel_names.size();
 }
 
-BRX_ASSET_IMPORT_SKELETON_JOINT_CONSTRAINT_NAME const *brx_asset_import_model_animation::get_switch_channel_names() const
+BRX_ASSET_IMPORT_SKELETON_JOINT_CONSTRAINT_NAME const *brx_asset_import_mesh_animation::get_switch_channel_names() const
 {
     return this->m_switch_channel_names.data();
 }
 
-uint8_t const *brx_asset_import_model_animation::get_switches() const
+uint8_t const *brx_asset_import_mesh_animation::get_switches() const
 {
     return this->m_switches.data();
 }
 
-brx_asset_import_model_scene::brx_asset_import_model_scene(
-    mcrt_vector<brx_asset_import_model_surface_group> &&surface_groups,
-    mcrt_vector<brx_asset_import_model_animation> &&animations)
+brx_asset_import_mesh_scene::brx_asset_import_mesh_scene(
+    mcrt_vector<brx_asset_import_mesh_surface_group> &&surface_groups,
+    mcrt_vector<brx_asset_import_mesh_animation> &&animations)
     : m_surface_groups(std::move(surface_groups)),
       m_animations(std::move(animations))
 {
 }
 
-brx_asset_import_model_scene::~brx_asset_import_model_scene()
+brx_asset_import_mesh_scene::~brx_asset_import_mesh_scene()
 {
 }
 
-uint32_t brx_asset_import_model_scene::get_surface_group_count() const
+uint32_t brx_asset_import_mesh_scene::get_surface_group_count() const
 {
     return this->m_surface_groups.size();
 }
 
-brx_asset_import_surface_group const *brx_asset_import_model_scene::get_surface_group(uint32_t group_index) const
+brx_asset_import_surface_group const *brx_asset_import_mesh_scene::get_surface_group(uint32_t group_index) const
 {
     return &this->m_surface_groups[group_index];
 }
 
-uint32_t brx_asset_import_model_scene::get_animation_count() const
+uint32_t brx_asset_import_mesh_scene::get_animation_count() const
 {
     return this->m_animations.size();
 }
 
-brx_asset_import_animation const *brx_asset_import_model_scene::get_animation(uint32_t skeleton_animation_index) const
+brx_asset_import_animation const *brx_asset_import_mesh_scene::get_animation(uint32_t skeleton_animation_index) const
 {
     return &this->m_animations[skeleton_animation_index];
 }

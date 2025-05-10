@@ -43,7 +43,7 @@ extern void cgltf_custom_free(void *, void *ptr);
 // TODO: change to static
 extern void internal_import_skeleton(cgltf_data const *data, mcrt_vector<DirectX::XMFLOAT4X4> &out_internal_node_world_transforms, mcrt_vector<mcrt_vector<cgltf_node const *>> &out_internal_mesh_instance_nodes, mcrt_vector<uint32_t> &out_internal_node_index_to_skeleton_joint_index, mcrt_vector<mcrt_string> &out_skeleton_joint_names, mcrt_vector<uint32_t> &out_skeleton_joint_parent_indices, mcrt_vector<brx_asset_import_rigid_transform> &out_skeleton_bind_pose_joint_transforms, uint32_t *out_vrm_skeleton_joint_names);
 
-static inline void internal_import_surface(cgltf_data const *data, mcrt_vector<DirectX::XMFLOAT4X4> const &internal_node_world_transforms, mcrt_vector<mcrt_vector<cgltf_node const *>> const &internal_mesh_instances, mcrt_vector<uint32_t> const &internal_node_index_to_skeleton_joint_index, mcrt_vector<brx_asset_import_model_surface> &out_surfaces);
+static inline void internal_import_surface(cgltf_data const *data, mcrt_vector<DirectX::XMFLOAT4X4> const &internal_node_world_transforms, mcrt_vector<mcrt_vector<cgltf_node const *>> const &internal_mesh_instances, mcrt_vector<uint32_t> const &internal_node_index_to_skeleton_joint_index, mcrt_vector<brx_asset_import_mesh_surface> &out_surfaces);
 
 // TODO: change to static
 // TODO: change name "out_skeleton_joint_names" to "animation channel name"
@@ -55,7 +55,7 @@ static inline void internal_scene_depth_first_search_traverse(cgltf_data const *
 
 static inline void internal_scene_breadth_first_search_traverse(cgltf_data const *data, void (*pfn_user_callback)(cgltf_data const *data, cgltf_node const *current_node, cgltf_node const *parent_node, void *user_data_x, void *user_data_y, void *user_data_z, void *user_data_u, void *user_data_v, void *user_data_w, void *user_data_l, void *user_data_m, void *user_data_n), void *user_data_x, void *user_data_y, void *user_data_z, void *user_data_u, void *user_data_v, void *user_data_w, void *user_data_l, void *user_data_m, void *user_data_n);
 
-extern bool internal_import_gltf_scene(brx_asset_import_input_stream_factory *input_stream_factory, char const *file_name, mcrt_vector<brx_asset_import_model_surface_group> &out_surface_groups)
+extern bool internal_import_gltf_scene(brx_asset_import_input_stream_factory *input_stream_factory, char const *file_name, mcrt_vector<brx_asset_import_mesh_surface_group> &out_surface_groups)
 {
     cgltf_data *data = NULL;
     {
@@ -427,7 +427,7 @@ extern void internal_import_skeleton(cgltf_data const *data, mcrt_vector<DirectX
     assert(out_skeleton_bind_pose_joint_transforms.size() == ((BRX_ASSET_IMPORT_UINT32_INDEX_INVALID != root_node_index) ? node_index_in_skeleton.size() : (node_index_in_skeleton.size() + 1U)));
 }
 
-static inline void internal_import_surface(cgltf_data const *data, mcrt_vector<DirectX::XMFLOAT4X4> const &internal_node_world_transforms, mcrt_vector<mcrt_vector<cgltf_node const *>> const &internal_mesh_instances, mcrt_vector<uint32_t> const &internal_node_index_to_skeleton_joint_index, mcrt_vector<brx_asset_import_model_surface> &out_surfaces)
+static inline void internal_import_surface(cgltf_data const *data, mcrt_vector<DirectX::XMFLOAT4X4> const &internal_node_world_transforms, mcrt_vector<mcrt_vector<cgltf_node const *>> const &internal_mesh_instances, mcrt_vector<uint32_t> const &internal_node_index_to_skeleton_joint_index, mcrt_vector<brx_asset_import_mesh_surface> &out_surfaces)
 {
     // [glTF Validator: NODE_SKINNED_MESH_NON_ROOT](https://github.com/KhronosGroup/glTF-Validator/blob/main/lib/src/errors.dart#L444)
     // [glTF Validator: NODE_SKINNED_MESH_LOCAL_TRANSFORMS](https://github.com/KhronosGroup/glTF-Validator/blob/main/lib/src/errors.dart#L450)
@@ -454,10 +454,10 @@ static inline void internal_import_surface(cgltf_data const *data, mcrt_vector<D
     assert(DirectX::XMVector3EqualInt(DirectX::XMVectorTrueInt(), DirectX::XMVectorLess(DirectX::XMVectorAbs(DirectX::XMVectorSubtract(out_instance_node_world_translation, DirectX::XMVectorZero())), DirectX::XMVectorReplicate(translation_epsilon))));
 #endif
 
-    mcrt_vector<brx_asset_import_model_surface> immutable_surface;
-    mcrt_vector<brx_asset_import_model_surface> morph_deform_surfaces;
-    mcrt_vector<brx_asset_import_model_surface> skin_deform_surfaces;
-    mcrt_vector<brx_asset_import_model_surface> morph_and_skin_deform_surfaces;
+    mcrt_vector<brx_asset_import_mesh_surface> immutable_surface;
+    mcrt_vector<brx_asset_import_mesh_surface> morph_deform_surfaces;
+    mcrt_vector<brx_asset_import_mesh_surface> skin_deform_surfaces;
+    mcrt_vector<brx_asset_import_mesh_surface> morph_and_skin_deform_surfaces;
 
     // std::cout << "Multiple skeletons bound to the same mesh: \"" << " [" << ((NULL != current_node->mesh->name) ? current_node->mesh->name : "Name N/A") << " ]. Only the joint indices of the first skeleton will be used; all others will be ignored." << std::endl;
     for (size_t mesh_index = 0U; mesh_index < data->meshes_count; ++mesh_index)

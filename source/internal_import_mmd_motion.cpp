@@ -66,7 +66,7 @@ static inline mmd_vmd_vec3_t internal_transform_translation(mmd_vmd_vec3_t const
 
 static inline mmd_vmd_vec4_t internal_transform_rotation(mmd_vmd_vec4_t const &q);
 
-extern bool internal_import_mmd_motion(void const *data_base, size_t data_size, mcrt_vector<brx_asset_import_model_animation> &out_animations)
+extern bool internal_import_mmd_motion(void const *data_base, size_t data_size, mcrt_vector<brx_asset_import_mesh_animation> &out_animations)
 {
     mcrt_vector<BRX_ASSET_IMPORT_MORPH_TARGET_NAME> weight_channel_names;
     mcrt_vector<float> weights;

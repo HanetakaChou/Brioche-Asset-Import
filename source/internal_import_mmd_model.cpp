@@ -106,9 +106,9 @@ static inline void internal_import_ragdoll_physics(mcrt_vector<mmd_pmx_rigid_bod
 
 static inline void internal_import_mesh_sections(mcrt_vector<mmd_pmx_vertex_t> const &in_vertices, mcrt_vector<mmd_pmx_face_t> const &in_faces, mcrt_vector<mmd_pmx_texture_t> const &in_textures, mcrt_vector<mmd_pmx_material_t> const &in_materials, mcrt_vector<mcrt_map<uint32_t, internal_mmd_morph_target_vertex_t>> const &in_morph_targets_vertices, mcrt_vector<uint32_t> const &in_model_node_to_animation_skeleton_joint_map, mcrt_vector<internal_mmd_mesh_section_t> &out_mesh_sections);
 
-extern bool internal_import_mmd_model(void const *data_base, size_t data_size, mcrt_vector<brx_asset_import_model_surface_group> &out_surface_groups)
+extern bool internal_import_mmd_model(void const *data_base, size_t data_size, mcrt_vector<brx_asset_import_mesh_surface_group> &out_surface_groups)
 {
-	mcrt_vector<brx_asset_import_model_surface> surfaces;
+	mcrt_vector<brx_asset_import_mesh_surface> surfaces;
 
 	mcrt_vector<BRX_ASSET_IMPORT_SKELETON_JOINT_NAME> animation_skeleton_joint_names;
 	mcrt_vector<uint32_t> animation_skeleton_joint_parent_indices;

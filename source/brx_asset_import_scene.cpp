@@ -15,20 +15,20 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "brx_asset_import_model_scene.h"
+#include "brx_asset_import_mesh_scene.h"
 #include "internal_import_scene.h"
 #include <cassert>
 
 extern "C" brx_asset_import_scene *brx_asset_import_create_scene_from_memory(void const *data_base, size_t data_size)
 {
-    mcrt_vector<brx_asset_import_model_surface_group> surface_groups;
-    mcrt_vector<brx_asset_import_model_animation> animations;
+    mcrt_vector<brx_asset_import_mesh_surface_group> surface_groups;
+    mcrt_vector<brx_asset_import_mesh_animation> animations;
     if (internal_import_model_scene(data_base, data_size, surface_groups, animations))
     {
-        void *new_unwrapped_model_scene_base = mcrt_malloc(sizeof(brx_asset_import_model_scene), alignof(brx_asset_import_model_scene));
+        void *new_unwrapped_model_scene_base = mcrt_malloc(sizeof(brx_asset_import_mesh_scene), alignof(brx_asset_import_mesh_scene));
         assert(NULL != new_unwrapped_model_scene_base);
 
-        brx_asset_import_model_scene *new_unwrapped_model_scene = new (new_unwrapped_model_scene_base) brx_asset_import_model_scene{std::move(surface_groups), std::move(animations)};
+        brx_asset_import_mesh_scene *new_unwrapped_model_scene = new (new_unwrapped_model_scene_base) brx_asset_import_mesh_scene{std::move(surface_groups), std::move(animations)};
         return new_unwrapped_model_scene;
     }
     else
@@ -40,9 +40,9 @@ extern "C" brx_asset_import_scene *brx_asset_import_create_scene_from_memory(voi
 extern "C" void brx_asset_import_destroy_scene(brx_asset_import_scene *wrapped_scene)
 {
     assert(NULL != wrapped_scene);
-    brx_asset_import_model_scene *delete_unwrapped_scene = static_cast<brx_asset_import_model_scene *>(wrapped_scene);
+    brx_asset_import_mesh_scene *delete_unwrapped_scene = static_cast<brx_asset_import_mesh_scene *>(wrapped_scene);
 
-    delete_unwrapped_scene->~brx_asset_import_model_scene();
+    delete_unwrapped_scene->~brx_asset_import_mesh_scene();
 
     mcrt_free(delete_unwrapped_scene);
 }

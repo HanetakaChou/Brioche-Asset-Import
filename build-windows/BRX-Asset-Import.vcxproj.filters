@@ -27,7 +27,7 @@
     <ClInclude Include="..\source\brx_asset_import_memory_input_stream.h">
       <Filter>source</Filter>
     </ClInclude>
-    <ClInclude Include="..\source\brx_asset_import_model_scene.h">
+    <ClInclude Include="..\source\brx_asset_import_mesh_scene.h">
       <Filter>source</Filter>
     </ClInclude>
     <ClInclude Include="..\source\internal_import_image.h">
@@ -83,7 +83,7 @@
     <ClCompile Include="..\source\brx_asset_import_memory_input_stream.cpp">
       <Filter>source</Filter>
     </ClCompile>
-    <ClCompile Include="..\source\brx_asset_import_model_scene.cpp">
+    <ClCompile Include="..\source\brx_asset_import_mesh_scene.cpp">
       <Filter>source</Filter>
     </ClCompile>
     <ClCompile Include="..\source\brx_asset_import_scene.cpp">

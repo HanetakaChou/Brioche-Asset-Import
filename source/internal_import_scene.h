@@ -18,11 +18,11 @@
 #ifndef _INTERNAL_IMPORT_SCENE_H_
 #define _INTERNAL_IMPORT_SCENE_H_ 1
 
-#include "brx_asset_import_model_scene.h"
+#include "brx_asset_import_mesh_scene.h"
 #include "../../McRT-Malloc/include/mcrt_vector.h"
 #include <cstddef>
 #include <cstdint>
 
-extern bool internal_import_model_scene(void const *data_base, size_t data_size, mcrt_vector<brx_asset_import_model_surface_group> &out_surface_groups, mcrt_vector<brx_asset_import_model_animation> &out_animations);
+extern bool internal_import_model_scene(void const *data_base, size_t data_size, mcrt_vector<brx_asset_import_mesh_surface_group> &out_surface_groups, mcrt_vector<brx_asset_import_mesh_animation> &out_animations);
 
 #endif

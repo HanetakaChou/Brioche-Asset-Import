@@ -18,10 +18,10 @@
 #ifndef _INTERNAL_IMPORT_MMD_MODEL_H_
 #define _INTERNAL_IMPORT_MMD_MODEL_H_ 1
 
-#include "brx_asset_import_model_scene.h"
+#include "brx_asset_import_mesh_scene.h"
 #include <cstddef>
 #include <cstdint>
 
-extern bool internal_import_mmd_model(void const *data_base, size_t data_size, mcrt_vector<brx_asset_import_model_surface_group> &out_surface_groups);
+extern bool internal_import_mmd_model(void const *data_base, size_t data_size, mcrt_vector<brx_asset_import_mesh_surface_group> &out_surface_groups);
 
 #endif
