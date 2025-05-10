@@ -24,13 +24,13 @@
 
 class brx_asset_import_mesh_surface final : public brx_asset_import_surface
 {
-    mcrt_vector<brx_asset_import_vertex_position> m_vertex_positions;
-    mcrt_vector<brx_asset_import_vertex_varying> m_vertex_varyings;
-    mcrt_vector<brx_asset_import_vertex_blending> m_vertex_blendings;
+    mcrt_vector<brx_asset_import_surface_vertex_position> m_vertex_positions;
+    mcrt_vector<brx_asset_import_surface_vertex_varying> m_vertex_varyings;
+    mcrt_vector<brx_asset_import_surface_vertex_blending> m_vertex_blendings;
 
     mcrt_vector<BRX_ASSET_IMPORT_MORPH_TARGET_NAME> m_morph_target_names;
-    mcrt_vector<mcrt_vector<brx_asset_import_vertex_position>> m_morph_targets_vertex_positions;
-    mcrt_vector<mcrt_vector<brx_asset_import_vertex_varying>> m_morph_targets_vertex_varyings;
+    mcrt_vector<mcrt_vector<brx_asset_import_surface_vertex_position>> m_morph_targets_vertex_positions;
+    mcrt_vector<mcrt_vector<brx_asset_import_surface_vertex_varying>> m_morph_targets_vertex_varyings;
 
     mcrt_vector<uint32_t> m_indices;
 
@@ -43,12 +43,12 @@ class brx_asset_import_mesh_surface final : public brx_asset_import_surface
 
 public:
     brx_asset_import_mesh_surface(
-        mcrt_vector<brx_asset_import_vertex_position> &&vertex_positions,
-        mcrt_vector<brx_asset_import_vertex_varying> &&vertex_varyings,
-        mcrt_vector<brx_asset_import_vertex_blending> &&vertex_blendings,
+        mcrt_vector<brx_asset_import_surface_vertex_position> &&vertex_positions,
+        mcrt_vector<brx_asset_import_surface_vertex_varying> &&vertex_varyings,
+        mcrt_vector<brx_asset_import_surface_vertex_blending> &&vertex_blendings,
         mcrt_vector<BRX_ASSET_IMPORT_MORPH_TARGET_NAME> &&morph_target_names,
-        mcrt_vector<mcrt_vector<brx_asset_import_vertex_position>> &&morph_targets_vertex_positions,
-        mcrt_vector<mcrt_vector<brx_asset_import_vertex_varying>> &&morph_targets_vertex_varyings,
+        mcrt_vector<mcrt_vector<brx_asset_import_surface_vertex_position>> &&morph_targets_vertex_positions,
+        mcrt_vector<mcrt_vector<brx_asset_import_surface_vertex_varying>> &&morph_targets_vertex_varyings,
         mcrt_vector<uint32_t> &&indices,
         bool is_double_sided,
         mcrt_vector<BRX_ASSET_IMPORT_TEXTURE_NAME> &&texture_names,
@@ -58,14 +58,14 @@ public:
 
 private:
     uint32_t get_vertex_count() const override;
-    brx_asset_import_vertex_position const *get_vertex_position(uint32_t vertex_index) const override;
-    brx_asset_import_vertex_varying const *get_vertex_varying(uint32_t vertex_index) const override;
-    brx_asset_import_vertex_blending const *get_vertex_blending(uint32_t vertex_index) const override;
+    brx_asset_import_surface_vertex_position const *get_vertex_positions() const override;
+    brx_asset_import_surface_vertex_varying const *get_vertex_varyings() const override;
+    brx_asset_import_surface_vertex_blending const *get_vertex_blendings() const override;
 
     uint32_t get_morph_target_count() const override;
     BRX_ASSET_IMPORT_MORPH_TARGET_NAME get_morph_target_name(uint32_t morph_target_index) const override;
-    brx_asset_import_vertex_position const *get_morph_target_vertex_position(uint32_t morph_target_index, uint32_t vertex_index) const override;
-    brx_asset_import_vertex_varying const *get_morph_target_vertex_varying(uint32_t morph_target_index, uint32_t vertex_index) const override;
+    brx_asset_import_surface_vertex_position const *get_morph_target_vertex_positions(uint32_t morph_target_index) const override;
+    brx_asset_import_surface_vertex_varying const *get_morph_target_vertex_varyings(uint32_t morph_target_index) const override;
 
     uint32_t get_index_count() const override;
     uint32_t get_index(uint32_t index_index) const override;

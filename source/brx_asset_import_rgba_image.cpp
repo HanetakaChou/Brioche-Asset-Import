@@ -32,17 +32,17 @@ BRX_ASSET_IMPORT_IMAGE_FORMAT brx_asset_import_rgba_image::get_format() const
     return BRX_ASSET_IMPORT_IMAGE_FORMAT_R8G8B8A8;
 }
 
-uint32_t brx_asset_import_rgba_image::get_width(uint32_t mip_level_index) const
+uint32_t brx_asset_import_rgba_image::get_width() const
 {
     return this->m_width;
 }
 
-uint32_t brx_asset_import_rgba_image::get_height(uint32_t mip_level_index) const
+uint32_t brx_asset_import_rgba_image::get_height() const
 {
     return this->m_height;
 }
 
-void const *brx_asset_import_rgba_image::get_pixel_data(uint32_t mip_level_index) const
+void const *brx_asset_import_rgba_image::get_pixel_data() const
 {
     return this->m_pixel_data.data();
 }

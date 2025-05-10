@@ -33,9 +33,9 @@ public:
 
 private:
     BRX_ASSET_IMPORT_IMAGE_FORMAT get_format() const override;
-    uint32_t get_width(uint32_t mip_level_index) const override;
-    uint32_t get_height(uint32_t mip_level_index) const override;
-    void const *get_pixel_data(uint32_t mip_level_index) const override;
+    uint32_t get_width() const override;
+    uint32_t get_height() const override;
+    void const *get_pixel_data() const override;
 };
 
 #endif

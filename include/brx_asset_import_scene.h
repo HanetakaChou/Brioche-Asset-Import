@@ -418,19 +418,19 @@ enum BRX_ASSET_IMPORT_PHYSICS_CONSTRAINT_TYPE : uint32_t
     BRX_ASSET_IMPORT_PHYSICS_CONSTRAINT_RAGDOLL = 4
 };
 
-struct brx_asset_import_vertex_position
+struct brx_asset_import_surface_vertex_position
 {
     float m_position[3];
 };
 
-struct brx_asset_import_vertex_varying
+struct brx_asset_import_surface_vertex_varying
 {
     float m_normal[3];
     float m_tangent[4];
     float m_texcoord[2];
 };
 
-struct brx_asset_import_vertex_blending
+struct brx_asset_import_surface_vertex_blending
 {
     uint32_t m_indices[4];
     float m_weights[4];
@@ -565,19 +565,19 @@ class brx_asset_import_surface
 {
 public:
     virtual uint32_t get_vertex_count() const = 0;
-    virtual brx_asset_import_vertex_position const *get_vertex_position(uint32_t vertex_index) const = 0;
-    virtual brx_asset_import_vertex_varying const *get_vertex_varying(uint32_t vertex_index) const = 0;
+    virtual brx_asset_import_surface_vertex_position const *get_vertex_positions() const = 0;
+    virtual brx_asset_import_surface_vertex_varying const *get_vertex_varyings() const = 0;
     // NULL: no skin (even if there is one skeleton bound to the group)
     // not NULL: skin (there must be one skeleton bound to the group)
-    virtual brx_asset_import_vertex_blending const *get_vertex_blending(uint32_t vertex_index) const = 0;
+    virtual brx_asset_import_surface_vertex_blending const *get_vertex_blendings() const = 0;
 
     // geometry
     // 0: no morph animation
     // greater than 0: morph animation
     virtual uint32_t get_morph_target_count() const = 0;
     virtual BRX_ASSET_IMPORT_MORPH_TARGET_NAME get_morph_target_name(uint32_t morph_target_index) const = 0;
-    virtual brx_asset_import_vertex_position const *get_morph_target_vertex_position(uint32_t morph_target_index, uint32_t vertex_index) const = 0;
-    virtual brx_asset_import_vertex_varying const *get_morph_target_vertex_varying(uint32_t morph_target_index, uint32_t vertex_index) const = 0;
+    virtual brx_asset_import_surface_vertex_position const *get_morph_target_vertex_positions(uint32_t morph_target_index) const = 0;
+    virtual brx_asset_import_surface_vertex_varying const *get_morph_target_vertex_varyings(uint32_t morph_target_index) const = 0;
 
     virtual uint32_t get_index_count() const = 0;
     virtual uint32_t get_index(uint32_t index_index) const = 0;

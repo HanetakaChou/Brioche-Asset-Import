@@ -22,6 +22,6 @@
 #include <cstddef>
 #include <cstdint>
 
-extern bool internal_import_png_image(void const* data_base, size_t data_size, mcrt_vector<uint32_t>& out_pixel_data, uint32_t* out_width, uint32_t* out_height);
+extern bool internal_import_png_image(void const *data_base, size_t data_size, mcrt_vector<uint32_t> &out_pixel_data, uint32_t *out_width, uint32_t *out_height);
 
 #endif

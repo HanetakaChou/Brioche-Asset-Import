@@ -20,12 +20,12 @@
 #include <cassert>
 
 brx_asset_import_mesh_surface::brx_asset_import_mesh_surface(
-    mcrt_vector<brx_asset_import_vertex_position> &&vertex_positions,
-    mcrt_vector<brx_asset_import_vertex_varying> &&vertex_varyings,
-    mcrt_vector<brx_asset_import_vertex_blending> &&vertex_blendings,
+    mcrt_vector<brx_asset_import_surface_vertex_position> &&vertex_positions,
+    mcrt_vector<brx_asset_import_surface_vertex_varying> &&vertex_varyings,
+    mcrt_vector<brx_asset_import_surface_vertex_blending> &&vertex_blendings,
     mcrt_vector<BRX_ASSET_IMPORT_MORPH_TARGET_NAME> &&morph_target_names,
-    mcrt_vector<mcrt_vector<brx_asset_import_vertex_position>> &&morph_targets_vertex_positions,
-    mcrt_vector<mcrt_vector<brx_asset_import_vertex_varying>> &&morph_targets_vertex_varyings,
+    mcrt_vector<mcrt_vector<brx_asset_import_surface_vertex_position>> &&morph_targets_vertex_positions,
+    mcrt_vector<mcrt_vector<brx_asset_import_surface_vertex_varying>> &&morph_targets_vertex_varyings,
     mcrt_vector<uint32_t> &&indices,
     bool is_double_sided,
     mcrt_vector<BRX_ASSET_IMPORT_TEXTURE_NAME> &&texture_names,
@@ -55,12 +55,12 @@ uint32_t brx_asset_import_mesh_surface::get_vertex_count() const
     assert(this->m_vertex_varyings.size() == vertex_count);
     assert(this->m_vertex_blendings.empty() || this->m_vertex_blendings.size() == vertex_count);
 #ifndef NDEBUG
-    for (mcrt_vector<brx_asset_import_vertex_position> const &morph_target_vertex_positions : this->m_morph_targets_vertex_positions)
+    for (mcrt_vector<brx_asset_import_surface_vertex_position> const &morph_target_vertex_positions : this->m_morph_targets_vertex_positions)
     {
         assert(morph_target_vertex_positions.size() == vertex_count);
     }
 
-    for (mcrt_vector<brx_asset_import_vertex_varying> const &morph_target_vertex_varyings : this->m_morph_targets_vertex_varyings)
+    for (mcrt_vector<brx_asset_import_surface_vertex_varying> const &morph_target_vertex_varyings : this->m_morph_targets_vertex_varyings)
     {
         assert(morph_target_vertex_varyings.size() == vertex_count);
     }
@@ -68,19 +68,19 @@ uint32_t brx_asset_import_mesh_surface::get_vertex_count() const
     return vertex_count;
 }
 
-brx_asset_import_vertex_position const *brx_asset_import_mesh_surface::get_vertex_position(uint32_t vertex_index) const
+brx_asset_import_surface_vertex_position const *brx_asset_import_mesh_surface::get_vertex_positions() const
 {
-    return &this->m_vertex_positions[vertex_index];
+    return this->m_vertex_positions.data();
 }
 
-brx_asset_import_vertex_varying const *brx_asset_import_mesh_surface::get_vertex_varying(uint32_t vertex_index) const
+brx_asset_import_surface_vertex_varying const *brx_asset_import_mesh_surface::get_vertex_varyings() const
 {
-    return &this->m_vertex_varyings[vertex_index];
+    return this->m_vertex_varyings.data();
 }
 
-brx_asset_import_vertex_blending const *brx_asset_import_mesh_surface::get_vertex_blending(uint32_t vertex_index) const
+brx_asset_import_surface_vertex_blending const *brx_asset_import_mesh_surface::get_vertex_blendings() const
 {
-    return (!this->m_vertex_blendings.empty()) ? &this->m_vertex_blendings[vertex_index] : NULL;
+    return (!this->m_vertex_blendings.empty()) ? this->m_vertex_blendings.data() : NULL;
 }
 
 uint32_t brx_asset_import_mesh_surface::get_morph_target_count() const
@@ -96,14 +96,14 @@ BRX_ASSET_IMPORT_MORPH_TARGET_NAME brx_asset_import_mesh_surface::get_morph_targ
     return this->m_morph_target_names[morph_target_index];
 }
 
-brx_asset_import_vertex_position const *brx_asset_import_mesh_surface::get_morph_target_vertex_position(uint32_t morph_target_index, uint32_t vertex_index) const
+brx_asset_import_surface_vertex_position const *brx_asset_import_mesh_surface::get_morph_target_vertex_positions(uint32_t morph_target_index) const
 {
-    return &this->m_morph_targets_vertex_positions[morph_target_index][vertex_index];
+    return this->m_morph_targets_vertex_positions[morph_target_index].data();
 }
 
-brx_asset_import_vertex_varying const *brx_asset_import_mesh_surface::get_morph_target_vertex_varying(uint32_t morph_target_index, uint32_t vertex_index) const
+brx_asset_import_surface_vertex_varying const *brx_asset_import_mesh_surface::get_morph_target_vertex_varyings(uint32_t morph_target_index) const
 {
-    return &this->m_morph_targets_vertex_varyings[morph_target_index][vertex_index];
+    return this->m_morph_targets_vertex_varyings[morph_target_index].data();
 }
 
 uint32_t brx_asset_import_mesh_surface::get_index_count() const

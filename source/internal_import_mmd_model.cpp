@@ -179,12 +179,12 @@ extern bool internal_import_mmd_model(void const *data_base, size_t data_size, m
 
 			for (internal_mmd_mesh_section_t const &mesh_section : mesh_sections)
 			{
-				mcrt_vector<brx_asset_import_vertex_position> vertex_positions;
-				mcrt_vector<brx_asset_import_vertex_varying> vertex_varyings;
-				mcrt_vector<brx_asset_import_vertex_blending> vertex_blendings;
+				mcrt_vector<brx_asset_import_surface_vertex_position> vertex_positions;
+				mcrt_vector<brx_asset_import_surface_vertex_varying> vertex_varyings;
+				mcrt_vector<brx_asset_import_surface_vertex_blending> vertex_blendings;
 				mcrt_vector<BRX_ASSET_IMPORT_MORPH_TARGET_NAME> mesh_section_morph_target_names;
-				mcrt_vector<mcrt_vector<brx_asset_import_vertex_position>> morph_targets_vertex_positions;
-				mcrt_vector<mcrt_vector<brx_asset_import_vertex_varying>> morph_targets_vertex_varyings;
+				mcrt_vector<mcrt_vector<brx_asset_import_surface_vertex_position>> morph_targets_vertex_positions;
+				mcrt_vector<mcrt_vector<brx_asset_import_surface_vertex_varying>> morph_targets_vertex_varyings;
 				mcrt_vector<uint32_t> indices;
 				bool is_double_sided;
 				mcrt_vector<BRX_ASSET_IMPORT_TEXTURE_NAME> texture_names;
@@ -299,7 +299,7 @@ extern bool internal_import_mmd_model(void const *data_base, size_t data_size, m
 							}
 
 							{
-								mcrt_vector<brx_asset_import_vertex_position> &morph_target_vertex_positions = morph_targets_vertex_positions[morph_target_index];
+								mcrt_vector<brx_asset_import_surface_vertex_position> &morph_target_vertex_positions = morph_targets_vertex_positions[morph_target_index];
 								morph_target_vertex_positions.resize(vertex_count);
 
 								for (uint32_t vertex_index = 0U; vertex_index < vertex_count; ++vertex_index)
@@ -311,7 +311,7 @@ extern bool internal_import_mmd_model(void const *data_base, size_t data_size, m
 							}
 
 							{
-								mcrt_vector<brx_asset_import_vertex_varying> &morph_target_vertex_varyings = morph_targets_vertex_varyings[morph_target_index];
+								mcrt_vector<brx_asset_import_surface_vertex_varying> &morph_target_vertex_varyings = morph_targets_vertex_varyings[morph_target_index];
 								morph_target_vertex_varyings.resize(vertex_count);
 
 								for (uint32_t vertex_index = 0U; vertex_index < vertex_count; ++vertex_index)
