@@ -37,7 +37,7 @@ class brx_asset_import_mesh_surface final : public brx_asset_import_surface
     bool m_is_double_sided;
 
     mcrt_vector<BRX_ASSET_IMPORT_TEXTURE_NAME> m_texture_names;
-    mcrt_vector<brx_asset_import_texture_factor> m_texture_factors;
+    mcrt_vector<brx_asset_import_surface_texture_factor> m_texture_factors;
     // use vector instead of string to support data binary
     mcrt_vector<mcrt_vector<uint8_t>> m_texture_urls;
 
@@ -52,7 +52,7 @@ public:
         mcrt_vector<uint32_t> &&indices,
         bool is_double_sided,
         mcrt_vector<BRX_ASSET_IMPORT_TEXTURE_NAME> &&texture_names,
-        mcrt_vector<brx_asset_import_texture_factor> &&texture_factors,
+        mcrt_vector<brx_asset_import_surface_texture_factor> &&texture_factors,
         mcrt_vector<mcrt_vector<uint8_t>> &&texture_urls);
     ~brx_asset_import_mesh_surface();
 
@@ -68,13 +68,13 @@ private:
     brx_asset_import_surface_vertex_varying const *get_morph_target_vertex_varyings(uint32_t morph_target_index) const override;
 
     uint32_t get_index_count() const override;
-    uint32_t get_index(uint32_t index_index) const override;
+    uint32_t const *get_indices() const override;
 
     bool is_double_sided() const override;
 
     uint32_t get_texture_count() const override;
-    BRX_ASSET_IMPORT_TEXTURE_NAME get_texture_name(uint32_t texture_index) const override;
-    brx_asset_import_texture_factor const *get_texture_factor(uint32_t texture_index) const override;
+    BRX_ASSET_IMPORT_TEXTURE_NAME const *get_texture_names() const override;
+    brx_asset_import_surface_texture_factor const *get_texture_factors() const override;
     void const *get_texture_url(uint32_t texture_index) const override;
 };
 

@@ -188,7 +188,7 @@ extern bool internal_import_mmd_model(void const *data_base, size_t data_size, m
 				mcrt_vector<uint32_t> indices;
 				bool is_double_sided;
 				mcrt_vector<BRX_ASSET_IMPORT_TEXTURE_NAME> texture_names;
-				mcrt_vector<brx_asset_import_texture_factor> texture_factors;
+				mcrt_vector<brx_asset_import_surface_texture_factor> texture_factors;
 				mcrt_vector<mcrt_vector<uint8_t>> texture_urls;
 				{
 					uint32_t const vertex_count = mesh_section.m_vertices.size();
@@ -351,7 +351,7 @@ extern bool internal_import_mmd_model(void const *data_base, size_t data_size, m
 
 					texture_names.emplace_back(BRX_ASSET_IMPORT_TEXTURE_NAME_PBR_BASE_COLOR);
 
-					texture_factors.emplace_back(brx_asset_import_texture_factor{mesh_section.m_diffuse[0], mesh_section.m_diffuse[1], mesh_section.m_diffuse[2], mesh_section.m_diffuse[3]});
+					texture_factors.emplace_back(brx_asset_import_surface_texture_factor{mesh_section.m_diffuse[0], mesh_section.m_diffuse[1], mesh_section.m_diffuse[2], mesh_section.m_diffuse[3]});
 
 					{
 						mcrt_string texture_url;

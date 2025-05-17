@@ -436,7 +436,7 @@ struct brx_asset_import_surface_vertex_blending
     float m_weights[4];
 };
 
-struct brx_asset_import_texture_factor
+struct brx_asset_import_surface_texture_factor
 {
     float m_rgba[4];
 };
@@ -580,15 +580,19 @@ public:
     virtual brx_asset_import_surface_vertex_varying const *get_morph_target_vertex_varyings(uint32_t morph_target_index) const = 0;
 
     virtual uint32_t get_index_count() const = 0;
-    virtual uint32_t get_index(uint32_t index_index) const = 0;
+    virtual uint32_t const *get_indices() const = 0;
 
     // material
     virtual bool is_double_sided() const = 0;
 
     virtual uint32_t get_texture_count() const = 0;
-    virtual BRX_ASSET_IMPORT_TEXTURE_NAME get_texture_name(uint32_t texture_index) const = 0;
-    // R8G8B8A8_UNORM
-    virtual brx_asset_import_texture_factor const *get_texture_factor(uint32_t texture_index) const = 0;
+    virtual BRX_ASSET_IMPORT_TEXTURE_NAME const *get_texture_names() const = 0;
+    // emissive factor: rgb
+    // normal scale: r
+    // base color factor: rgb
+    // metallic factor: b
+    // roughness factor: g
+    virtual brx_asset_import_surface_texture_factor const *get_texture_factors() const = 0;
     // start with file:// : external file
     // start with data:// : internal data
     virtual void const *get_texture_url(uint32_t texture_index) const = 0;

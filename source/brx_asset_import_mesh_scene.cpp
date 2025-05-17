@@ -29,7 +29,7 @@ brx_asset_import_mesh_surface::brx_asset_import_mesh_surface(
     mcrt_vector<uint32_t> &&indices,
     bool is_double_sided,
     mcrt_vector<BRX_ASSET_IMPORT_TEXTURE_NAME> &&texture_names,
-    mcrt_vector<brx_asset_import_texture_factor> &&texture_factors,
+    mcrt_vector<brx_asset_import_surface_texture_factor> &&texture_factors,
     mcrt_vector<mcrt_vector<uint8_t>> &&texture_urls)
     : m_vertex_positions(std::move(vertex_positions)),
       m_vertex_varyings(std::move(vertex_varyings)),
@@ -70,12 +70,12 @@ uint32_t brx_asset_import_mesh_surface::get_vertex_count() const
 
 brx_asset_import_surface_vertex_position const *brx_asset_import_mesh_surface::get_vertex_positions() const
 {
-    return this->m_vertex_positions.data();
+    return (!this->m_vertex_positions.empty()) ? this->m_vertex_positions.data() : NULL;
 }
 
 brx_asset_import_surface_vertex_varying const *brx_asset_import_mesh_surface::get_vertex_varyings() const
 {
-    return this->m_vertex_varyings.data();
+    return (!this->m_vertex_varyings.empty()) ? this->m_vertex_varyings.data() : NULL;
 }
 
 brx_asset_import_surface_vertex_blending const *brx_asset_import_mesh_surface::get_vertex_blendings() const
@@ -111,9 +111,9 @@ uint32_t brx_asset_import_mesh_surface::get_index_count() const
     return this->m_indices.size();
 }
 
-uint32_t brx_asset_import_mesh_surface::get_index(uint32_t index_index) const
+uint32_t const *brx_asset_import_mesh_surface::get_indices() const
 {
-    return this->m_indices[index_index];
+    return (!this->m_indices.empty()) ? this->m_indices.data() : NULL;
 }
 
 bool brx_asset_import_mesh_surface::is_double_sided() const
@@ -123,25 +123,25 @@ bool brx_asset_import_mesh_surface::is_double_sided() const
 
 uint32_t brx_asset_import_mesh_surface::get_texture_count() const
 {
-    uint32_t const _texture_count = this->m_texture_names.size();
-    assert(this->m_texture_factors.size() == _texture_count);
-    assert(this->m_texture_urls.size() == _texture_count);
-    return _texture_count;
+    uint32_t const texture_count = this->m_texture_names.size();
+    assert(this->m_texture_factors.size() == texture_count);
+    assert(this->m_texture_urls.size() == texture_count);
+    return texture_count;
 }
 
-BRX_ASSET_IMPORT_TEXTURE_NAME brx_asset_import_mesh_surface::get_texture_name(uint32_t texture_index) const
+BRX_ASSET_IMPORT_TEXTURE_NAME const *brx_asset_import_mesh_surface::get_texture_names() const
 {
-    return this->m_texture_names[texture_index];
+    return (!this->m_texture_names.empty()) ? this->m_texture_names.data() : NULL;
 }
 
-brx_asset_import_texture_factor const *brx_asset_import_mesh_surface::get_texture_factor(uint32_t texture_index) const
+brx_asset_import_surface_texture_factor const *brx_asset_import_mesh_surface::get_texture_factors() const
 {
-    return &this->m_texture_factors[texture_index];
+    return (!this->m_texture_factors.empty()) ? this->m_texture_factors.data() : NULL;
 }
 
 void const *brx_asset_import_mesh_surface::get_texture_url(uint32_t texture_index) const
 {
-    return ((!this->m_texture_urls[texture_index].empty()) ? this->m_texture_urls[texture_index].data() : NULL);
+    return (!this->m_texture_urls[texture_index].empty()) ? this->m_texture_urls[texture_index].data() : NULL;
 }
 
 brx_asset_import_mesh_surface_group::brx_asset_import_mesh_surface_group(
