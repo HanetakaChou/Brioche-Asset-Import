@@ -39,6 +39,8 @@ struct ui_controller_t
 
     mcrt_string m_new_instance_motion_selected_asset_motion;
     int m_new_instance_motion_selected_animation_index;
+    mcrt_vector<char> m_new_instance_motion_name;
+    uint64_t m_selected_instance_motion;
 };
 
 struct user_camera_controller_t

@@ -217,6 +217,8 @@ static inline brx_anari_image *_internal_load_asset_image_file(char const *asset
 
 extern void ui_controller_init(ui_controller_t *ui_controller)
 {
+    constexpr size_t const MAX_INPUT_TEXT_SIZE = 4096U;
+
     ui_controller->m_language_index = 0;
 
     ui_controller->m_import_asset_image_force_srgb = true;
@@ -231,6 +233,9 @@ extern void ui_controller_init(ui_controller_t *ui_controller)
 
     ui_controller->m_new_instance_motion_selected_asset_motion.clear();
     ui_controller->m_new_instance_motion_selected_animation_index = -1;
+    ui_controller->m_new_instance_motion_name.resize(MAX_INPUT_TEXT_SIZE);
+
+    ui_controller->m_selected_instance_motion = -1;
 }
 
 extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_model_t *ui_model, ui_controller_t *ui_controller)
@@ -1455,6 +1460,15 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                 }
 
                 {
+                    constexpr char const *const hint[LANGUAGE_COUNT] = {
+                        "New Instance Motion Name",
+                        "新規実例資源名前",
+                        "新建實例資源名稱",
+                        "新建实例资源名称"};
+                    ImGui::InputTextWithHint("##Instance-Motion-Manager-New-Instance-Name", hint[ui_controller->m_language_index], ui_controller->m_new_instance_motion_name.data(), ui_controller->m_new_instance_motion_name.size());
+                }
+
+                {
                     constexpr char const *const text[LANGUAGE_COUNT] = {
                         "New",
                         "新規作成",
@@ -1477,7 +1491,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                                 uint64_t const timestamp = _internal_tick_count_now();
 
                                 // should always NOT alreay exist in practice
-                                std::pair<uint64_t, ui_instance_motion_model_t> instance_motion_model(timestamp, ui_instance_motion_model_t{ui_controller->m_new_instance_motion_selected_asset_motion, static_cast<uint32_t>(ui_controller->m_new_instance_motion_selected_animation_index), motion_animation_instance});
+                                std::pair<uint64_t, ui_instance_motion_model_t> instance_motion_model(timestamp, ui_instance_motion_model_t{ui_controller->m_new_instance_motion_name.data(), ui_controller->m_new_instance_motion_selected_asset_motion, static_cast<uint32_t>(ui_controller->m_new_instance_motion_selected_animation_index), motion_animation_instance});
                                 ui_model->m_instance_motions.insert(ui_model->m_instance_motions.end(), instance_motion_model);
                             }
                             else
@@ -1489,6 +1503,224 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                 }
 
                 ImGui::Separator();
+
+                {
+                    constexpr char const *const text[LANGUAGE_COUNT] = {
+                        "Delete",
+                        "削除",
+                        "刪除",
+                        "删除"};
+                    ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+
+                    ImGui::SameLine();
+
+                    if (ImGui::Button("X##Instance-Motion-Manager-Delete"))
+                    {
+                        auto const &found_instance_motion = ui_model->m_instance_motions.find(ui_controller->m_selected_instance_motion);
+                        if (ui_model->m_instance_motions.end() != found_instance_motion)
+                        {
+                            if (NULL != found_instance_motion->second.m_animation_instance)
+                            {
+                                brx_motion_destroy_animation_instance(found_instance_motion->second.m_animation_instance);
+                                found_instance_motion->second.m_animation_instance = NULL;
+                            }
+                            else
+                            {
+                                assert(false);
+                            }
+
+                            ui_model->m_instance_motions.erase(found_instance_motion);
+                            ui_controller->m_selected_instance_motion = -1;
+                        }
+                    }
+                }
+
+                ImGui::Separator();
+
+                if (ImGui::BeginChild("##Instance-Motion-Manager-Left-Child", ImVec2(ui_width * 0.5F, 0.0F), ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX))
+                {
+                    ImGui::SetNextItemWidth(-FLT_MIN);
+                    ImGui::PushItemFlag(ImGuiItemFlags_NoNavDefaultFocus, true);
+                    ImGuiTextFilter text_filter;
+                    {
+                        constexpr char const *const hint[LANGUAGE_COUNT] = {
+                            "Search",
+                            "検索",
+                            "檢索",
+                            "检索"};
+                        if (ImGui::InputTextWithHint("##Instance-Motion-Manager-Left-Child-Text-Filter", hint[ui_controller->m_language_index], text_filter.InputBuf, IM_ARRAYSIZE(text_filter.InputBuf), ImGuiInputTextFlags_EscapeClearsAll))
+                        {
+                            text_filter.Build();
+                        }
+                    }
+
+                    ImGui::PopItemFlag();
+
+                    if (ImGui::BeginTable("##Instance-Motion-Manager-Left-Child-Table", 1, ImGuiTableFlags_RowBg))
+                    {
+                        for (auto const &instance_motion : ui_model->m_instance_motions)
+                        {
+                            mcrt_string instance_motion_identity;
+                            {
+                                char instance_motion_timestamp_text[] = {"18446744073709551615"};
+                                std::snprintf(instance_motion_timestamp_text, sizeof(instance_motion_timestamp_text) / sizeof(instance_motion_timestamp_text[0]), "%llu", static_cast<long long unsigned>(instance_motion.first));
+                                instance_motion_timestamp_text[(sizeof(instance_motion_timestamp_text) / sizeof(instance_motion_timestamp_text[0])) - 1] = '\0';
+
+                                instance_motion_identity += instance_motion_timestamp_text;
+                                instance_motion_identity += ' ';
+                                instance_motion_identity += instance_motion.second.m_name;
+                            }
+
+                            if (text_filter.PassFilter(instance_motion_identity.c_str()))
+                            {
+                                ImGui::TableNextRow();
+                                ImGui::TableNextColumn();
+
+                                ImGuiTreeNodeFlags const flags = ((ui_controller->m_selected_instance_motion != instance_motion.first)) ? ImGuiTreeNodeFlags_Leaf : (ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Selected);
+
+                                bool const node_open = ImGui::TreeNodeEx(instance_motion_identity.c_str(), flags);
+
+                                if (ImGui::IsItemFocused())
+                                {
+                                    ui_controller->m_selected_instance_motion = instance_motion.first;
+                                }
+
+                                if (node_open)
+                                {
+                                    ImGui::TreePop();
+                                }
+                            }
+                        }
+
+                        ImGui::EndTable();
+                    }
+                }
+                ImGui::EndChild();
+
+                auto const &found_instance_motion = ui_model->m_instance_motions.find(ui_controller->m_selected_instance_motion);
+
+                if (ui_model->m_instance_motions.end() != found_instance_motion)
+                {
+                    ImGui::SameLine();
+
+                    ImGui::BeginGroup();
+
+                    {
+                        ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
+                        ImGui::TextUnformatted(found_instance_motion->second.m_name.c_str());
+                        ImGui::PopStyleColor();
+                    }
+
+                    ImGui::Separator();
+                    {
+                        mcrt_string timestamp_text = "Timestamp: ";
+                        mcrt_string directory_name;
+                        mcrt_string file_name;
+                        {
+                            size_t const timestamp_text_end_pos = found_instance_motion->second.m_asset_motion.find(' ');
+                            size_t const directory_name_end_pos = found_instance_motion->second.m_asset_motion.find_last_of("/\\");
+                            if ((mcrt_string::npos != timestamp_text_end_pos) && (mcrt_string::npos != directory_name_end_pos) && (timestamp_text_end_pos < directory_name_end_pos))
+                            {
+                                timestamp_text += found_instance_motion->second.m_asset_motion.substr(0U, timestamp_text_end_pos);
+                                directory_name = found_instance_motion->second.m_asset_motion.substr(timestamp_text_end_pos + 1U, ((directory_name_end_pos - timestamp_text_end_pos) - 1U));
+                                file_name = found_instance_motion->second.m_asset_motion.substr(directory_name_end_pos + 1U);
+                            }
+                            else
+                            {
+                                assert(false);
+                                timestamp_text = "N/A";
+                                directory_name = "N/A";
+                                file_name = "N/A";
+                            }
+                        }
+
+                        {
+                            ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
+                            ImGui::TextUnformatted(file_name.c_str());
+                            ImGui::PopStyleColor();
+                        }
+
+                        {
+                            ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
+                            ImGui::TextUnformatted(directory_name.c_str());
+                            ImGui::PopStyleColor();
+                        }
+
+                        {
+                            ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
+                            ImGui::TextUnformatted(timestamp_text.c_str());
+                            ImGui::PopStyleColor();
+                        }
+                    }
+
+                    ImGui::Separator();
+                    {
+                        mcrt_string animation_index_text;
+                        {
+                            constexpr char const *const text1[LANGUAGE_COUNT] = {
+                                "Animation Index ",
+                                "Animation 索引 ",
+                                "動畫索引 ",
+                                "动画索引 "};
+
+                            animation_index_text += text1[ui_controller->m_language_index];
+
+                            char text2[] = {"18446744073709551615"};
+                            std::snprintf(text2, sizeof(text2) / sizeof(text2[0]), "%llu", static_cast<long long unsigned>(found_instance_motion->second.m_animation_index));
+                            text2[(sizeof(text2) / sizeof(text2[0])) - 1] = '\0';
+
+                            animation_index_text += text2;
+                        }
+
+                        {
+                            ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
+                            ImGui::TextUnformatted(animation_index_text.c_str());
+                            ImGui::PopStyleColor();
+                        }
+                    }
+
+                    ImGui::Separator();
+
+#if 0
+                    if (ImGui::BeginTable("##Instance-Motion-Manager-Right-Group-Table", 2, ImGuiTableFlags_BordersInnerV))
+                    {
+                        ImGui::TableSetupColumn("##Instance-Motion-Manager-Right-Group-Table-Property", ImGuiTableColumnFlags_WidthFixed);
+                        ImGui::TableSetupColumn("##Instance-Motion-Manager-Right-Group-Table-Value", ImGuiTableColumnFlags_WidthStretch, 2.0F);
+
+                        ImGui::TableNextRow();
+                        ImGui::TableNextColumn();
+                        ImGui::AlignTextToFramePadding();
+                        {
+                            constexpr char const *const text[LANGUAGE_COUNT] = {
+                                "Mesh Count",
+                                "Mesh 数",
+                                "網格數",
+                                "网格数"};
+                            ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
+                            ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                            ImGui::PopStyleColor();
+                        }
+                        ImGui::TableNextColumn();
+                        {
+                            assert(!found_asset_model->second.m_surface_groups.empty());
+                            assert(!found_asset_model->second.m_skeletons.empty());
+                            uint32_t const mesh_count = static_cast<uint32_t>(found_asset_model->second.m_surface_groups.size());
+                            assert(mesh_count == found_asset_model->second.m_skeletons.size());
+
+                            char mesh_count_text[] = {"18446744073709551615"};
+                            std::snprintf(mesh_count_text, sizeof(mesh_count_text) / sizeof(mesh_count_text[0]), "%llu", static_cast<long long unsigned>(mesh_count));
+                            mesh_count_text[(sizeof(mesh_count_text) / sizeof(mesh_count_text[0])) - 1] = '\0';
+
+                            ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
+                            ImGui::TextUnformatted(mesh_count_text);
+                            ImGui::PopStyleColor();
+                        }
+
+                        ImGui::EndTable();
+                    }
+#endif
+                    ImGui::EndGroup();
+                }
 
                 ImGui::TreePop();
             }

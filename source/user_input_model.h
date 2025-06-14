@@ -43,6 +43,7 @@ struct ui_asset_image_model_t
 
 struct ui_instance_motion_model_t
 {
+    mcrt_string m_name;
     mcrt_string m_asset_motion;
     uint32_t m_animation_index;
     brx_motion_animation_instance *m_animation_instance;
