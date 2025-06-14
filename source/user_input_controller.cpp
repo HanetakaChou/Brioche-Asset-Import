@@ -1653,15 +1653,14 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                         }
                     }
 
-                    ImGui::Separator();
                     {
                         mcrt_string animation_index_text;
                         {
                             constexpr char const *const text1[LANGUAGE_COUNT] = {
-                                "Animation Index ",
-                                "Animation 索引 ",
-                                "動畫索引 ",
-                                "动画索引 "};
+                                "Animation Index: ",
+                                "Animation 索引: ",
+                                "動畫索引: ",
+                                "动画索引: "};
 
                             animation_index_text += text1[ui_controller->m_language_index];
 
@@ -1681,7 +1680,6 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
 
                     ImGui::Separator();
 
-#if 0
                     if (ImGui::BeginTable("##Instance-Motion-Manager-Right-Group-Table", 2, ImGuiTableFlags_BordersInnerV))
                     {
                         ImGui::TableSetupColumn("##Instance-Motion-Manager-Right-Group-Table-Property", ImGuiTableColumnFlags_WidthFixed);
@@ -1692,33 +1690,29 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                         ImGui::AlignTextToFramePadding();
                         {
                             constexpr char const *const text[LANGUAGE_COUNT] = {
-                                "Mesh Count",
-                                "Mesh 数",
-                                "網格數",
-                                "网格数"};
+                                "Frame Index",
+                                "帧索引",
+                                "帧索引",
+                                "帧索引"};
                             ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
                             ImGui::TextUnformatted(text[ui_controller->m_language_index]);
                             ImGui::PopStyleColor();
                         }
                         ImGui::TableNextColumn();
                         {
-                            assert(!found_asset_model->second.m_surface_groups.empty());
-                            assert(!found_asset_model->second.m_skeletons.empty());
-                            uint32_t const mesh_count = static_cast<uint32_t>(found_asset_model->second.m_surface_groups.size());
-                            assert(mesh_count == found_asset_model->second.m_skeletons.size());
+                            assert(NULL != found_instance_motion->second.m_animation_instance);
 
-                            char mesh_count_text[] = {"18446744073709551615"};
-                            std::snprintf(mesh_count_text, sizeof(mesh_count_text) / sizeof(mesh_count_text[0]), "%llu", static_cast<long long unsigned>(mesh_count));
-                            mesh_count_text[(sizeof(mesh_count_text) / sizeof(mesh_count_text[0])) - 1] = '\0';
+                            char frame_index_text[] = {"18446744073709551615"};
+                            std::snprintf(frame_index_text, sizeof(frame_index_text) / sizeof(frame_index_text[0]), "%llu", static_cast<long long unsigned>(found_instance_motion->second.m_animation_instance->get_frame_index()));
+                            frame_index_text[(sizeof(frame_index_text) / sizeof(frame_index_text[0])) - 1] = '\0';
 
                             ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
-                            ImGui::TextUnformatted(mesh_count_text);
+                            ImGui::TextUnformatted(frame_index_text);
                             ImGui::PopStyleColor();
                         }
 
                         ImGui::EndTable();
                     }
-#endif
                     ImGui::EndGroup();
                 }
 
