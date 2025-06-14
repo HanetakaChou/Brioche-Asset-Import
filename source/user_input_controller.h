@@ -29,7 +29,8 @@ struct ui_controller_t
     bool m_import_asset_image_force_srgb;
     int m_import_asset_image_get_open_file_name_file_type_index;
     mcrt_string m_selected_asset_image;
-    int m_import_model_asset_get_open_file_name_file_type_index;
+    int m_import_asset_model_get_open_file_name_file_type_index;
+    mcrt_string m_selected_asset_model;
     int m_import_motion_asset_get_open_file_name_file_type_index;
 };
 

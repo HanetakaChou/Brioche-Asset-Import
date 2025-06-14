@@ -96,11 +96,38 @@ extern void ui_model_uninit(brx_anari_device *device, ui_model_t *ui_model)
     }
     ui_model->m_asset_model.m_surface_groups.clear();
 
-    for (auto &image : ui_model->m_asset_images)
+
+    for (auto &asset_model : ui_model->m_asset_models)
     {
-        assert(NULL != image.second.m_image);
-        device->release_image(image.second.m_image);
-        image.second.m_image = NULL;
+        assert(!asset_model.second.m_surface_groups.empty());
+        assert(!asset_model.second.m_skeletons.empty());
+        assert(asset_model.second.m_surface_groups.size() == asset_model.second.m_skeletons.size());
+
+        for (brx_anari_surface_group *const surface_group : asset_model.second.m_surface_groups)
+        {
+            if (NULL != surface_group)
+            {
+                device->release_surface_group(surface_group);
+            }
+        }
+        asset_model.second.m_surface_groups.clear();
+
+        for (brx_motion_skeleton *const skeleton :  asset_model.second.m_skeletons)
+        {
+            if (NULL != skeleton)
+            {
+                brx_motion_destroy_skeleton(skeleton);
+            }
+        }
+        asset_model.second.m_skeletons.clear();
+    }
+    ui_model->m_asset_models.clear();
+
+    for (auto &asset_image : ui_model->m_asset_images)
+    {
+        assert(NULL != asset_image.second.m_image);
+        device->release_image(asset_image.second.m_image);
+        asset_image.second.m_image = NULL;
     }
     ui_model->m_asset_images.clear();
 }

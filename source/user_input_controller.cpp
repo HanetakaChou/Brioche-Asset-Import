@@ -219,7 +219,8 @@ extern void ui_controller_init(ui_controller_t *ui_controller)
     ui_controller->m_import_asset_image_force_srgb = true;
     ui_controller->m_import_asset_image_get_open_file_name_file_type_index = 1;
     ui_controller->m_selected_asset_image.clear();
-    ui_controller->m_import_model_asset_get_open_file_name_file_type_index = 1;
+    ui_controller->m_import_asset_model_get_open_file_name_file_type_index = 1;
+    ui_controller->m_selected_asset_model.clear();
     ui_controller->m_import_motion_asset_get_open_file_name_file_type_index = 1;
 }
 
@@ -371,6 +372,8 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                     {
                         assert(NULL != found_asset_image->second.m_image);
                         device->release_image(found_asset_image->second.m_image);
+                        found_asset_image->second.m_image = NULL;
+
                         ui_model->m_asset_images.erase(found_asset_image);
                         ui_controller->m_selected_asset_image.clear();
                     }
@@ -400,7 +403,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
 
                 if (ImGui::BeginTable("##Asset-Image-Manager-Left-Child-Table", 1, ImGuiTableFlags_RowBg))
                 {
-                    for (const auto &asset_image : ui_model->m_asset_images)
+                    for (auto const &asset_image : ui_model->m_asset_images)
                     {
                         if (text_filter.PassFilter(asset_image.first.c_str()))
                         {
@@ -488,18 +491,17 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                     ImGui::TableNextColumn();
                     ImGui::AlignTextToFramePadding();
                     {
-                        ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
                         constexpr char const *const text[LANGUAGE_COUNT] = {
                             "Force SRGB",
                             "強制 SRGB",
                             "強制 SRGB",
                             "强制 SRGB"};
+                        ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
                         ImGui::TextUnformatted(text[ui_controller->m_language_index]);
                         ImGui::PopStyleColor();
                     }
                     ImGui::TableNextColumn();
                     {
-                        ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
                         if (found_asset_image->second.m_force_srgb)
                         {
                             constexpr char const *const text[LANGUAGE_COUNT] = {
@@ -507,7 +509,10 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                                 "有効",
                                 "啟用",
                                 "启用"};
+
+                            ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
                             ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                            ImGui::PopStyleColor();
                         }
                         else
                         {
@@ -516,8 +521,407 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                                 "無効",
                                 "停用",
                                 "停用"};
+
+                            ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
                             ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                            ImGui::PopStyleColor();
                         }
+                    }
+
+                    ImGui::EndTable();
+                }
+
+                ImGui::EndGroup();
+            }
+
+            ImGui::TreePop();
+        }
+    }
+
+    {
+        ImGui::Separator();
+
+        {
+            constexpr char const *const text[LANGUAGE_COUNT] = {
+                "Asset Model Manager",
+                "資源型式管理",
+                "資源模型管理",
+                "资源模型管理"};
+            ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+        }
+
+        ImGui::SameLine();
+
+        if (ImGui::TreeNodeEx("##Asset-Model-Manager", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_NoAutoOpenOnLog))
+        {
+
+            {
+                constexpr char const *const text[LANGUAGE_COUNT] = {
+                    "Import",
+                    "輸入",
+                    "導入",
+                    "导入"};
+                ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+
+                ImGui::SameLine();
+
+                if (ImGui::Button("O##Asset-Model-Manager-Import"))
+                {
+                    bool asset_model_file_open;
+                    mcrt_string asset_model_file_name;
+                    uint64_t asset_model_file_timestamp;
+                    mcrt_vector<uint8_t> asset_model_file_data;
+                    {
+                        constexpr size_t const asset_model_filter_count = 4;
+
+                        constexpr char const *const asset_model_filter_names[asset_model_filter_count] = {
+                            "All Files",
+                            "MMD Model Data",
+                            "glTF Binary",
+                            "glTF Separate"};
+
+                        constexpr char const *const asset_model_filter_specs[asset_model_filter_count] = {
+                            "*.*",
+                            "*.pmx",
+                            "*.glb;*.vrm",
+                            "*.gltf"};
+
+                        asset_model_file_open = _internal_platform_get_open_file_name(platform_context, asset_model_filter_count, asset_model_filter_names, asset_model_filter_specs, ui_controller->m_import_asset_model_get_open_file_name_file_type_index, &asset_model_file_name, &asset_model_file_timestamp, &asset_model_file_data);
+                    }
+
+                    if (asset_model_file_open)
+                    {
+                        assert(!asset_model_file_name.empty());
+                        assert(0U != asset_model_file_timestamp);
+                        assert(!asset_model_file_data.empty());
+
+                        mcrt_string asset_model_file_identity;
+                        {
+                            char asset_model_file_timestamp_text[] = {"18446744073709551615"};
+                            std::snprintf(asset_model_file_timestamp_text, sizeof(asset_model_file_timestamp_text) / sizeof(asset_model_file_timestamp_text[0]), "%llu", static_cast<long long unsigned>(asset_model_file_timestamp));
+                            asset_model_file_timestamp_text[(sizeof(asset_model_file_timestamp_text) / sizeof(asset_model_file_timestamp_text[0])) - 1] = '\0';
+
+                            asset_model_file_identity += asset_model_file_timestamp_text;
+                            asset_model_file_identity += ' ';
+                            asset_model_file_identity += asset_model_file_name;
+                        }
+
+                        auto const &found_asset_model = ui_model->m_asset_models.find(asset_model_file_identity);
+
+                        if (ui_model->m_asset_models.end() == found_asset_model)
+                        {
+                            brx_asset_import_scene *const asset_import_scene = brx_asset_import_create_scene_from_memory(asset_model_file_data.data(), asset_model_file_data.size());
+                            if (NULL != asset_import_scene)
+                            {
+                                mcrt_string asset_model_directory_name;
+                                {
+                                    size_t directory_name_end_pos = asset_model_file_name.find_last_of("/\\");
+                                    if (mcrt_string::npos != directory_name_end_pos)
+                                    {
+                                        asset_model_directory_name = asset_model_file_name.substr(0U, directory_name_end_pos);
+                                    }
+                                    else
+                                    {
+                                        asset_model_directory_name = ".";
+                                    }
+                                }
+
+                                uint32_t const surface_group_count = asset_import_scene->get_surface_group_count();
+
+                                bool success = true;
+                                mcrt_vector<brx_anari_surface_group *> surface_groups(static_cast<size_t>(surface_group_count), NULL);
+                                mcrt_vector<brx_motion_skeleton *> skeletons(static_cast<size_t>(surface_group_count), NULL);
+                                for (uint32_t surface_group_index = 0U; surface_group_index < surface_group_count; ++surface_group_index)
+                                {
+                                    brx_asset_import_surface_group const *const asset_import_surface_group = asset_import_scene->get_surface_group(surface_group_index);
+
+                                    uint32_t const surface_count = asset_import_surface_group->get_surface_count();
+
+                                    mcrt_vector<BRX_ANARI_SURFACE> surfaces(static_cast<size_t>(surface_count));
+
+                                    for (uint32_t surface_index = 0U; surface_index < surface_count; ++surface_index)
+                                    {
+                                        brx_asset_import_surface const *const asset_import_surface = asset_import_surface_group->get_surface(surface_index);
+
+                                        surfaces[surface_index].m_vertex_count = asset_import_surface->get_vertex_count();
+                                        surfaces[surface_index].m_vertex_positions = wrap(asset_import_surface->get_vertex_positions());
+                                        surfaces[surface_index].m_vertex_varyings = wrap(asset_import_surface->get_vertex_varyings());
+                                        surfaces[surface_index].m_vertex_blendings = wrap(asset_import_surface->get_vertex_blendings());
+                                        for (uint32_t morph_target_name_index = 0U; morph_target_name_index < BRX_ANARI_MORPH_TARGET_NAME_MMD_COUNT; ++morph_target_name_index)
+                                        {
+                                            surfaces[surface_index].m_morph_targets_vertex_positions[morph_target_name_index] = NULL;
+                                            surfaces[surface_index].m_morph_targets_vertex_varyings[morph_target_name_index] = NULL;
+                                        }
+                                        for (uint32_t morph_target_index = 0U; morph_target_index < asset_import_surface->get_morph_target_count(); ++morph_target_index)
+                                        {
+                                            BRX_ANARI_MORPH_TARGET_NAME const morph_target_name = wrap(asset_import_surface->get_morph_target_name(morph_target_index));
+                                            uint32_t const morph_target_name_index = morph_target_name;
+                                            surfaces[surface_index].m_morph_targets_vertex_positions[morph_target_name_index] = wrap(asset_import_surface->get_morph_target_vertex_positions(morph_target_index));
+                                            surfaces[surface_index].m_morph_targets_vertex_varyings[morph_target_name_index] = wrap(asset_import_surface->get_morph_target_vertex_varyings(morph_target_index));
+                                        }
+                                        surfaces[surface_index].m_index_count = asset_import_surface->get_index_count();
+                                        surfaces[surface_index].m_indices = asset_import_surface->get_indices();
+                                        surfaces[surface_index].m_emissive_image = _internal_load_asset_image(asset_import_surface->get_emissive_image_url(), asset_model_directory_name.c_str(), false, device, ui_model);
+                                        surfaces[surface_index].m_emissive_factor = wrap(asset_import_surface->get_emissive_factor());
+                                        surfaces[surface_index].m_normal_image = _internal_load_asset_image(asset_import_surface->get_normal_image_url(), asset_model_directory_name.c_str(), false, device, ui_model);
+                                        surfaces[surface_index].m_normal_scale = asset_import_surface->get_normal_scale();
+                                        surfaces[surface_index].m_base_color_image = _internal_load_asset_image(asset_import_surface->get_base_color_image_url(), asset_model_directory_name.c_str(), true, device, ui_model);
+                                        surfaces[surface_index].m_base_color_factor = wrap(asset_import_surface->get_base_color_factor());
+                                        surfaces[surface_index].m_metallic_roughness_image = _internal_load_asset_image(asset_import_surface->get_metallic_roughness_image_url(), asset_model_directory_name.c_str(), false, device, ui_model);
+                                        surfaces[surface_index].m_metallic_factor = asset_import_surface->get_metallic_factor();
+                                        surfaces[surface_index].m_roughness_factor = asset_import_surface->get_roughness_factor();
+                                    }
+
+                                    brx_anari_surface_group *const anari_surface_group = device->new_surface_group(surface_count, surfaces.data());
+
+                                    uint32_t const animation_skeleton_joint_count = asset_import_surface_group->get_animation_skeleton_joint_count();
+
+                                    brx_motion_skeleton *const motion_skeleton = brx_motion_create_skeleton(animation_skeleton_joint_count, wrap(asset_import_surface_group->get_animation_skeleton_joint_names()), asset_import_surface_group->get_animation_skeleton_joint_parent_indices(), wrap(asset_import_surface_group->get_animation_skeleton_joint_transforms_bind_pose_local_space()), asset_import_surface_group->get_animation_skeleton_joint_constraint_count(), wrap(asset_import_surface_group->get_animation_skeleton_joint_constraint_names()), wrap(asset_import_surface_group->get_animation_skeleton_joint_constraints()), asset_import_surface_group->get_ragdoll_skeleton_rigid_body_count(), wrap(asset_import_surface_group->get_ragdoll_skeleton_rigid_bodies()), asset_import_surface_group->get_ragdoll_skeleton_constraint_count(), wrap(asset_import_surface_group->get_ragdoll_skeleton_constraints()), asset_import_surface_group->get_animation_to_ragdoll_direct_mapping_count(), wrap(asset_import_surface_group->get_animation_to_ragdoll_direct_mappings()), asset_import_surface_group->get_ragdoll_to_animation_direct_mapping_count(), wrap(asset_import_surface_group->get_ragdoll_to_animation_direct_mappings()));
+
+                                    if ((NULL != anari_surface_group) && (NULL != motion_skeleton))
+                                    {
+
+                                        surface_groups[surface_group_index] = anari_surface_group;
+                                        skeletons[surface_group_index] = motion_skeleton;
+                                    }
+                                    else
+                                    {
+                                        success = false;
+                                        break;
+                                    }
+                                }
+
+                                if (success)
+                                {
+                                    for (brx_anari_surface_group *const surface_group : surface_groups)
+                                    {
+                                        assert(NULL != surface_group);
+                                    }
+
+                                    for (brx_motion_skeleton *const skeleton : skeletons)
+                                    {
+                                        assert(NULL != skeleton);
+                                    }
+
+                                    std::pair<mcrt_string, ui_asset_model_model_2_t> model_model(asset_model_file_identity, ui_asset_model_model_2_t{std::move(surface_groups), std::move(skeletons)});
+                                    ui_model->m_asset_models.insert(found_asset_model, std::move(model_model));
+                                }
+                                else
+                                {
+                                    assert(false);
+
+                                    for (brx_anari_surface_group *const surface_group : surface_groups)
+                                    {
+                                        if (NULL != surface_group)
+                                        {
+                                            device->release_surface_group(surface_group);
+                                        }
+                                    }
+
+                                    for (brx_motion_skeleton *const skeleton : skeletons)
+                                    {
+                                        if (NULL != skeleton)
+                                        {
+                                            brx_motion_destroy_skeleton(skeleton);
+                                        }
+                                    }
+                                }
+
+                                brx_asset_import_destroy_scene(asset_import_scene);
+                            }
+                            else
+                            {
+                                assert(false);
+                            }
+                        }
+                        else
+                        {
+                            assert(!found_asset_model->second.m_surface_groups.empty());
+                            assert(!found_asset_model->second.m_skeletons.empty());
+                            assert(found_asset_model->second.m_surface_groups.size() == found_asset_model->second.m_skeletons.size());
+                        }
+                    }
+                }
+            }
+
+            ImGui::Separator();
+
+            {
+                constexpr char const *const text[LANGUAGE_COUNT] = {
+                    "Delete",
+                    "削除",
+                    "刪除",
+                    "删除"};
+                ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+
+                ImGui::SameLine();
+
+                if (ImGui::Button("X##Asset-Model-Manager-Delete"))
+                {
+                    auto const &found_asset_model = ui_model->m_asset_models.find(ui_controller->m_selected_asset_model);
+                    if (ui_model->m_asset_models.end() != found_asset_model)
+                    {
+                        assert(!found_asset_model->second.m_surface_groups.empty());
+                        assert(!found_asset_model->second.m_skeletons.empty());
+                        assert(found_asset_model->second.m_surface_groups.size() == found_asset_model->second.m_skeletons.size());
+
+                        for (brx_anari_surface_group *const surface_group : found_asset_model->second.m_surface_groups)
+                        {
+                            if (NULL != surface_group)
+                            {
+                                device->release_surface_group(surface_group);
+                            }
+                        }
+                        found_asset_model->second.m_surface_groups.clear();
+
+                        for (brx_motion_skeleton *const skeleton : found_asset_model->second.m_skeletons)
+                        {
+                            if (NULL != skeleton)
+                            {
+                                brx_motion_destroy_skeleton(skeleton);
+                            }
+                        }
+                        found_asset_model->second.m_skeletons.clear();
+
+                        ui_model->m_asset_models.erase(found_asset_model);
+                        ui_controller->m_selected_asset_model.clear();
+                    }
+                }
+            }
+
+            ImGui::Separator();
+
+            if (ImGui::BeginChild("##Asset-Model-Manager-Left-Child", ImVec2(ui_width * 0.5F, 0.0F), ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX))
+            {
+                ImGui::SetNextItemWidth(-FLT_MIN);
+                ImGui::PushItemFlag(ImGuiItemFlags_NoNavDefaultFocus, true);
+                ImGuiTextFilter text_filter;
+                {
+                    constexpr char const *const hint[LANGUAGE_COUNT] = {
+                        "Search",
+                        "検索",
+                        "檢索",
+                        "检索"};
+                    if (ImGui::InputTextWithHint("##Asset-Model-Manager-Left-Child-Text-Filter", hint[ui_controller->m_language_index], text_filter.InputBuf, IM_ARRAYSIZE(text_filter.InputBuf), ImGuiInputTextFlags_EscapeClearsAll))
+                    {
+                        text_filter.Build();
+                    }
+                }
+
+                ImGui::PopItemFlag();
+
+                if (ImGui::BeginTable("##Asset-Model-Manager-Left-Child-Table", 1, ImGuiTableFlags_RowBg))
+                {
+                    for (auto const &asset_model : ui_model->m_asset_models)
+                    {
+                        if (text_filter.PassFilter(asset_model.first.c_str()))
+                        {
+                            ImGui::TableNextRow();
+                            ImGui::TableNextColumn();
+
+                            ImGuiTreeNodeFlags const flags = ((ui_controller->m_selected_asset_model != asset_model.first)) ? ImGuiTreeNodeFlags_Leaf : (ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Selected);
+
+                            bool const node_open = ImGui::TreeNodeEx(asset_model.first.c_str(), flags);
+
+                            if (ImGui::IsItemFocused())
+                            {
+                                ui_controller->m_selected_asset_model = asset_model.first;
+                            }
+
+                            if (node_open)
+                            {
+                                ImGui::TreePop();
+                            }
+                        }
+                    }
+
+                    ImGui::EndTable();
+                }
+            }
+            ImGui::EndChild();
+
+            auto const &found_asset_model = ui_model->m_asset_models.find(ui_controller->m_selected_asset_model);
+
+            if (ui_model->m_asset_models.end() != found_asset_model)
+            {
+                ImGui::SameLine();
+
+                ImGui::BeginGroup();
+
+                mcrt_string timestamp_text;
+                mcrt_string directory_name;
+                mcrt_string file_name;
+                {
+                    size_t const timestamp_text_end_pos = found_asset_model->first.find(' ');
+                    size_t const directory_name_end_pos = found_asset_model->first.find_last_of("/\\");
+                    if ((mcrt_string::npos != timestamp_text_end_pos) && (mcrt_string::npos != directory_name_end_pos) && (timestamp_text_end_pos < directory_name_end_pos))
+                    {
+                        timestamp_text = found_asset_model->first.substr(0U, timestamp_text_end_pos);
+                        directory_name = found_asset_model->first.substr(timestamp_text_end_pos + 1U, ((directory_name_end_pos - timestamp_text_end_pos) - 1U));
+                        file_name = found_asset_model->first.substr(directory_name_end_pos + 1U);
+                    }
+                    else
+                    {
+                        assert(false);
+                        timestamp_text = "N/A";
+                        directory_name = "N/A";
+                        file_name = "N/A";
+                    }
+                }
+
+                {
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
+                    ImGui::TextUnformatted(file_name.c_str());
+                    ImGui::PopStyleColor();
+                }
+
+                {
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
+                    ImGui::TextUnformatted(directory_name.c_str());
+                    ImGui::PopStyleColor();
+                }
+
+                {
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
+                    ImGui::TextUnformatted("Timestamp:");
+                    ImGui::SameLine();
+                    ImGui::TextUnformatted(timestamp_text.c_str());
+                    ImGui::PopStyleColor();
+                }
+
+                ImGui::Separator();
+
+                if (ImGui::BeginTable("##Asset-Model-Manager-Right-Group-Table", 2, ImGuiTableFlags_BordersInnerV))
+                {
+                    ImGui::TableSetupColumn("##Asset-Model-Manager-Right-Group-Table-Property", ImGuiTableColumnFlags_WidthFixed);
+                    ImGui::TableSetupColumn("##Asset-Model-Manager-Right-Group-Table-Value", ImGuiTableColumnFlags_WidthStretch, 2.0F);
+
+                    ImGui::TableNextRow();
+                    ImGui::TableNextColumn();
+                    ImGui::AlignTextToFramePadding();
+                    {
+                        constexpr char const *const text[LANGUAGE_COUNT] = {
+                            "Mesh Count:",
+                            "Mesh数:",
+                            "網格數:",
+                            "网格数:"};
+                        ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
+                        ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                        ImGui::PopStyleColor();
+                    }
+                    ImGui::TableNextColumn();
+                    {
+                        assert(!found_asset_model->second.m_surface_groups.empty());
+                        assert(!found_asset_model->second.m_skeletons.empty());
+                        uint32_t const mesh_count = static_cast<uint32_t>(found_asset_model->second.m_surface_groups.size());
+                        assert(mesh_count == found_asset_model->second.m_skeletons.size());
+
+                        char mesh_count_text[] = {"18446744073709551615"};
+                        std::snprintf(mesh_count_text, sizeof(mesh_count_text) / sizeof(mesh_count_text[0]), "%llu", static_cast<long long unsigned>(mesh_count));
+                        mesh_count_text[(sizeof(mesh_count_text) / sizeof(mesh_count_text[0])) - 1] = '\0';
+
+                        ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
+                        ImGui::TextUnformatted(mesh_count_text);
                         ImGui::PopStyleColor();
                     }
 
@@ -564,7 +968,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                         "*.glb;*.vrm",
                         "*.gltf"};
 
-                    model_file = _internal_platform_get_open_file_name(platform_context, model_filter_count, model_filter_names, model_filter_specs, ui_controller->m_import_model_asset_get_open_file_name_file_type_index, &model_file_name, &model_file_timestamp, &model_file_data);
+                    model_file = _internal_platform_get_open_file_name(platform_context, model_filter_count, model_filter_names, model_filter_specs, ui_controller->m_import_asset_model_get_open_file_name_file_type_index, &model_file_name, &model_file_timestamp, &model_file_data);
                 }
 
                 if (model_file)
@@ -918,6 +1322,7 @@ static inline brx_anari_image *_internal_load_asset_image(uint8_t const *asset_i
             mcrt_string asset_image_file_name;
             {
                 asset_image_file_name += asset_model_directory_name;
+                asset_image_file_name += '/';
                 asset_image_file_name += reinterpret_cast<char const *>(asset_image_url + 7);
             }
 
