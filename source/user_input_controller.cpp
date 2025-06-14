@@ -446,7 +446,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
 
                 ImGui::BeginGroup();
 
-                mcrt_string timestamp_text;
+                mcrt_string timestamp_text = "Timestamp: ";
                 mcrt_string directory_name;
                 mcrt_string file_name;
                 {
@@ -454,7 +454,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                     size_t const directory_name_end_pos = found_asset_image->first.find_last_of("/\\");
                     if ((mcrt_string::npos != timestamp_text_end_pos) && (mcrt_string::npos != directory_name_end_pos) && (timestamp_text_end_pos < directory_name_end_pos))
                     {
-                        timestamp_text = found_asset_image->first.substr(0U, timestamp_text_end_pos);
+                        timestamp_text += found_asset_image->first.substr(0U, timestamp_text_end_pos);
                         directory_name = found_asset_image->first.substr(timestamp_text_end_pos + 1U, ((directory_name_end_pos - timestamp_text_end_pos) - 1U));
                         file_name = found_asset_image->first.substr(directory_name_end_pos + 1U);
                     }
@@ -481,8 +481,6 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
 
                 {
                     ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
-                    ImGui::TextUnformatted("Timestamp:");
-                    ImGui::SameLine();
                     ImGui::TextUnformatted(timestamp_text.c_str());
                     ImGui::PopStyleColor();
                 }
@@ -862,7 +860,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
 
                 ImGui::BeginGroup();
 
-                mcrt_string timestamp_text;
+                mcrt_string timestamp_text = "Timestamp: ";
                 mcrt_string directory_name;
                 mcrt_string file_name;
                 {
@@ -870,7 +868,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                     size_t const directory_name_end_pos = found_asset_model->first.find_last_of("/\\");
                     if ((mcrt_string::npos != timestamp_text_end_pos) && (mcrt_string::npos != directory_name_end_pos) && (timestamp_text_end_pos < directory_name_end_pos))
                     {
-                        timestamp_text = found_asset_model->first.substr(0U, timestamp_text_end_pos);
+                        timestamp_text += found_asset_model->first.substr(0U, timestamp_text_end_pos);
                         directory_name = found_asset_model->first.substr(timestamp_text_end_pos + 1U, ((directory_name_end_pos - timestamp_text_end_pos) - 1U));
                         file_name = found_asset_model->first.substr(directory_name_end_pos + 1U);
                     }
@@ -897,8 +895,6 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
 
                 {
                     ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
-                    ImGui::TextUnformatted("Timestamp:");
-                    ImGui::SameLine();
                     ImGui::TextUnformatted(timestamp_text.c_str());
                     ImGui::PopStyleColor();
                 }
@@ -915,10 +911,10 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                     ImGui::AlignTextToFramePadding();
                     {
                         constexpr char const *const text[LANGUAGE_COUNT] = {
-                            "Mesh Count:",
-                            "Mesh数:",
-                            "網格數:",
-                            "网格数:"};
+                            "Mesh Count",
+                            "Mesh 数",
+                            "網格數",
+                            "网格数"};
                         ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
                         ImGui::TextUnformatted(text[ui_controller->m_language_index]);
                         ImGui::PopStyleColor();
@@ -1081,6 +1077,183 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                         }
                     }
                 }
+            }
+
+            ImGui::Separator();
+
+            {
+                constexpr char const *const text[LANGUAGE_COUNT] = {
+                    "Delete",
+                    "削除",
+                    "刪除",
+                    "删除"};
+                ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+
+                ImGui::SameLine();
+
+                if (ImGui::Button("X##Asset-Motion-Manager-Delete"))
+                {
+                    auto const &found_asset_motion = ui_model->m_asset_motions.find(ui_controller->m_selected_asset_motion);
+                    if (ui_model->m_asset_motions.end() != found_asset_motion)
+                    {
+                        assert(!found_asset_motion->second.m_animations.empty());
+
+                        for (brx_motion_animation *const animation : found_asset_motion->second.m_animations)
+                        {
+                            if (NULL != animation)
+                            {
+                                brx_motion_destroy_animation(animation);
+                            }
+                            else
+                            {
+                                assert(false);
+                            }
+                        }
+                        found_asset_motion->second.m_animations.clear();
+
+                        ui_model->m_asset_motions.erase(found_asset_motion);
+                        ui_controller->m_selected_asset_motion.clear();
+                    }
+                }
+            }
+
+            ImGui::Separator();
+
+            if (ImGui::BeginChild("##Asset-Motion-Manager-Left-Child", ImVec2(ui_width * 0.5F, 0.0F), ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX))
+            {
+                ImGui::SetNextItemWidth(-FLT_MIN);
+                ImGui::PushItemFlag(ImGuiItemFlags_NoNavDefaultFocus, true);
+                ImGuiTextFilter text_filter;
+                {
+                    constexpr char const *const hint[LANGUAGE_COUNT] = {
+                        "Search",
+                        "検索",
+                        "檢索",
+                        "检索"};
+                    if (ImGui::InputTextWithHint("##Asset-Motion-Manager-Left-Child-Text-Filter", hint[ui_controller->m_language_index], text_filter.InputBuf, IM_ARRAYSIZE(text_filter.InputBuf), ImGuiInputTextFlags_EscapeClearsAll))
+                    {
+                        text_filter.Build();
+                    }
+                }
+
+                ImGui::PopItemFlag();
+
+                if (ImGui::BeginTable("##Asset-Motion-Manager-Left-Child-Table", 1, ImGuiTableFlags_RowBg))
+                {
+                    for (auto const &asset_motion : ui_model->m_asset_motions)
+                    {
+                        if (text_filter.PassFilter(asset_motion.first.c_str()))
+                        {
+                            ImGui::TableNextRow();
+                            ImGui::TableNextColumn();
+
+                            ImGuiTreeNodeFlags const flags = ((ui_controller->m_selected_asset_motion != asset_motion.first)) ? ImGuiTreeNodeFlags_Leaf : (ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Selected);
+
+                            bool const node_open = ImGui::TreeNodeEx(asset_motion.first.c_str(), flags);
+
+                            if (ImGui::IsItemFocused())
+                            {
+                                ui_controller->m_selected_asset_motion = asset_motion.first;
+                            }
+
+                            if (node_open)
+                            {
+                                ImGui::TreePop();
+                            }
+                        }
+                    }
+
+                    ImGui::EndTable();
+                }
+            }
+            ImGui::EndChild();
+
+            auto const &found_asset_motion = ui_model->m_asset_motions.find(ui_controller->m_selected_asset_motion);
+
+            if (ui_model->m_asset_motions.end() != found_asset_motion)
+            {
+                ImGui::SameLine();
+
+                ImGui::BeginGroup();
+
+                mcrt_string timestamp_text = "Timestamp: ";
+                mcrt_string directory_name;
+                mcrt_string file_name;
+                {
+                    size_t const timestamp_text_end_pos = found_asset_motion->first.find(' ');
+                    size_t const directory_name_end_pos = found_asset_motion->first.find_last_of("/\\");
+                    if ((mcrt_string::npos != timestamp_text_end_pos) && (mcrt_string::npos != directory_name_end_pos) && (timestamp_text_end_pos < directory_name_end_pos))
+                    {
+                        timestamp_text += found_asset_motion->first.substr(0U, timestamp_text_end_pos);
+                        directory_name = found_asset_motion->first.substr(timestamp_text_end_pos + 1U, ((directory_name_end_pos - timestamp_text_end_pos) - 1U));
+                        file_name = found_asset_motion->first.substr(directory_name_end_pos + 1U);
+                    }
+                    else
+                    {
+                        assert(false);
+                        timestamp_text = "N/A";
+                        directory_name = "N/A";
+                        file_name = "N/A";
+                    }
+                }
+
+                {
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
+                    ImGui::TextUnformatted(file_name.c_str());
+                    ImGui::PopStyleColor();
+                }
+
+                {
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
+                    ImGui::TextUnformatted(directory_name.c_str());
+                    ImGui::PopStyleColor();
+                }
+
+                {
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
+                    ImGui::TextUnformatted(timestamp_text.c_str());
+                    ImGui::PopStyleColor();
+                }
+
+                ImGui::Separator();
+
+                if (ImGui::BeginTable("##Asset-Motion-Manager-Right-Group-Table", 2, ImGuiTableFlags_BordersInnerV))
+                {
+                    ImGui::TableSetupColumn("##Asset-Motion-Manager-Right-Group-Table-Property", ImGuiTableColumnFlags_WidthFixed);
+                    ImGui::TableSetupColumn("##Asset-Motion-Manager-Right-Group-Table-Value", ImGuiTableColumnFlags_WidthStretch, 2.0F);
+
+                    ImGui::TableNextRow();
+                    ImGui::TableNextColumn();
+                    ImGui::AlignTextToFramePadding();
+                    {
+                        constexpr char const *const text[LANGUAGE_COUNT] = {
+                            "Animation Count",
+                            "Animation 数",
+                            "動畫數",
+                            "动画数"};
+                        ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
+                        ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                        ImGui::PopStyleColor();
+                    }
+                    ImGui::TableNextColumn();
+                    {
+                        assert(!found_asset_motion->second.m_animations.empty());
+                        uint32_t const animation_count = static_cast<uint32_t>(found_asset_motion->second.m_animations.size());
+                        assert(animation_count == found_asset_motion->second.m_animations.size());
+
+                        char animation_count_text[] = {"18446744073709551615"};
+                        std::snprintf(animation_count_text, sizeof(animation_count_text) / sizeof(animation_count_text[0]), "%llu", static_cast<long long unsigned>(animation_count));
+                        animation_count_text[(sizeof(animation_count_text) / sizeof(animation_count_text[0])) - 1] = '\0';
+
+                        ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
+                        ImGui::TextUnformatted(animation_count_text);
+                        ImGui::PopStyleColor();
+                    }
+
+                    ImGui::EndTable();
+                }
+
+                ImGui::EndGroup();
             }
 
             ImGui::TreePop();
