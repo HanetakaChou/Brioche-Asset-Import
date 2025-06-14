@@ -36,6 +36,11 @@ struct ui_asset_model_model_2_t
     mcrt_vector<brx_motion_skeleton *> m_skeletons;
 };
 
+struct ui_asset_motion_model_2_t
+{
+    mcrt_vector<brx_motion_animation *> m_animations;
+};
+
 struct ui_asset_model_model_t
 {
     mcrt_string m_file_name;
@@ -58,6 +63,7 @@ struct ui_model_t
 {
     mcrt_unordered_map<mcrt_string, ui_asset_image_model_t> m_asset_images;
     mcrt_unordered_map<mcrt_string, ui_asset_model_model_2_t> m_asset_models;
+    mcrt_unordered_map<mcrt_string, ui_asset_motion_model_2_t> m_asset_motions;
     ui_asset_model_model_t m_asset_model;
     ui_asset_motion_model_t m_asset_motion;
     float m_scene_color_clear_value[3];

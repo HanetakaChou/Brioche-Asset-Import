@@ -96,6 +96,24 @@ extern void ui_model_uninit(brx_anari_device *device, ui_model_t *ui_model)
     }
     ui_model->m_asset_model.m_surface_groups.clear();
 
+    for (auto &asset_motion : ui_model->m_asset_motions)
+    {
+        assert(!asset_motion.second.m_animations.empty());
+
+        for (brx_motion_animation *const animation : asset_motion.second.m_animations)
+        {
+            if(NULL != animation)
+            {
+            brx_motion_destroy_animation(animation);
+            }
+            else
+            {
+                assert(false);
+            }
+        }
+        asset_motion.second.m_animations.clear();
+    }
+    ui_model->m_asset_motions.clear();
 
     for (auto &asset_model : ui_model->m_asset_models)
     {
@@ -109,14 +127,22 @@ extern void ui_model_uninit(brx_anari_device *device, ui_model_t *ui_model)
             {
                 device->release_surface_group(surface_group);
             }
+            else
+            {
+                assert(false);
+            }
         }
         asset_model.second.m_surface_groups.clear();
 
-        for (brx_motion_skeleton *const skeleton :  asset_model.second.m_skeletons)
+        for (brx_motion_skeleton *const skeleton : asset_model.second.m_skeletons)
         {
             if (NULL != skeleton)
             {
                 brx_motion_destroy_skeleton(skeleton);
+            }
+            else
+            {
+                assert(false);
             }
         }
         asset_model.second.m_skeletons.clear();
@@ -125,9 +151,15 @@ extern void ui_model_uninit(brx_anari_device *device, ui_model_t *ui_model)
 
     for (auto &asset_image : ui_model->m_asset_images)
     {
-        assert(NULL != asset_image.second.m_image);
-        device->release_image(asset_image.second.m_image);
-        asset_image.second.m_image = NULL;
+        if (NULL != asset_image.second.m_image)
+        {
+            device->release_image(asset_image.second.m_image);
+            asset_image.second.m_image = NULL;
+        }
+        else
+        {
+            assert(false);
+        }
     }
     ui_model->m_asset_images.clear();
 }

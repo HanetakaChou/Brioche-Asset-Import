@@ -370,9 +370,15 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                     auto const &found_asset_image = ui_model->m_asset_images.find(ui_controller->m_selected_asset_image);
                     if (ui_model->m_asset_images.end() != found_asset_image)
                     {
-                        assert(NULL != found_asset_image->second.m_image);
-                        device->release_image(found_asset_image->second.m_image);
-                        found_asset_image->second.m_image = NULL;
+                        if (NULL != found_asset_image->second.m_image)
+                        {
+                            device->release_image(found_asset_image->second.m_image);
+                            found_asset_image->second.m_image = NULL;
+                        }
+                        else
+                        {
+                            assert(false);
+                        }
 
                         ui_model->m_asset_images.erase(found_asset_image);
                         ui_controller->m_selected_asset_image.clear();
@@ -771,6 +777,10 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                             {
                                 device->release_surface_group(surface_group);
                             }
+                            else
+                            {
+                                assert(false);
+                            }
                         }
                         found_asset_model->second.m_surface_groups.clear();
 
@@ -779,6 +789,10 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                             if (NULL != skeleton)
                             {
                                 brx_motion_destroy_skeleton(skeleton);
+                            }
+                            else
+                            {
+                                assert(false);
                             }
                         }
                         found_asset_model->second.m_skeletons.clear();
