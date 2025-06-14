@@ -96,24 +96,33 @@ extern void ui_model_uninit(brx_anari_device *device, ui_model_t *ui_model)
     }
     ui_model->m_asset_model.m_surface_groups.clear();
 
-    for (auto &asset_motion : ui_model->m_asset_motions)
+    for (auto &instance_motion : ui_model->m_instance_motions)
     {
-        assert(!asset_motion.second.m_animations.empty());
-
-        for (brx_motion_animation *const animation : asset_motion.second.m_animations)
+        if (NULL != instance_motion.second.m_animation_instance)
         {
-            if (NULL != animation)
-            {
-                brx_motion_destroy_animation(animation);
-            }
-            else
-            {
-                assert(false);
-            }
+            brx_motion_destroy_animation_instance(instance_motion.second.m_animation_instance);
+            instance_motion.second.m_animation_instance = NULL;
         }
-        asset_motion.second.m_animations.clear();
+        else
+        {
+            assert(false);
+        }
     }
-    ui_model->m_asset_motions.clear();
+    ui_model->m_instance_motions.clear();
+
+    for (auto &asset_image : ui_model->m_asset_images)
+    {
+        if (NULL != asset_image.second.m_image)
+        {
+            device->release_image(asset_image.second.m_image);
+            asset_image.second.m_image = NULL;
+        }
+        else
+        {
+            assert(false);
+        }
+    }
+    ui_model->m_asset_images.clear();
 
     for (auto &asset_model : ui_model->m_asset_models)
     {
@@ -149,19 +158,24 @@ extern void ui_model_uninit(brx_anari_device *device, ui_model_t *ui_model)
     }
     ui_model->m_asset_models.clear();
 
-    for (auto &asset_image : ui_model->m_asset_images)
+    for (auto &asset_motion : ui_model->m_asset_motions)
     {
-        if (NULL != asset_image.second.m_image)
+        assert(!asset_motion.second.m_animations.empty());
+
+        for (brx_motion_animation *const animation : asset_motion.second.m_animations)
         {
-            device->release_image(asset_image.second.m_image);
-            asset_image.second.m_image = NULL;
+            if (NULL != animation)
+            {
+                brx_motion_destroy_animation(animation);
+            }
+            else
+            {
+                assert(false);
+            }
         }
-        else
-        {
-            assert(false);
-        }
+        asset_motion.second.m_animations.clear();
     }
-    ui_model->m_asset_images.clear();
+    ui_model->m_asset_motions.clear();
 }
 
 extern void user_camera_model_init(brx_anari_device *device, user_camera_model_t *out_user_camera_model)
