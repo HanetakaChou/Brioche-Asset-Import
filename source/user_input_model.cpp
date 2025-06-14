@@ -102,9 +102,9 @@ extern void ui_model_uninit(brx_anari_device *device, ui_model_t *ui_model)
 
         for (brx_motion_animation *const animation : asset_motion.second.m_animations)
         {
-            if(NULL != animation)
+            if (NULL != animation)
             {
-            brx_motion_destroy_animation(animation);
+                brx_motion_destroy_animation(animation);
             }
             else
             {

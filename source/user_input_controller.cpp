@@ -221,7 +221,8 @@ extern void ui_controller_init(ui_controller_t *ui_controller)
     ui_controller->m_selected_asset_image.clear();
     ui_controller->m_import_asset_model_get_open_file_name_file_type_index = 1;
     ui_controller->m_selected_asset_model.clear();
-    ui_controller->m_import_motion_asset_get_open_file_name_file_type_index = 1;
+    ui_controller->m_import_asset_motion_get_open_file_name_file_type_index = 1;
+    ui_controller->m_selected_asset_motion.clear();
 }
 
 extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_model_t *ui_model, ui_controller_t *ui_controller)

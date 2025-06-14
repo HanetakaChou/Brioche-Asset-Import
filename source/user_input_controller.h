@@ -31,7 +31,8 @@ struct ui_controller_t
     mcrt_string m_selected_asset_image;
     int m_import_asset_model_get_open_file_name_file_type_index;
     mcrt_string m_selected_asset_model;
-    int m_import_motion_asset_get_open_file_name_file_type_index;
+    int m_import_asset_motion_get_open_file_name_file_type_index;
+    mcrt_string m_selected_asset_motion;
 };
 
 struct user_camera_controller_t
