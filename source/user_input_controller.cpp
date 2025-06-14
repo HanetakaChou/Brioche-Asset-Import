@@ -209,6 +209,8 @@ extern bool _internal_platform_get_open_file_name(void *platform_context, size_t
 
 extern bool _internal_platform_get_file_timestamp_and_data(char const *file_name, uint64_t *out_file_timestamp, mcrt_vector<uint8_t> *out_file_data);
 
+extern uint64_t _internal_tick_count_now();
+
 static inline brx_anari_image *_internal_load_asset_image(uint8_t const *asset_image_url, char const *asset_model_directory_name, bool force_srgb, brx_anari_device *device, ui_model_t *ui_model);
 
 static inline brx_anari_image *_internal_load_asset_image_file(char const *asset_image_file_name, uint64_t asset_image_file_timestamp, void const *asset_image_file_data_base, size_t asset_image_file_data_size, bool force_srgb, brx_anari_device *device, ui_model_t *ui_model);
@@ -227,7 +229,8 @@ extern void ui_controller_init(ui_controller_t *ui_controller)
     ui_controller->m_import_asset_motion_get_open_file_name_file_type_index = 1;
     ui_controller->m_selected_asset_motion.clear();
 
-    ui_controller->m_new_instance_motion_asset_motion_name.clear();
+    ui_controller->m_new_instance_motion_selected_asset_motion.clear();
+    ui_controller->m_new_instance_motion_selected_animation_index = -1;
 }
 
 extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_model_t *ui_model, ui_controller_t *ui_controller)
@@ -578,7 +581,6 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                     {
                         assert(!found_asset_motion->second.m_animations.empty());
                         uint32_t const animation_count = static_cast<uint32_t>(found_asset_motion->second.m_animations.size());
-                        assert(animation_count == found_asset_motion->second.m_animations.size());
 
                         char animation_count_text[] = {"18446744073709551615"};
                         std::snprintf(animation_count_text, sizeof(animation_count_text) / sizeof(animation_count_text[0]), "%llu", static_cast<long long unsigned>(animation_count));
@@ -1127,7 +1129,6 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                         text_filter.Build();
                     }
                 }
-
                 ImGui::PopItemFlag();
 
                 if (ImGui::BeginTable("##Asset-Image-Manager-Left-Child-Table", 1, ImGuiTableFlags_RowBg))
@@ -1283,20 +1284,23 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
             if (ImGui::TreeNodeEx("##Instance-Motion-Manager", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_NoAutoOpenOnLog))
             {
                 {
+                    constexpr char const *const text[LANGUAGE_COUNT] = {
+                        "Asset Motion",
+                        "資源行動",
+                        "資源動作",
+                        "资源动作"};
+
+                    constexpr char const *const label = "##Instance-Motion-Manager-Select-Asset-Motion";
+
                     if (!ui_model->m_asset_motions.empty())
                     {
-                        constexpr char const *const text[LANGUAGE_COUNT] = {
-                            "Asset Motion",
-                            "資源行動",
-                            "資源動作",
-                            "资源动作"};
                         ImGui::TextUnformatted(text[ui_controller->m_language_index]);
 
                         ImGui::SameLine();
 
                         mcrt_vector<mcrt_string> item_strings(static_cast<size_t>(ui_model->m_asset_motions.size()));
                         mcrt_vector<char const *> items(static_cast<size_t>(ui_model->m_asset_motions.size()));
-                        int select_asset_motion_index = 0;
+                        int selected_asset_motion_index = 0;
                         {
                             size_t asset_motion_index = 0U;
                             for (auto const &asset_motion : ui_model->m_asset_motions)
@@ -1304,22 +1308,22 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                                 item_strings[asset_motion_index] = asset_motion.first;
                                 items[asset_motion_index] = item_strings[asset_motion_index].c_str();
 
-                                if (0 == std::strcmp(ui_controller->m_new_instance_motion_asset_motion_name.data(), asset_motion.first.c_str()))
+                                if (0 == std::strcmp(ui_controller->m_new_instance_motion_selected_asset_motion.data(), asset_motion.first.c_str()))
                                 {
-                                    assert(0 == select_asset_motion_index);
+                                    assert(0 == selected_asset_motion_index);
                                     assert((1U + asset_motion_index) < static_cast<size_t>(INT_MAX));
-                                    select_asset_motion_index = static_cast<int>(asset_motion_index);
+                                    selected_asset_motion_index = static_cast<int>(asset_motion_index);
                                 }
 
                                 ++asset_motion_index;
                             }
                         }
 
-                        ImGui::Combo("##Instance-Motion-Manager-Asset-Motion-Selection", &select_asset_motion_index, items.data(), items.size());
+                        ImGui::Combo(label, &selected_asset_motion_index, items.data(), items.size());
 
-                        if (select_asset_motion_index >= 0)
+                        if (selected_asset_motion_index >= 0)
                         {
-                            ui_controller->m_new_instance_motion_asset_motion_name = std::move(item_strings[select_asset_motion_index]);
+                            ui_controller->m_new_instance_motion_selected_asset_motion = std::move(item_strings[selected_asset_motion_index]);
                         }
                         else
                         {
@@ -1329,11 +1333,6 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                     else
                     {
 
-                        constexpr char const *const text[LANGUAGE_COUNT] = {
-                            "Asset Motion",
-                            "資源行動",
-                            "資源動作",
-                            "资源动作"};
                         ImGui::TextUnformatted(text[ui_controller->m_language_index]);
 
                         ImGui::SameLine();
@@ -1344,15 +1343,152 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                             {"停用"},
                             {"停用"}};
 
-                        int select_asset_motion_index = 0;
+                        int selected_asset_motion_index = 0;
 
-                        ImGui::Combo("##Instance-Motion-Manager-Asset-Motion-Selection", &select_asset_motion_index, items[ui_controller->m_language_index], IM_ARRAYSIZE(items[ui_controller->m_language_index]));
+                        ImGui::Combo(label, &selected_asset_motion_index, items[ui_controller->m_language_index], IM_ARRAYSIZE(items[ui_controller->m_language_index]));
 
-                        assert(0 == select_asset_motion_index);
+                        assert(0 == selected_asset_motion_index);
 
-                        ui_controller->m_new_instance_motion_asset_motion_name.clear();
+                        ui_controller->m_new_instance_motion_selected_asset_motion.clear();
                     }
                 }
+
+                {
+                    auto const &found_asset_motion = ui_model->m_asset_motions.find(ui_controller->m_new_instance_motion_selected_asset_motion);
+
+                    constexpr char const *const text[LANGUAGE_COUNT] = {
+                        "Animation Index",
+                        "Animation 索引",
+                        "動畫索引",
+                        "动画索引"};
+
+                    constexpr char const *const label = "##Instance-Motion-Manager-Select-Animation-Index";
+
+                    if (ui_model->m_asset_motions.end() != found_asset_motion)
+                    {
+                        assert(!found_asset_motion->second.m_animations.empty());
+                        uint32_t const animation_count = static_cast<uint32_t>(found_asset_motion->second.m_animations.size());
+
+                        if (animation_count > 0U)
+                        {
+
+                            ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+
+                            ImGui::SameLine();
+
+                            mcrt_vector<mcrt_string> item_strings(static_cast<size_t>(animation_count));
+                            mcrt_vector<char const *> items(static_cast<size_t>(animation_count));
+                            int selected_animation_index = 0;
+                            {
+                                for (uint32_t animation_index = 0U; animation_index < animation_count; ++animation_index)
+                                {
+                                    char animation_index_text[] = {"18446744073709551615"};
+                                    std::snprintf(animation_index_text, sizeof(animation_index_text) / sizeof(animation_index_text[0]), "%llu", static_cast<long long unsigned>(animation_index));
+                                    animation_index_text[(sizeof(animation_index_text) / sizeof(animation_index_text[0])) - 1] = '\0';
+
+                                    item_strings[animation_index] = animation_index_text;
+                                    items[animation_index] = item_strings[animation_index].c_str();
+
+                                    if (ui_controller->m_new_instance_motion_selected_animation_index == animation_index)
+                                    {
+                                        assert(0 == selected_animation_index);
+                                        assert(static_cast<size_t>(1U + animation_index) < static_cast<size_t>(INT_MAX));
+                                        selected_animation_index = static_cast<int>(animation_index);
+                                    }
+                                }
+                            }
+
+                            ImGui::Combo(label, &selected_animation_index, items.data(), items.size());
+
+                            if (selected_animation_index >= 0)
+                            {
+                                ui_controller->m_new_instance_motion_selected_animation_index = selected_animation_index;
+                            }
+                            else
+                            {
+                                assert(false);
+                            }
+                        }
+                        else
+                        {
+                            assert(false);
+
+                            ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+
+                            ImGui::SameLine();
+
+                            char const *const items[LANGUAGE_COUNT][1] = {
+                                {"Disable"},
+                                {"無効"},
+                                {"停用"},
+                                {"停用"}};
+
+                            int selected_asset_motion_index = 0;
+
+                            ImGui::Combo(label, &selected_asset_motion_index, items[ui_controller->m_language_index], IM_ARRAYSIZE(items[ui_controller->m_language_index]));
+
+                            assert(0 == selected_asset_motion_index);
+
+                            ui_controller->m_new_instance_motion_selected_animation_index = -1;
+                        }
+                    }
+                    else
+                    {
+                        ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+
+                        ImGui::SameLine();
+
+                        char const *const items[LANGUAGE_COUNT][1] = {
+                            {"Disable"},
+                            {"無効"},
+                            {"停用"},
+                            {"停用"}};
+
+                        int selected_asset_motion_index = 0;
+
+                        ImGui::Combo(label, &selected_asset_motion_index, items[ui_controller->m_language_index], IM_ARRAYSIZE(items[ui_controller->m_language_index]));
+
+                        assert(0 == selected_asset_motion_index);
+
+                        ui_controller->m_new_instance_motion_selected_animation_index = -1;
+                    }
+                }
+
+                {
+                    constexpr char const *const text[LANGUAGE_COUNT] = {
+                        "New",
+                        "新規作成",
+                        "新建",
+                        "新建"};
+
+                    ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+
+                    ImGui::SameLine();
+
+                    if (ImGui::Button("N##Instance-Motion-Manager-New"))
+                    {
+                        auto const &found_asset_motion = ui_model->m_asset_motions.find(ui_controller->m_new_instance_motion_selected_asset_motion);
+
+                        if ((ui_model->m_asset_motions.end() != found_asset_motion) && (ui_controller->m_new_instance_motion_selected_animation_index < found_asset_motion->second.m_animations.size()))
+                        {
+                            brx_motion_animation_instance *const motion_animation_instance = brx_motion_create_animation_instance(found_asset_motion->second.m_animations[ui_controller->m_new_instance_motion_selected_animation_index]);
+                            if (NULL != motion_animation_instance)
+                            {
+                                uint64_t const timestamp = _internal_tick_count_now();
+
+                                // should always NOT alreay exist in practice
+                                std::pair<uint64_t, ui_instance_motion_model_t> instance_motion_model(timestamp, ui_instance_motion_model_t{ui_controller->m_new_instance_motion_selected_asset_motion, static_cast<uint32_t>(ui_controller->m_new_instance_motion_selected_animation_index), motion_animation_instance});
+                                ui_model->m_instance_motions.insert(ui_model->m_instance_motions.end(), instance_motion_model);
+                            }
+                            else
+                            {
+                                assert(false);
+                            }
+                        }
+                    }
+                }
+
+                ImGui::Separator();
 
                 ImGui::TreePop();
             }

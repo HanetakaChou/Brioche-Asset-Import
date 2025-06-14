@@ -42,9 +42,9 @@ struct wsi_state_t
     user_camera_controller_t m_user_camera_controller;
 };
 
-static uint64_t inline tick_count_per_second();
+static inline uint64_t _internal_tick_count_per_second();
 
-static uint64_t inline tick_count_now();
+extern uint64_t _internal_tick_count_now();
 
 static inline BRX_ANARI_MORPH_TARGET_NAME const wrap(BRX_MOTION_MORPH_TARGET_NAME const morph_target_name)
 {
@@ -1167,8 +1167,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR 
         NULL,
         1280,
         720,
-        1.0 / static_cast<double>(tick_count_per_second()),
-        tick_count_now(),
+        1.0 / static_cast<double>(_internal_tick_count_per_second()),
+        _internal_tick_count_now(),
         true};
     ATOM window_class = 0;
     HWND window = NULL;
@@ -1274,7 +1274,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR 
         {
             float interval_time;
             {
-                uint64_t const tick_count_current_frame = tick_count_now();
+                uint64_t const tick_count_current_frame = _internal_tick_count_now();
                 interval_time = static_cast<float>(static_cast<double>(tick_count_current_frame - wsi_state.m_tick_count_previous_frame) * wsi_state.m_tick_count_resolution);
                 wsi_state.m_tick_count_previous_frame = tick_count_current_frame;
             }
@@ -1973,7 +1973,7 @@ extern uint64_t tick_count_now()
 #include <sdkddkver.h>
 #include <Windows.h>
 
-extern uint64_t tick_count_per_second()
+static inline uint64_t _internal_tick_count_per_second()
 {
     LARGE_INTEGER int64_frequency;
     BOOL result_query_performance_frequency = QueryPerformanceFrequency(&int64_frequency);
@@ -1983,7 +1983,7 @@ extern uint64_t tick_count_per_second()
     return tick_count_per_second;
 }
 
-extern uint64_t tick_count_now()
+extern uint64_t _internal_tick_count_now()
 {
     LARGE_INTEGER int64_performance_count;
     BOOL result_query_performance_counter = QueryPerformanceCounter(&int64_performance_count);

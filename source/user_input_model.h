@@ -24,10 +24,9 @@
 #include "../thirdparty/Brioche-Analytic-Rendering-Interface/include/brx_anari.h"
 #include "../thirdparty/Brioche-Motion/include/brx_motion.h"
 
-struct ui_asset_image_model_t
+struct ui_asset_motion_model_2_t
 {
-    bool m_force_srgb;
-    brx_anari_image *m_image;
+    mcrt_vector<brx_motion_animation *> m_animations;
 };
 
 struct ui_asset_model_model_2_t
@@ -36,9 +35,17 @@ struct ui_asset_model_model_2_t
     mcrt_vector<brx_motion_skeleton *> m_skeletons;
 };
 
-struct ui_asset_motion_model_2_t
+struct ui_asset_image_model_t
 {
-    mcrt_vector<brx_motion_animation *> m_animations;
+    bool m_force_srgb;
+    brx_anari_image *m_image;
+};
+
+struct ui_instance_motion_model_t
+{
+    mcrt_string m_asset_motion;
+    uint32_t m_animation_index;
+    brx_motion_animation_instance *m_animation_instance;
 };
 
 struct ui_asset_model_model_t
@@ -61,9 +68,11 @@ struct ui_asset_motion_model_t
 
 struct ui_model_t
 {
-    mcrt_unordered_map<mcrt_string, ui_asset_image_model_t> m_asset_images;
-    mcrt_unordered_map<mcrt_string, ui_asset_model_model_2_t> m_asset_models;
     mcrt_unordered_map<mcrt_string, ui_asset_motion_model_2_t> m_asset_motions;
+    mcrt_unordered_map<mcrt_string, ui_asset_model_model_2_t> m_asset_models;
+    mcrt_unordered_map<mcrt_string, ui_asset_image_model_t> m_asset_images;
+    mcrt_unordered_map<uint64_t, ui_instance_motion_model_t> m_instance_motions;
+
     ui_asset_model_model_t m_asset_model;
     ui_asset_motion_model_t m_asset_motion;
     float m_scene_color_clear_value[3];
