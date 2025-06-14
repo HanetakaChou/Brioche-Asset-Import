@@ -632,9 +632,8 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                                     }
                                 }
 
-                                uint32_t const surface_group_count = asset_import_scene->get_surface_group_count();
-
                                 bool success = true;
+                                uint32_t const surface_group_count = asset_import_scene->get_surface_group_count();
                                 mcrt_vector<brx_anari_surface_group *> surface_groups(static_cast<size_t>(surface_group_count), NULL);
                                 mcrt_vector<brx_motion_skeleton *> skeletons(static_cast<size_t>(surface_group_count), NULL);
                                 for (uint32_t surface_group_index = 0U; surface_group_index < surface_group_count; ++surface_group_index)
@@ -686,7 +685,6 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
 
                                     if ((NULL != anari_surface_group) && (NULL != motion_skeleton))
                                     {
-
                                         surface_groups[surface_group_index] = anari_surface_group;
                                         skeletons[surface_group_index] = motion_skeleton;
                                     }
@@ -723,6 +721,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                                             device->release_surface_group(surface_group);
                                         }
                                     }
+                                    surface_groups.clear();
 
                                     for (brx_motion_skeleton *const skeleton : skeletons)
                                     {
@@ -731,6 +730,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                                             brx_motion_destroy_skeleton(skeleton);
                                         }
                                     }
+                                    skeletons.clear();
                                 }
 
                                 brx_asset_import_destroy_scene(asset_import_scene);
@@ -977,6 +977,109 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
 
                 if (ImGui::Button("O##Asset-Motion-Manager-Import"))
                 {
+                    bool asset_motion_file_open;
+                    mcrt_string asset_motion_file_name;
+                    uint64_t asset_motion_file_timestamp;
+                    mcrt_vector<uint8_t> asset_motion_file_data;
+                    {
+                        constexpr size_t const asset_motion_filter_count = 4;
+
+                        constexpr char const *const asset_motion_filter_names[asset_motion_filter_count] = {
+                            "All Files",
+                            "MMD Motion Data",
+                            "glTF Binary",
+                            "glTF Separate"};
+
+                        constexpr char const *const asset_motion_filter_specs[asset_motion_filter_count] = {
+                            "*.*",
+                            "*.vmd",
+                            "*.glb;*.vrma",
+                            "*.gltf"};
+
+                        asset_motion_file_open = _internal_platform_get_open_file_name(platform_context, asset_motion_filter_count, asset_motion_filter_names, asset_motion_filter_specs, ui_controller->m_import_asset_motion_get_open_file_name_file_type_index, &asset_motion_file_name, &asset_motion_file_timestamp, &asset_motion_file_data);
+                    }
+
+                    if (asset_motion_file_open)
+                    {
+                        assert(!asset_motion_file_name.empty());
+                        assert(0U != asset_motion_file_timestamp);
+                        assert(!asset_motion_file_data.empty());
+
+                        mcrt_string asset_motion_file_identity;
+                        {
+                            char asset_motion_file_timestamp_text[] = {"18446744073709551615"};
+                            std::snprintf(asset_motion_file_timestamp_text, sizeof(asset_motion_file_timestamp_text) / sizeof(asset_motion_file_timestamp_text[0]), "%llu", static_cast<long long unsigned>(asset_motion_file_timestamp));
+                            asset_motion_file_timestamp_text[(sizeof(asset_motion_file_timestamp_text) / sizeof(asset_motion_file_timestamp_text[0])) - 1] = '\0';
+
+                            asset_motion_file_identity += asset_motion_file_timestamp_text;
+                            asset_motion_file_identity += ' ';
+                            asset_motion_file_identity += asset_motion_file_name;
+                        }
+
+                        auto const &found_asset_motion = ui_model->m_asset_motions.find(asset_motion_file_identity);
+
+                        if (ui_model->m_asset_motions.end() == found_asset_motion)
+                        {
+                            brx_asset_import_scene *const asset_import_scene = brx_asset_import_create_scene_from_memory(asset_motion_file_data.data(), asset_motion_file_data.size());
+                            if (NULL != asset_import_scene)
+                            {
+                                bool success = true;
+                                uint32_t const animation_count = asset_import_scene->get_animation_count();
+                                mcrt_vector<brx_motion_animation *> animations(static_cast<size_t>(animation_count), NULL);
+                                for (uint32_t animation_index = 0U; animation_index < animation_count; ++animation_index)
+                                {
+                                    brx_asset_import_animation const *const asset_import_animation = asset_import_scene->get_animation(animation_index);
+
+                                    brx_motion_animation *const motion_animation = brx_motion_create_animation(asset_import_animation->get_frame_count(), asset_import_animation->get_weight_channel_count(), wrap(asset_import_animation->get_weight_channel_names()), asset_import_animation->get_weights(), asset_import_animation->get_rigid_transform_channel_count(), wrap(asset_import_animation->get_rigid_transform_channel_names()), wrap(asset_import_animation->get_rigid_transforms()), asset_import_animation->get_switch_channel_count(), wrap(asset_import_animation->get_switch_channel_names()), asset_import_animation->get_switches());
+
+                                    if (NULL != motion_animation)
+                                    {
+                                        animations[animation_index] = motion_animation;
+                                    }
+                                    else
+                                    {
+                                        success = false;
+                                        break;
+                                    }
+                                }
+
+                                if (success)
+                                {
+                                    for (brx_motion_animation *const animation : animations)
+                                    {
+                                        assert(NULL != animation);
+                                    }
+
+                                    std::pair<mcrt_string, ui_asset_motion_model_2_t> motion_model(asset_motion_file_identity, ui_asset_motion_model_2_t{std::move(animations)});
+                                    ui_model->m_asset_motions.insert(found_asset_motion, std::move(motion_model));
+                                }
+                                else
+                                {
+                                    assert(false);
+
+                                    for (brx_motion_animation *const animation : animations)
+                                    {
+                                        if (NULL != animation)
+                                        {
+                                            brx_motion_destroy_animation(animation);
+                                        }
+                                    }
+
+                                    animations.clear();
+                                }
+
+                                brx_asset_import_destroy_scene(asset_import_scene);
+                            }
+                            else
+                            {
+                                assert(false);
+                            }
+                        }
+                        else
+                        {
+                            assert(!found_asset_motion->second.m_animations.empty());
+                        }
+                    }
                 }
             }
 
