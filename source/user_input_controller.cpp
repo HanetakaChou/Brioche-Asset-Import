@@ -561,7 +561,6 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
 
         if (ImGui::TreeNodeEx("##Asset-Model-Manager", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_NoAutoOpenOnLog))
         {
-
             {
                 constexpr char const *const text[LANGUAGE_COUNT] = {
                     "Import",
@@ -951,6 +950,41 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
     }
 
     {
+        ImGui::Separator();
+
+        {
+            constexpr char const *const text[LANGUAGE_COUNT] = {
+                "Asset Motion Manager",
+                "資源行動管理",
+                "資源動作管理",
+                "资源动作管理"};
+            ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+        }
+
+        ImGui::SameLine();
+
+        if (ImGui::TreeNodeEx("##Asset-Motion-Manager", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_NoAutoOpenOnLog))
+        {
+            {
+                constexpr char const *const text[LANGUAGE_COUNT] = {
+                    "Import",
+                    "輸入",
+                    "導入",
+                    "导入"};
+                ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+
+                ImGui::SameLine();
+
+                if (ImGui::Button("O##Asset-Motion-Manager-Import"))
+                {
+                }
+            }
+
+            ImGui::TreePop();
+        }
+    }
+
+    {
         {
             constexpr char const *const text[LANGUAGE_COUNT] = {
                 "Import Model Asset",
@@ -1185,7 +1219,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                         "*.glb;*.vrma",
                         "*.gltf"};
 
-                    motion_file = _internal_platform_get_open_file_name(platform_context, motion_filter_count, motion_filter_names, motion_filter_specs, ui_controller->m_import_motion_asset_get_open_file_name_file_type_index, &motion_file_name, &motion_file_timestamp, &motion_file_data);
+                    motion_file = _internal_platform_get_open_file_name(platform_context, motion_filter_count, motion_filter_names, motion_filter_specs, ui_controller->m_import_asset_motion_get_open_file_name_file_type_index, &motion_file_name, &motion_file_timestamp, &motion_file_data);
                 }
 
                 if (motion_file)
