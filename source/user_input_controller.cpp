@@ -1329,13 +1329,22 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                     else
                     {
 
-                        int select_asset_motion_index = 0;
+                        constexpr char const *const text[LANGUAGE_COUNT] = {
+                            "Asset Motion",
+                            "資源行動",
+                            "資源動作",
+                            "资源动作"};
+                        ImGui::TextUnformatted(text[ui_controller->m_language_index]);
 
-                        char const *items[LANGUAGE_COUNT][1] = {
+                        ImGui::SameLine();
+
+                        char const *const items[LANGUAGE_COUNT][1] = {
                             {"Disable"},
                             {"無効"},
                             {"停用"},
                             {"停用"}};
+
+                        int select_asset_motion_index = 0;
 
                         ImGui::Combo("##Instance-Motion-Manager-Asset-Motion-Selection", &select_asset_motion_index, items[ui_controller->m_language_index], IM_ARRAYSIZE(items[ui_controller->m_language_index]));
 
