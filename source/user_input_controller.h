@@ -26,13 +26,18 @@
 struct ui_controller_t
 {
     int m_language_index;
+
     bool m_import_asset_image_force_srgb;
     int m_import_asset_image_get_open_file_name_file_type_index;
     mcrt_string m_selected_asset_image;
+
     int m_import_asset_model_get_open_file_name_file_type_index;
     mcrt_string m_selected_asset_model;
+
     int m_import_asset_motion_get_open_file_name_file_type_index;
     mcrt_string m_selected_asset_motion;
+
+    mcrt_string m_new_instance_motion_asset_motion_name;
 };
 
 struct user_camera_controller_t

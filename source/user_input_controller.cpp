@@ -216,13 +216,18 @@ static inline brx_anari_image *_internal_load_asset_image_file(char const *asset
 extern void ui_controller_init(ui_controller_t *ui_controller)
 {
     ui_controller->m_language_index = 0;
+
     ui_controller->m_import_asset_image_force_srgb = true;
     ui_controller->m_import_asset_image_get_open_file_name_file_type_index = 1;
     ui_controller->m_selected_asset_image.clear();
+
     ui_controller->m_import_asset_model_get_open_file_name_file_type_index = 1;
     ui_controller->m_selected_asset_model.clear();
+
     ui_controller->m_import_asset_motion_get_open_file_name_file_type_index = 1;
     ui_controller->m_selected_asset_motion.clear();
+
+    ui_controller->m_new_instance_motion_asset_motion_name.clear();
 }
 
 extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_model_t *ui_model, ui_controller_t *ui_controller)
@@ -284,30 +289,17 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
 
         {
             constexpr char const *const text[LANGUAGE_COUNT] = {
-                "Asset Image Manager",
-                "資源画像管理",
-                "資源图像管理",
-                "资源圖像管理"};
+                "Asset Motion Manager",
+                "資源行動管理",
+                "資源動作管理",
+                "资源动作管理"};
             ImGui::TextUnformatted(text[ui_controller->m_language_index]);
         }
 
         ImGui::SameLine();
 
-        if (ImGui::TreeNodeEx("##Asset-Image-Manager", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_NoAutoOpenOnLog))
+        if (ImGui::TreeNodeEx("##Asset-Motion-Manager", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_NoAutoOpenOnLog))
         {
-            {
-                constexpr char const *const text[LANGUAGE_COUNT] = {
-                    "Force SRGB",
-                    "強制 SRGB",
-                    "強制 SRGB",
-                    "强制 SRGB"};
-                ImGui::TextUnformatted(text[ui_controller->m_language_index]);
-
-                ImGui::SameLine();
-
-                ImGui::Checkbox("##Asset-Image-Manager-Force-SRGB", &ui_controller->m_import_asset_image_force_srgb);
-            }
-
             {
                 constexpr char const *const text[LANGUAGE_COUNT] = {
                     "Import",
@@ -318,38 +310,110 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
 
                 ImGui::SameLine();
 
-                if (ImGui::Button("O##Asset-Image-Manager-Import"))
+                if (ImGui::Button("O##Asset-Motion-Manager-Import"))
                 {
-                    bool asset_image_file_open;
-                    mcrt_string asset_image_file_name;
-                    uint64_t asset_image_file_timestamp;
-                    mcrt_vector<uint8_t> asset_image_file_data;
+                    bool asset_motion_file_open;
+                    mcrt_string asset_motion_file_name;
+                    uint64_t asset_motion_file_timestamp;
+                    mcrt_vector<uint8_t> asset_motion_file_data;
                     {
-                        constexpr size_t const asset_image_filter_count = 4;
+                        constexpr size_t const asset_motion_filter_count = 2;
 
-                        constexpr char const *const asset_image_filter_names[asset_image_filter_count] = {
+                        // TODO
+                        // "glTF Binary"    "*.glb;*.vrma"
+                        // "glTF Separate"  "*.gltf"
+
+                        constexpr char const *const asset_motion_filter_names[asset_motion_filter_count] = {
                             "All Files",
-                            "Web Picture",
-                            "Portable Network Graphics",
-                            "Joint Photographic Expert Group"};
+                            "MMD Motion Data"};
 
-                        constexpr char const *const asset_image_filter_specs[asset_image_filter_count] = {
+                        constexpr char const *const asset_motion_filter_specs[asset_motion_filter_count] = {
                             "*.*",
-                            "*.webp",
-                            "*.png",
-                            "*.jpg;*.jpeg"};
+                            "*.vmd"};
 
-                        asset_image_file_open = _internal_platform_get_open_file_name(platform_context, asset_image_filter_count, asset_image_filter_names, asset_image_filter_specs, ui_controller->m_import_asset_image_get_open_file_name_file_type_index, &asset_image_file_name, &asset_image_file_timestamp, &asset_image_file_data);
+                        asset_motion_file_open = _internal_platform_get_open_file_name(platform_context, asset_motion_filter_count, asset_motion_filter_names, asset_motion_filter_specs, ui_controller->m_import_asset_motion_get_open_file_name_file_type_index, &asset_motion_file_name, &asset_motion_file_timestamp, &asset_motion_file_data);
                     }
 
-                    if (asset_image_file_open)
+                    if (asset_motion_file_open)
                     {
-                        assert(!asset_image_file_name.empty());
-                        assert(0U != asset_image_file_timestamp);
-                        assert(!asset_image_file_data.empty());
+                        assert(!asset_motion_file_name.empty());
+                        assert(0U != asset_motion_file_timestamp);
+                        assert(!asset_motion_file_data.empty());
 
-                        brx_anari_image *const load_anari_image = _internal_load_asset_image_file(asset_image_file_name.c_str(), asset_image_file_timestamp, asset_image_file_data.data(), asset_image_file_data.size(), ui_controller->m_import_asset_image_force_srgb, device, ui_model);
-                        assert(NULL != load_anari_image);
+                        mcrt_string asset_motion_file_identity;
+                        {
+                            char asset_motion_file_timestamp_text[] = {"18446744073709551615"};
+                            std::snprintf(asset_motion_file_timestamp_text, sizeof(asset_motion_file_timestamp_text) / sizeof(asset_motion_file_timestamp_text[0]), "%llu", static_cast<long long unsigned>(asset_motion_file_timestamp));
+                            asset_motion_file_timestamp_text[(sizeof(asset_motion_file_timestamp_text) / sizeof(asset_motion_file_timestamp_text[0])) - 1] = '\0';
+
+                            asset_motion_file_identity += asset_motion_file_timestamp_text;
+                            asset_motion_file_identity += ' ';
+                            asset_motion_file_identity += asset_motion_file_name;
+                        }
+
+                        auto const &found_asset_motion = ui_model->m_asset_motions.find(asset_motion_file_identity);
+
+                        if (ui_model->m_asset_motions.end() == found_asset_motion)
+                        {
+                            brx_asset_import_scene *const asset_import_scene = brx_asset_import_create_scene_from_memory(asset_motion_file_data.data(), asset_motion_file_data.size());
+                            if (NULL != asset_import_scene)
+                            {
+                                bool success = true;
+                                uint32_t const animation_count = asset_import_scene->get_animation_count();
+                                mcrt_vector<brx_motion_animation *> animations(static_cast<size_t>(animation_count), NULL);
+                                for (uint32_t animation_index = 0U; animation_index < animation_count; ++animation_index)
+                                {
+                                    brx_asset_import_animation const *const asset_import_animation = asset_import_scene->get_animation(animation_index);
+
+                                    brx_motion_animation *const motion_animation = brx_motion_create_animation(asset_import_animation->get_frame_count(), asset_import_animation->get_weight_channel_count(), wrap(asset_import_animation->get_weight_channel_names()), asset_import_animation->get_weights(), asset_import_animation->get_rigid_transform_channel_count(), wrap(asset_import_animation->get_rigid_transform_channel_names()), wrap(asset_import_animation->get_rigid_transforms()), asset_import_animation->get_switch_channel_count(), wrap(asset_import_animation->get_switch_channel_names()), asset_import_animation->get_switches());
+
+                                    if (NULL != motion_animation)
+                                    {
+                                        animations[animation_index] = motion_animation;
+                                    }
+                                    else
+                                    {
+                                        success = false;
+                                        break;
+                                    }
+                                }
+
+                                if (success)
+                                {
+                                    for (brx_motion_animation *const animation : animations)
+                                    {
+                                        assert(NULL != animation);
+                                    }
+
+                                    std::pair<mcrt_string, ui_asset_motion_model_2_t> motion_model(asset_motion_file_identity, ui_asset_motion_model_2_t{std::move(animations)});
+                                    ui_model->m_asset_motions.insert(found_asset_motion, std::move(motion_model));
+                                }
+                                else
+                                {
+                                    assert(false);
+
+                                    for (brx_motion_animation *const animation : animations)
+                                    {
+                                        if (NULL != animation)
+                                        {
+                                            brx_motion_destroy_animation(animation);
+                                        }
+                                    }
+
+                                    animations.clear();
+                                }
+
+                                brx_asset_import_destroy_scene(asset_import_scene);
+                            }
+                            else
+                            {
+                                assert(false);
+                            }
+                        }
+                        else
+                        {
+                            assert(!found_asset_motion->second.m_animations.empty());
+                        }
                     }
                 }
             }
@@ -366,30 +430,35 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
 
                 ImGui::SameLine();
 
-                if (ImGui::Button("X##Asset-Image-Manager-Delete"))
+                if (ImGui::Button("X##Asset-Motion-Manager-Delete"))
                 {
-                    auto const &found_asset_image = ui_model->m_asset_images.find(ui_controller->m_selected_asset_image);
-                    if (ui_model->m_asset_images.end() != found_asset_image)
+                    auto const &found_asset_motion = ui_model->m_asset_motions.find(ui_controller->m_selected_asset_motion);
+                    if (ui_model->m_asset_motions.end() != found_asset_motion)
                     {
-                        if (NULL != found_asset_image->second.m_image)
-                        {
-                            device->release_image(found_asset_image->second.m_image);
-                            found_asset_image->second.m_image = NULL;
-                        }
-                        else
-                        {
-                            assert(false);
-                        }
+                        assert(!found_asset_motion->second.m_animations.empty());
 
-                        ui_model->m_asset_images.erase(found_asset_image);
-                        ui_controller->m_selected_asset_image.clear();
+                        for (brx_motion_animation *const animation : found_asset_motion->second.m_animations)
+                        {
+                            if (NULL != animation)
+                            {
+                                brx_motion_destroy_animation(animation);
+                            }
+                            else
+                            {
+                                assert(false);
+                            }
+                        }
+                        found_asset_motion->second.m_animations.clear();
+
+                        ui_model->m_asset_motions.erase(found_asset_motion);
+                        ui_controller->m_selected_asset_motion.clear();
                     }
                 }
             }
 
             ImGui::Separator();
 
-            if (ImGui::BeginChild("##Asset-Image-Manager-Left-Child", ImVec2(ui_width * 0.5F, 0.0F), ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX))
+            if (ImGui::BeginChild("##Asset-Motion-Manager-Left-Child", ImVec2(ui_width * 0.5F, 0.0F), ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX))
             {
                 ImGui::SetNextItemWidth(-FLT_MIN);
                 ImGui::PushItemFlag(ImGuiItemFlags_NoNavDefaultFocus, true);
@@ -400,7 +469,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                         "検索",
                         "檢索",
                         "检索"};
-                    if (ImGui::InputTextWithHint("##Asset-Image-Manager-Left-Child-Text-Filter", hint[ui_controller->m_language_index], text_filter.InputBuf, IM_ARRAYSIZE(text_filter.InputBuf), ImGuiInputTextFlags_EscapeClearsAll))
+                    if (ImGui::InputTextWithHint("##Asset-Motion-Manager-Left-Child-Text-Filter", hint[ui_controller->m_language_index], text_filter.InputBuf, IM_ARRAYSIZE(text_filter.InputBuf), ImGuiInputTextFlags_EscapeClearsAll))
                     {
                         text_filter.Build();
                     }
@@ -408,22 +477,22 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
 
                 ImGui::PopItemFlag();
 
-                if (ImGui::BeginTable("##Asset-Image-Manager-Left-Child-Table", 1, ImGuiTableFlags_RowBg))
+                if (ImGui::BeginTable("##Asset-Motion-Manager-Left-Child-Table", 1, ImGuiTableFlags_RowBg))
                 {
-                    for (auto const &asset_image : ui_model->m_asset_images)
+                    for (auto const &asset_motion : ui_model->m_asset_motions)
                     {
-                        if (text_filter.PassFilter(asset_image.first.c_str()))
+                        if (text_filter.PassFilter(asset_motion.first.c_str()))
                         {
                             ImGui::TableNextRow();
                             ImGui::TableNextColumn();
 
-                            ImGuiTreeNodeFlags const flags = ((ui_controller->m_selected_asset_image != asset_image.first)) ? ImGuiTreeNodeFlags_Leaf : (ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Selected);
+                            ImGuiTreeNodeFlags const flags = ((ui_controller->m_selected_asset_motion != asset_motion.first)) ? ImGuiTreeNodeFlags_Leaf : (ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Selected);
 
-                            bool const node_open = ImGui::TreeNodeEx(asset_image.first.c_str(), flags);
+                            bool const node_open = ImGui::TreeNodeEx(asset_motion.first.c_str(), flags);
 
                             if (ImGui::IsItemFocused())
                             {
-                                ui_controller->m_selected_asset_image = asset_image.first;
+                                ui_controller->m_selected_asset_motion = asset_motion.first;
                             }
 
                             if (node_open)
@@ -438,9 +507,9 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
             }
             ImGui::EndChild();
 
-            auto const &found_asset_image = ui_model->m_asset_images.find(ui_controller->m_selected_asset_image);
+            auto const &found_asset_motion = ui_model->m_asset_motions.find(ui_controller->m_selected_asset_motion);
 
-            if (ui_model->m_asset_images.end() != found_asset_image)
+            if (ui_model->m_asset_motions.end() != found_asset_motion)
             {
                 ImGui::SameLine();
 
@@ -450,13 +519,13 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                 mcrt_string directory_name;
                 mcrt_string file_name;
                 {
-                    size_t const timestamp_text_end_pos = found_asset_image->first.find(' ');
-                    size_t const directory_name_end_pos = found_asset_image->first.find_last_of("/\\");
+                    size_t const timestamp_text_end_pos = found_asset_motion->first.find(' ');
+                    size_t const directory_name_end_pos = found_asset_motion->first.find_last_of("/\\");
                     if ((mcrt_string::npos != timestamp_text_end_pos) && (mcrt_string::npos != directory_name_end_pos) && (timestamp_text_end_pos < directory_name_end_pos))
                     {
-                        timestamp_text += found_asset_image->first.substr(0U, timestamp_text_end_pos);
-                        directory_name = found_asset_image->first.substr(timestamp_text_end_pos + 1U, ((directory_name_end_pos - timestamp_text_end_pos) - 1U));
-                        file_name = found_asset_image->first.substr(directory_name_end_pos + 1U);
+                        timestamp_text += found_asset_motion->first.substr(0U, timestamp_text_end_pos);
+                        directory_name = found_asset_motion->first.substr(timestamp_text_end_pos + 1U, ((directory_name_end_pos - timestamp_text_end_pos) - 1U));
+                        file_name = found_asset_motion->first.substr(directory_name_end_pos + 1U);
                     }
                     else
                     {
@@ -487,50 +556,37 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
 
                 ImGui::Separator();
 
-                if (ImGui::BeginTable("##Asset-Image-Manager-Right-Group-Table", 2, ImGuiTableFlags_BordersInnerV))
+                if (ImGui::BeginTable("##Asset-Motion-Manager-Right-Group-Table", 2, ImGuiTableFlags_BordersInnerV))
                 {
-                    ImGui::TableSetupColumn("##Asset-Image-Manager-Right-Group-Table-Property", ImGuiTableColumnFlags_WidthFixed);
-                    ImGui::TableSetupColumn("##Asset-Image-Manager-Right-Group-Table-Value", ImGuiTableColumnFlags_WidthStretch, 2.0F);
+                    ImGui::TableSetupColumn("##Asset-Motion-Manager-Right-Group-Table-Property", ImGuiTableColumnFlags_WidthFixed);
+                    ImGui::TableSetupColumn("##Asset-Motion-Manager-Right-Group-Table-Value", ImGuiTableColumnFlags_WidthStretch, 2.0F);
 
                     ImGui::TableNextRow();
                     ImGui::TableNextColumn();
                     ImGui::AlignTextToFramePadding();
                     {
                         constexpr char const *const text[LANGUAGE_COUNT] = {
-                            "Force SRGB",
-                            "強制 SRGB",
-                            "強制 SRGB",
-                            "强制 SRGB"};
+                            "Animation Count",
+                            "Animation 数",
+                            "動畫數",
+                            "动画数"};
                         ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
                         ImGui::TextUnformatted(text[ui_controller->m_language_index]);
                         ImGui::PopStyleColor();
                     }
                     ImGui::TableNextColumn();
                     {
-                        if (found_asset_image->second.m_force_srgb)
-                        {
-                            constexpr char const *const text[LANGUAGE_COUNT] = {
-                                "Enable",
-                                "有効",
-                                "啟用",
-                                "启用"};
+                        assert(!found_asset_motion->second.m_animations.empty());
+                        uint32_t const animation_count = static_cast<uint32_t>(found_asset_motion->second.m_animations.size());
+                        assert(animation_count == found_asset_motion->second.m_animations.size());
 
-                            ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
-                            ImGui::TextUnformatted(text[ui_controller->m_language_index]);
-                            ImGui::PopStyleColor();
-                        }
-                        else
-                        {
-                            char const *text[LANGUAGE_COUNT] = {
-                                "Disable",
-                                "無効",
-                                "停用",
-                                "停用"};
+                        char animation_count_text[] = {"18446744073709551615"};
+                        std::snprintf(animation_count_text, sizeof(animation_count_text) / sizeof(animation_count_text[0]), "%llu", static_cast<long long unsigned>(animation_count));
+                        animation_count_text[(sizeof(animation_count_text) / sizeof(animation_count_text[0])) - 1] = '\0';
 
-                            ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
-                            ImGui::TextUnformatted(text[ui_controller->m_language_index]);
-                            ImGui::PopStyleColor();
-                        }
+                        ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
+                        ImGui::TextUnformatted(animation_count_text);
+                        ImGui::PopStyleColor();
                     }
 
                     ImGui::EndTable();
@@ -576,19 +632,19 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                     uint64_t asset_model_file_timestamp;
                     mcrt_vector<uint8_t> asset_model_file_data;
                     {
-                        constexpr size_t const asset_model_filter_count = 4;
+                        constexpr size_t const asset_model_filter_count = 2;
+
+                        // TODO
+                        // "glTF Binary"    "*.glb;*.vrm"
+                        // "glTF Separate"  "*.gltf"
 
                         constexpr char const *const asset_model_filter_names[asset_model_filter_count] = {
                             "All Files",
-                            "MMD Model Data",
-                            "glTF Binary",
-                            "glTF Separate"};
+                            "MMD Model Data"};
 
                         constexpr char const *const asset_model_filter_specs[asset_model_filter_count] = {
                             "*.*",
-                            "*.pmx",
-                            "*.glb;*.vrm",
-                            "*.gltf"};
+                            "*.pmx"};
 
                         asset_model_file_open = _internal_platform_get_open_file_name(platform_context, asset_model_filter_count, asset_model_filter_names, asset_model_filter_specs, ui_controller->m_import_asset_model_get_open_file_name_file_type_index, &asset_model_file_name, &asset_model_file_timestamp, &asset_model_file_data);
                     }
@@ -950,17 +1006,30 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
 
         {
             constexpr char const *const text[LANGUAGE_COUNT] = {
-                "Asset Motion Manager",
-                "資源行動管理",
-                "資源動作管理",
-                "资源动作管理"};
+                "Asset Image Manager",
+                "資源画像管理",
+                "資源图像管理",
+                "资源圖像管理"};
             ImGui::TextUnformatted(text[ui_controller->m_language_index]);
         }
 
         ImGui::SameLine();
 
-        if (ImGui::TreeNodeEx("##Asset-Motion-Manager", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_NoAutoOpenOnLog))
+        if (ImGui::TreeNodeEx("##Asset-Image-Manager", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_NoAutoOpenOnLog))
         {
+            {
+                constexpr char const *const text[LANGUAGE_COUNT] = {
+                    "Force SRGB",
+                    "強制 SRGB",
+                    "強制 SRGB",
+                    "强制 SRGB"};
+                ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+
+                ImGui::SameLine();
+
+                ImGui::Checkbox("##Asset-Image-Manager-Force-SRGB", &ui_controller->m_import_asset_image_force_srgb);
+            }
+
             {
                 constexpr char const *const text[LANGUAGE_COUNT] = {
                     "Import",
@@ -971,110 +1040,38 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
 
                 ImGui::SameLine();
 
-                if (ImGui::Button("O##Asset-Motion-Manager-Import"))
+                if (ImGui::Button("O##Asset-Image-Manager-Import"))
                 {
-                    bool asset_motion_file_open;
-                    mcrt_string asset_motion_file_name;
-                    uint64_t asset_motion_file_timestamp;
-                    mcrt_vector<uint8_t> asset_motion_file_data;
+                    bool asset_image_file_open;
+                    mcrt_string asset_image_file_name;
+                    uint64_t asset_image_file_timestamp;
+                    mcrt_vector<uint8_t> asset_image_file_data;
                     {
-                        constexpr size_t const asset_motion_filter_count = 4;
+                        constexpr size_t const asset_image_filter_count = 4;
 
-                        constexpr char const *const asset_motion_filter_names[asset_motion_filter_count] = {
+                        constexpr char const *const asset_image_filter_names[asset_image_filter_count] = {
                             "All Files",
-                            "MMD Motion Data",
-                            "glTF Binary",
-                            "glTF Separate"};
+                            "Web Picture",
+                            "Portable Network Graphics",
+                            "Joint Photographic Expert Group"};
 
-                        constexpr char const *const asset_motion_filter_specs[asset_motion_filter_count] = {
+                        constexpr char const *const asset_image_filter_specs[asset_image_filter_count] = {
                             "*.*",
-                            "*.vmd",
-                            "*.glb;*.vrma",
-                            "*.gltf"};
+                            "*.webp",
+                            "*.png",
+                            "*.jpg;*.jpeg"};
 
-                        asset_motion_file_open = _internal_platform_get_open_file_name(platform_context, asset_motion_filter_count, asset_motion_filter_names, asset_motion_filter_specs, ui_controller->m_import_asset_motion_get_open_file_name_file_type_index, &asset_motion_file_name, &asset_motion_file_timestamp, &asset_motion_file_data);
+                        asset_image_file_open = _internal_platform_get_open_file_name(platform_context, asset_image_filter_count, asset_image_filter_names, asset_image_filter_specs, ui_controller->m_import_asset_image_get_open_file_name_file_type_index, &asset_image_file_name, &asset_image_file_timestamp, &asset_image_file_data);
                     }
 
-                    if (asset_motion_file_open)
+                    if (asset_image_file_open)
                     {
-                        assert(!asset_motion_file_name.empty());
-                        assert(0U != asset_motion_file_timestamp);
-                        assert(!asset_motion_file_data.empty());
+                        assert(!asset_image_file_name.empty());
+                        assert(0U != asset_image_file_timestamp);
+                        assert(!asset_image_file_data.empty());
 
-                        mcrt_string asset_motion_file_identity;
-                        {
-                            char asset_motion_file_timestamp_text[] = {"18446744073709551615"};
-                            std::snprintf(asset_motion_file_timestamp_text, sizeof(asset_motion_file_timestamp_text) / sizeof(asset_motion_file_timestamp_text[0]), "%llu", static_cast<long long unsigned>(asset_motion_file_timestamp));
-                            asset_motion_file_timestamp_text[(sizeof(asset_motion_file_timestamp_text) / sizeof(asset_motion_file_timestamp_text[0])) - 1] = '\0';
-
-                            asset_motion_file_identity += asset_motion_file_timestamp_text;
-                            asset_motion_file_identity += ' ';
-                            asset_motion_file_identity += asset_motion_file_name;
-                        }
-
-                        auto const &found_asset_motion = ui_model->m_asset_motions.find(asset_motion_file_identity);
-
-                        if (ui_model->m_asset_motions.end() == found_asset_motion)
-                        {
-                            brx_asset_import_scene *const asset_import_scene = brx_asset_import_create_scene_from_memory(asset_motion_file_data.data(), asset_motion_file_data.size());
-                            if (NULL != asset_import_scene)
-                            {
-                                bool success = true;
-                                uint32_t const animation_count = asset_import_scene->get_animation_count();
-                                mcrt_vector<brx_motion_animation *> animations(static_cast<size_t>(animation_count), NULL);
-                                for (uint32_t animation_index = 0U; animation_index < animation_count; ++animation_index)
-                                {
-                                    brx_asset_import_animation const *const asset_import_animation = asset_import_scene->get_animation(animation_index);
-
-                                    brx_motion_animation *const motion_animation = brx_motion_create_animation(asset_import_animation->get_frame_count(), asset_import_animation->get_weight_channel_count(), wrap(asset_import_animation->get_weight_channel_names()), asset_import_animation->get_weights(), asset_import_animation->get_rigid_transform_channel_count(), wrap(asset_import_animation->get_rigid_transform_channel_names()), wrap(asset_import_animation->get_rigid_transforms()), asset_import_animation->get_switch_channel_count(), wrap(asset_import_animation->get_switch_channel_names()), asset_import_animation->get_switches());
-
-                                    if (NULL != motion_animation)
-                                    {
-                                        animations[animation_index] = motion_animation;
-                                    }
-                                    else
-                                    {
-                                        success = false;
-                                        break;
-                                    }
-                                }
-
-                                if (success)
-                                {
-                                    for (brx_motion_animation *const animation : animations)
-                                    {
-                                        assert(NULL != animation);
-                                    }
-
-                                    std::pair<mcrt_string, ui_asset_motion_model_2_t> motion_model(asset_motion_file_identity, ui_asset_motion_model_2_t{std::move(animations)});
-                                    ui_model->m_asset_motions.insert(found_asset_motion, std::move(motion_model));
-                                }
-                                else
-                                {
-                                    assert(false);
-
-                                    for (brx_motion_animation *const animation : animations)
-                                    {
-                                        if (NULL != animation)
-                                        {
-                                            brx_motion_destroy_animation(animation);
-                                        }
-                                    }
-
-                                    animations.clear();
-                                }
-
-                                brx_asset_import_destroy_scene(asset_import_scene);
-                            }
-                            else
-                            {
-                                assert(false);
-                            }
-                        }
-                        else
-                        {
-                            assert(!found_asset_motion->second.m_animations.empty());
-                        }
+                        brx_anari_image *const load_anari_image = _internal_load_asset_image_file(asset_image_file_name.c_str(), asset_image_file_timestamp, asset_image_file_data.data(), asset_image_file_data.size(), ui_controller->m_import_asset_image_force_srgb, device, ui_model);
+                        assert(NULL != load_anari_image);
                     }
                 }
             }
@@ -1091,35 +1088,30 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
 
                 ImGui::SameLine();
 
-                if (ImGui::Button("X##Asset-Motion-Manager-Delete"))
+                if (ImGui::Button("X##Asset-Image-Manager-Delete"))
                 {
-                    auto const &found_asset_motion = ui_model->m_asset_motions.find(ui_controller->m_selected_asset_motion);
-                    if (ui_model->m_asset_motions.end() != found_asset_motion)
+                    auto const &found_asset_image = ui_model->m_asset_images.find(ui_controller->m_selected_asset_image);
+                    if (ui_model->m_asset_images.end() != found_asset_image)
                     {
-                        assert(!found_asset_motion->second.m_animations.empty());
-
-                        for (brx_motion_animation *const animation : found_asset_motion->second.m_animations)
+                        if (NULL != found_asset_image->second.m_image)
                         {
-                            if (NULL != animation)
-                            {
-                                brx_motion_destroy_animation(animation);
-                            }
-                            else
-                            {
-                                assert(false);
-                            }
+                            device->release_image(found_asset_image->second.m_image);
+                            found_asset_image->second.m_image = NULL;
                         }
-                        found_asset_motion->second.m_animations.clear();
+                        else
+                        {
+                            assert(false);
+                        }
 
-                        ui_model->m_asset_motions.erase(found_asset_motion);
-                        ui_controller->m_selected_asset_motion.clear();
+                        ui_model->m_asset_images.erase(found_asset_image);
+                        ui_controller->m_selected_asset_image.clear();
                     }
                 }
             }
 
             ImGui::Separator();
 
-            if (ImGui::BeginChild("##Asset-Motion-Manager-Left-Child", ImVec2(ui_width * 0.5F, 0.0F), ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX))
+            if (ImGui::BeginChild("##Asset-Image-Manager-Left-Child", ImVec2(ui_width * 0.5F, 0.0F), ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX))
             {
                 ImGui::SetNextItemWidth(-FLT_MIN);
                 ImGui::PushItemFlag(ImGuiItemFlags_NoNavDefaultFocus, true);
@@ -1130,7 +1122,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                         "検索",
                         "檢索",
                         "检索"};
-                    if (ImGui::InputTextWithHint("##Asset-Motion-Manager-Left-Child-Text-Filter", hint[ui_controller->m_language_index], text_filter.InputBuf, IM_ARRAYSIZE(text_filter.InputBuf), ImGuiInputTextFlags_EscapeClearsAll))
+                    if (ImGui::InputTextWithHint("##Asset-Image-Manager-Left-Child-Text-Filter", hint[ui_controller->m_language_index], text_filter.InputBuf, IM_ARRAYSIZE(text_filter.InputBuf), ImGuiInputTextFlags_EscapeClearsAll))
                     {
                         text_filter.Build();
                     }
@@ -1138,22 +1130,22 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
 
                 ImGui::PopItemFlag();
 
-                if (ImGui::BeginTable("##Asset-Motion-Manager-Left-Child-Table", 1, ImGuiTableFlags_RowBg))
+                if (ImGui::BeginTable("##Asset-Image-Manager-Left-Child-Table", 1, ImGuiTableFlags_RowBg))
                 {
-                    for (auto const &asset_motion : ui_model->m_asset_motions)
+                    for (auto const &asset_image : ui_model->m_asset_images)
                     {
-                        if (text_filter.PassFilter(asset_motion.first.c_str()))
+                        if (text_filter.PassFilter(asset_image.first.c_str()))
                         {
                             ImGui::TableNextRow();
                             ImGui::TableNextColumn();
 
-                            ImGuiTreeNodeFlags const flags = ((ui_controller->m_selected_asset_motion != asset_motion.first)) ? ImGuiTreeNodeFlags_Leaf : (ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Selected);
+                            ImGuiTreeNodeFlags const flags = ((ui_controller->m_selected_asset_image != asset_image.first)) ? ImGuiTreeNodeFlags_Leaf : (ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Selected);
 
-                            bool const node_open = ImGui::TreeNodeEx(asset_motion.first.c_str(), flags);
+                            bool const node_open = ImGui::TreeNodeEx(asset_image.first.c_str(), flags);
 
                             if (ImGui::IsItemFocused())
                             {
-                                ui_controller->m_selected_asset_motion = asset_motion.first;
+                                ui_controller->m_selected_asset_image = asset_image.first;
                             }
 
                             if (node_open)
@@ -1168,9 +1160,9 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
             }
             ImGui::EndChild();
 
-            auto const &found_asset_motion = ui_model->m_asset_motions.find(ui_controller->m_selected_asset_motion);
+            auto const &found_asset_image = ui_model->m_asset_images.find(ui_controller->m_selected_asset_image);
 
-            if (ui_model->m_asset_motions.end() != found_asset_motion)
+            if (ui_model->m_asset_images.end() != found_asset_image)
             {
                 ImGui::SameLine();
 
@@ -1180,13 +1172,13 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                 mcrt_string directory_name;
                 mcrt_string file_name;
                 {
-                    size_t const timestamp_text_end_pos = found_asset_motion->first.find(' ');
-                    size_t const directory_name_end_pos = found_asset_motion->first.find_last_of("/\\");
+                    size_t const timestamp_text_end_pos = found_asset_image->first.find(' ');
+                    size_t const directory_name_end_pos = found_asset_image->first.find_last_of("/\\");
                     if ((mcrt_string::npos != timestamp_text_end_pos) && (mcrt_string::npos != directory_name_end_pos) && (timestamp_text_end_pos < directory_name_end_pos))
                     {
-                        timestamp_text += found_asset_motion->first.substr(0U, timestamp_text_end_pos);
-                        directory_name = found_asset_motion->first.substr(timestamp_text_end_pos + 1U, ((directory_name_end_pos - timestamp_text_end_pos) - 1U));
-                        file_name = found_asset_motion->first.substr(directory_name_end_pos + 1U);
+                        timestamp_text += found_asset_image->first.substr(0U, timestamp_text_end_pos);
+                        directory_name = found_asset_image->first.substr(timestamp_text_end_pos + 1U, ((directory_name_end_pos - timestamp_text_end_pos) - 1U));
+                        file_name = found_asset_image->first.substr(directory_name_end_pos + 1U);
                     }
                     else
                     {
@@ -1217,37 +1209,50 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
 
                 ImGui::Separator();
 
-                if (ImGui::BeginTable("##Asset-Motion-Manager-Right-Group-Table", 2, ImGuiTableFlags_BordersInnerV))
+                if (ImGui::BeginTable("##Asset-Image-Manager-Right-Group-Table", 2, ImGuiTableFlags_BordersInnerV))
                 {
-                    ImGui::TableSetupColumn("##Asset-Motion-Manager-Right-Group-Table-Property", ImGuiTableColumnFlags_WidthFixed);
-                    ImGui::TableSetupColumn("##Asset-Motion-Manager-Right-Group-Table-Value", ImGuiTableColumnFlags_WidthStretch, 2.0F);
+                    ImGui::TableSetupColumn("##Asset-Image-Manager-Right-Group-Table-Property", ImGuiTableColumnFlags_WidthFixed);
+                    ImGui::TableSetupColumn("##Asset-Image-Manager-Right-Group-Table-Value", ImGuiTableColumnFlags_WidthStretch, 2.0F);
 
                     ImGui::TableNextRow();
                     ImGui::TableNextColumn();
                     ImGui::AlignTextToFramePadding();
                     {
                         constexpr char const *const text[LANGUAGE_COUNT] = {
-                            "Animation Count",
-                            "Animation 数",
-                            "動畫數",
-                            "动画数"};
+                            "Force SRGB",
+                            "強制 SRGB",
+                            "強制 SRGB",
+                            "强制 SRGB"};
                         ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
                         ImGui::TextUnformatted(text[ui_controller->m_language_index]);
                         ImGui::PopStyleColor();
                     }
                     ImGui::TableNextColumn();
                     {
-                        assert(!found_asset_motion->second.m_animations.empty());
-                        uint32_t const animation_count = static_cast<uint32_t>(found_asset_motion->second.m_animations.size());
-                        assert(animation_count == found_asset_motion->second.m_animations.size());
+                        if (found_asset_image->second.m_force_srgb)
+                        {
+                            constexpr char const *const text[LANGUAGE_COUNT] = {
+                                "Enable",
+                                "有効",
+                                "啟用",
+                                "启用"};
 
-                        char animation_count_text[] = {"18446744073709551615"};
-                        std::snprintf(animation_count_text, sizeof(animation_count_text) / sizeof(animation_count_text[0]), "%llu", static_cast<long long unsigned>(animation_count));
-                        animation_count_text[(sizeof(animation_count_text) / sizeof(animation_count_text[0])) - 1] = '\0';
+                            ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
+                            ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                            ImGui::PopStyleColor();
+                        }
+                        else
+                        {
+                            char const *text[LANGUAGE_COUNT] = {
+                                "Disable",
+                                "無効",
+                                "停用",
+                                "停用"};
 
-                        ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
-                        ImGui::TextUnformatted(animation_count_text);
-                        ImGui::PopStyleColor();
+                            ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
+                            ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                            ImGui::PopStyleColor();
+                        }
                     }
 
                     ImGui::EndTable();
@@ -1257,6 +1262,91 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
             }
 
             ImGui::TreePop();
+        }
+    }
+
+    {
+        {
+            ImGui::Separator();
+
+            {
+                constexpr char const *const text[LANGUAGE_COUNT] = {
+                    "Instance Motion Manager",
+                    "実例行動管理",
+                    "實例動作管理",
+                    "实例动作管理"};
+                ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+            }
+
+            ImGui::SameLine();
+
+            if (ImGui::TreeNodeEx("##Instance-Motion-Manager", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_NoAutoOpenOnLog))
+            {
+                {
+                    if (!ui_model->m_asset_motions.empty())
+                    {
+                        constexpr char const *const text[LANGUAGE_COUNT] = {
+                            "Asset Motion",
+                            "資源行動",
+                            "資源動作",
+                            "资源动作"};
+                        ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+
+                        ImGui::SameLine();
+
+                        mcrt_vector<mcrt_string> item_strings(static_cast<size_t>(ui_model->m_asset_motions.size()));
+                        mcrt_vector<char const *> items(static_cast<size_t>(ui_model->m_asset_motions.size()));
+                        int select_asset_motion_index = 0;
+                        {
+                            size_t asset_motion_index = 0U;
+                            for (auto const &asset_motion : ui_model->m_asset_motions)
+                            {
+                                item_strings[asset_motion_index] = asset_motion.first;
+                                items[asset_motion_index] = item_strings[asset_motion_index].c_str();
+
+                                if (0 == std::strcmp(ui_controller->m_new_instance_motion_asset_motion_name.data(), asset_motion.first.c_str()))
+                                {
+                                    assert(0 == select_asset_motion_index);
+                                    assert((1U + asset_motion_index) < static_cast<size_t>(INT_MAX));
+                                    select_asset_motion_index = static_cast<int>(asset_motion_index);
+                                }
+
+                                ++asset_motion_index;
+                            }
+                        }
+
+                        ImGui::Combo("##Instance-Motion-Manager-Asset-Motion-Selection", &select_asset_motion_index, items.data(), items.size());
+
+                        if (select_asset_motion_index >= 0)
+                        {
+                            ui_controller->m_new_instance_motion_asset_motion_name = std::move(item_strings[select_asset_motion_index]);
+                        }
+                        else
+                        {
+                            assert(false);
+                        }
+                    }
+                    else
+                    {
+
+                        int select_asset_motion_index = 0;
+
+                        char const *items[LANGUAGE_COUNT][1] = {
+                            {"Disable"},
+                            {"無効"},
+                            {"停用"},
+                            {"停用"}};
+
+                        ImGui::Combo("##Instance-Motion-Manager-Asset-Motion-Selection", &select_asset_motion_index, items[ui_controller->m_language_index], IM_ARRAYSIZE(items[ui_controller->m_language_index]));
+
+                        assert(0 == select_asset_motion_index);
+
+                        ui_controller->m_new_instance_motion_asset_motion_name.clear();
+                    }
+                }
+
+                ImGui::TreePop();
+            }
         }
     }
 
@@ -1279,19 +1369,19 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                 uint64_t model_file_timestamp;
                 mcrt_vector<uint8_t> model_file_data;
                 {
-                    constexpr size_t const model_filter_count = 4;
+                    constexpr size_t const model_filter_count = 2;
+
+                    // TODO
+                    // "glTF Binary"    "*.glb;*.vrm"
+                    // "glTF Separate"  "*.gltf"
 
                     constexpr char const *const model_filter_names[model_filter_count] = {
                         "All Files",
-                        "MMD Model Data",
-                        "glTF Binary",
-                        "glTF Separate"};
+                        "MMD Model Data"};
 
                     constexpr char const *const model_filter_specs[model_filter_count] = {
                         "*.*",
-                        "*.pmx",
-                        "*.glb;*.vrm",
-                        "*.gltf"};
+                        "*.pmx"};
 
                     model_file = _internal_platform_get_open_file_name(platform_context, model_filter_count, model_filter_names, model_filter_specs, ui_controller->m_import_asset_model_get_open_file_name_file_type_index, &model_file_name, &model_file_timestamp, &model_file_data);
                 }
@@ -1481,19 +1571,19 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                 uint64_t motion_file_timestamp;
                 mcrt_vector<uint8_t> motion_file_data;
                 {
-                    constexpr size_t const motion_filter_count = 4;
+                    constexpr size_t const motion_filter_count = 2;
+
+                    // TODO
+                    // "glTF Binary"    "*.glb;*.vrma"
+                    // "glTF Separate"  "*.gltf"
 
                     constexpr char const *const motion_filter_names[motion_filter_count] = {
                         "All Files",
-                        "MMD Motion Data",
-                        "glTF Binary",
-                        "glTF Separate"};
+                        "MMD Motion Data"};
 
                     constexpr char const *const motion_filter_specs[motion_filter_count] = {
                         "*.*",
-                        "*.vmd",
-                        "*.glb;*.vrma",
-                        "*.gltf"};
+                        "*.vmd"};
 
                     motion_file = _internal_platform_get_open_file_name(platform_context, motion_filter_count, motion_filter_names, motion_filter_specs, ui_controller->m_import_asset_motion_get_open_file_name_file_type_index, &motion_file_name, &motion_file_timestamp, &motion_file_data);
                 }
