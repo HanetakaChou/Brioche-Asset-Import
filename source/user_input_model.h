@@ -49,6 +49,16 @@ struct ui_instance_motion_model_t
     brx_motion_animation_instance *m_animation_instance;
 };
 
+struct ui_instance_model_model_t
+{
+    mcrt_string m_name;
+    mcrt_string m_asset_model;
+    uint32_t m_surface_group_index;
+    brx_anari_surface_group_instance *m_surface_group_instance;
+    brx_motion_skeleton_instance *m_skeleton_instance;
+    uint64_t m_instance_motion;
+};
+
 struct ui_asset_model_model_t
 {
     mcrt_string m_file_name;
@@ -73,6 +83,7 @@ struct ui_model_t
     mcrt_unordered_map<mcrt_string, ui_asset_model_model_2_t> m_asset_models;
     mcrt_unordered_map<mcrt_string, ui_asset_image_model_t> m_asset_images;
     mcrt_unordered_map<uint64_t, ui_instance_motion_model_t> m_instance_motions;
+    mcrt_unordered_map<uint64_t, ui_instance_model_model_t> m_instance_models;
 
     ui_asset_model_model_t m_asset_model;
     ui_asset_motion_model_t m_asset_motion;

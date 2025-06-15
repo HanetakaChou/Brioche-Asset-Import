@@ -29,18 +29,24 @@ struct ui_controller_t
 
     bool m_import_asset_image_force_srgb;
     int m_import_asset_image_get_open_file_name_file_type_index;
-    mcrt_string m_selected_asset_image;
+    mcrt_string m_tree_view_selected_asset_image;
 
     int m_import_asset_model_get_open_file_name_file_type_index;
-    mcrt_string m_selected_asset_model;
+    mcrt_string m_tree_view_selected_asset_model;
 
     int m_import_asset_motion_get_open_file_name_file_type_index;
-    mcrt_string m_selected_asset_motion;
+    mcrt_string m_tree_view_selected_asset_motion;
 
+    mcrt_vector<char> m_new_instance_motion_name;
     mcrt_string m_new_instance_motion_selected_asset_motion;
     int m_new_instance_motion_selected_animation_index;
-    mcrt_vector<char> m_new_instance_motion_name;
-    uint64_t m_selected_instance_motion;
+    uint64_t m_tree_view_selected_instance_motion;
+
+    mcrt_vector<char> m_new_instance_model_name;
+    mcrt_string m_new_instance_model_selected_asset_model;
+    int m_new_instance_model_selected_surface_group_index;
+    uint64_t m_new_instance_model_selected_instance_motion;
+    uint64_t m_tree_view_selected_instance_model;
 };
 
 struct user_camera_controller_t

@@ -96,6 +96,30 @@ extern void ui_model_uninit(brx_anari_device *device, ui_model_t *ui_model)
     }
     ui_model->m_asset_model.m_surface_groups.clear();
 
+    for (auto &instance_model : ui_model->m_instance_models)
+    {
+        if (NULL != instance_model.second.m_surface_group_instance)
+        {
+            device->world_release_surface_group_instance(instance_model.second.m_surface_group_instance);
+            instance_model.second.m_surface_group_instance = NULL;
+        }
+        else
+        {
+            assert(false);
+        }
+
+        if (NULL != instance_model.second.m_skeleton_instance)
+        {
+            brx_motion_destroy_skeleton_instance(instance_model.second.m_skeleton_instance);
+            instance_model.second.m_skeleton_instance = NULL;
+        }
+        else
+        {
+            assert(false);
+        }
+    }
+    ui_model->m_instance_models.clear();
+
     for (auto &instance_motion : ui_model->m_instance_motions)
     {
         if (NULL != instance_motion.second.m_animation_instance)
