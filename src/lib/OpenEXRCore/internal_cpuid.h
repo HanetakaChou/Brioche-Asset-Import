@@ -6,7 +6,7 @@
 #ifndef IMF_INTERNAL_CPUID_H_HAS_BEEN_INCLUDED
 #define IMF_INTERNAL_CPUID_H_HAS_BEEN_INCLUDED
 
-#include "OpenEXRConfigInternal.h"
+#include "../OpenEXR/OpenEXRConfigInternal.h"
 
 #if defined(i386) || defined(__i386__) || defined(__i386) ||                   \
     defined(_M_X86) || defined(__x86_64__) || defined(_M_X64)

@@ -1,0 +1,129 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="build-windows">
+      <UniqueIdentifier>{8765e08b-15ba-4743-8a8e-d1a0e2d8ee2b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="build">
+      <UniqueIdentifier>{02ff5dd1-49e3-40f6-b5d7-7dd81f1d21ba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source">
+      <UniqueIdentifier>{3bf4c180-3b00-450a-b51a-43a279e73393}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="dllmain.cpp">
+      <Filter>build-windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lib\OpenEXRCore\internal_structs.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lib\OpenEXRCore\internal_zip.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lib\OpenEXRCore\memory.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lib\OpenEXRCore\opaque.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lib\OpenEXRCore\pack.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lib\OpenEXRCore\parse_header.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lib\OpenEXRCore\part.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lib\OpenEXRCore\part_attr.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lib\OpenEXRCore\preview.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lib\OpenEXRCore\std_attr.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lib\OpenEXRCore\string.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lib\OpenEXRCore\string_vector.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lib\OpenEXRCore\unpack.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lib\OpenEXRCore\validation.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lib\OpenEXRCore\write_header.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lib\OpenEXRCore\attributes.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lib\OpenEXRCore\base.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lib\OpenEXRCore\channel_list.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lib\OpenEXRCore\chunk.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lib\OpenEXRCore\coding.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lib\OpenEXRCore\compression.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lib\OpenEXRCore\context.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lib\OpenEXRCore\debug.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lib\OpenEXRCore\decoding.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lib\OpenEXRCore\encoding.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lib\OpenEXRCore\float_vector.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lib\OpenEXRCore\internal_b44.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lib\OpenEXRCore\internal_b44_table.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lib\OpenEXRCore\internal_dwa.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lib\OpenEXRCore\internal_huf.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lib\OpenEXRCore\internal_piz.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lib\OpenEXRCore\internal_pxr24.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lib\OpenEXRCore\internal_rle.c">
+      <Filter>source</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\lib\OpenEXR\OpenEXRConfig.h">
+      <Filter>build</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\lib\OpenEXR\OpenEXRConfigInternal.h">
+      <Filter>build</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\lib\IlmThread\IlmThreadConfig.h">
+      <Filter>build</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

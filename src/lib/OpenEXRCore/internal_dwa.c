@@ -116,7 +116,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "OpenEXRConfigInternal.h"
+#include "../OpenEXR/OpenEXRConfigInternal.h"
 
 #include "internal_dwa_helpers.h"
 

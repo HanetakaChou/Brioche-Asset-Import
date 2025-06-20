@@ -51,7 +51,7 @@
 #    include <arm_neon.h>
 #endif
 
-#include "OpenEXRConfigInternal.h"
+#include "../OpenEXR/OpenEXRConfigInternal.h"
 #ifdef OPENEXR_MISSING_ARM_VLD1
 /* Workaround for missing vld1q_f32_x2 in older gcc versions.  */
 

@@ -14,7 +14,7 @@
 #include "internal_file.h"
 #include "internal_huf.h"
 
-#include <libdeflate.h>
+#include "../../../../libdeflate/libdeflate.h"
 #include <string.h>
 
 #if (                                                                          \
