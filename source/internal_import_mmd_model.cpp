@@ -604,7 +604,9 @@ static inline void internal_import_morph_targets(mcrt_vector<mmd_pmx_vertex_t> c
 
 			if (1U == in_mmd_morphs[mmd_morph_current_index].m_morph_type || 2U == in_mmd_morphs[mmd_morph_current_index].m_morph_type)
 			{
-				assert(current_morph_target.empty());
+				// TODO: duplicated morph name
+				// assert(current_morph_target.empty());
+
 				uint32_t const mmd_morph_offset_count = in_mmd_morphs[mmd_morph_current_index].m_offsets.size();
 				for (size_t mmd_morph_offset_index = 0U; mmd_morph_offset_index < mmd_morph_offset_count; ++mmd_morph_offset_index)
 				{
@@ -2110,51 +2112,10 @@ static inline void internal_import_mesh_sections(mcrt_vector<mmd_pmx_vertex_t> c
 
 		assert((morph_face_indices.size() + non_morph_face_indices.size()) == face_count);
 
+		// TODO: we may not merge the surface since the alpha blending depends on the vertex order?
 		auto const material_compare = [&in_materials](uint32_t const &lhs, uint32_t const &rhs) -> bool
 		{
-			if ((!in_materials[lhs].m_is_double_sided) && (in_materials[rhs].m_is_double_sided))
-			{
-				return true;
-			}
-
-			if ((!in_materials[rhs].m_is_double_sided) && (in_materials[lhs].m_is_double_sided))
-			{
-				return false;
-			}
-
-			DirectX::PackedVector::XMUBYTEN4 lhs_diffuse;
-			{
-				DirectX::XMFLOAT4 const diffuse(in_materials[lhs].m_diffuse.m_x, in_materials[lhs].m_diffuse.m_y, in_materials[lhs].m_diffuse.m_z, in_materials[lhs].m_diffuse.m_w);
-				DirectX::PackedVector::XMStoreUByteN4(&lhs_diffuse, DirectX::XMLoadFloat4(&diffuse));
-			}
-
-			DirectX::PackedVector::XMUBYTEN4 rhs_diffuse;
-			{
-				DirectX::XMFLOAT4 const diffuse(in_materials[rhs].m_diffuse.m_x, in_materials[rhs].m_diffuse.m_y, in_materials[rhs].m_diffuse.m_z, in_materials[rhs].m_diffuse.m_w);
-				DirectX::PackedVector::XMStoreUByteN4(&rhs_diffuse, DirectX::XMLoadFloat4(&diffuse));
-			}
-
-			if (lhs_diffuse.v < rhs_diffuse.v)
-			{
-				return true;
-			}
-
-			if (rhs_diffuse.v < lhs_diffuse.v)
-			{
-				return false;
-			}
-
-			if (in_materials[lhs].m_texture_index < in_materials[rhs].m_texture_index)
-			{
-				return true;
-			}
-
-			if (in_materials[rhs].m_texture_index < in_materials[lhs].m_texture_index)
-			{
-				return false;
-			}
-
-			return false;
+			return lhs < rhs;
 		};
 
 		mcrt_map<uint32_t, mcrt_set<uint32_t>, decltype(material_compare)> materials_face_indices(material_compare);
@@ -2167,6 +2128,7 @@ static inline void internal_import_mesh_sections(mcrt_vector<mmd_pmx_vertex_t> c
 
 				uint32_t const material_face_count = in_materials[material_index].m_face_count;
 
+				// we preserve the vertex order even if we use the "set" instead of the "vector"
 				for (uint32_t material_face_index = 0U; material_face_index < material_face_count; ++material_face_index)
 				{
 					material_face_indices.emplace(face_index_begin + material_face_index);
@@ -2186,9 +2148,6 @@ static inline void internal_import_mesh_sections(mcrt_vector<mmd_pmx_vertex_t> c
 			assert(face_count == material_face_count);
 		}
 #endif
-
-		mcrt_map<uint32_t, mcrt_vector<uint32_t>> morph_materials_face_indices;
-		mcrt_map<uint32_t, mcrt_vector<uint32_t>> non_morph_materials_face_indices;
 
 		for (auto const &material_index_and_face_indices : materials_face_indices)
 		{
@@ -2216,35 +2175,17 @@ static inline void internal_import_mesh_sections(mcrt_vector<mmd_pmx_vertex_t> c
 
 			if (!morph_material_face_indices.empty())
 			{
-				assert(morph_materials_face_indices.end() == morph_materials_face_indices.find(material_index));
-				morph_materials_face_indices[material_index] = std::move(morph_material_face_indices);
+				mesh_sections_morph_switches.emplace_back(true);
+				mesh_sections_material_indices.emplace_back(material_index);
+				mesh_sections_face_indices.emplace_back(std::move(morph_material_face_indices));
 			}
 
 			if (!non_morph_material_face_indices.empty())
 			{
-				assert(non_morph_materials_face_indices.end() == non_morph_materials_face_indices.find(material_index));
-				non_morph_materials_face_indices[material_index] = std::move(non_morph_material_face_indices);
+				mesh_sections_morph_switches.emplace_back(false);
+				mesh_sections_material_indices.emplace_back(material_index);
+				mesh_sections_face_indices.emplace_back(std::move(non_morph_material_face_indices));
 			}
-		}
-
-		for (auto &morph_material_index_and_face_indices : morph_materials_face_indices)
-		{
-			uint32_t const morph_material_index = morph_material_index_and_face_indices.first;
-			mcrt_vector<uint32_t> &morph_material_face_indices = morph_material_index_and_face_indices.second;
-
-			mesh_sections_morph_switches.emplace_back(true);
-			mesh_sections_material_indices.emplace_back(morph_material_index);
-			mesh_sections_face_indices.emplace_back(std::move(morph_material_face_indices));
-		}
-
-		for (auto &non_morph_material_index_and_face_indices : non_morph_materials_face_indices)
-		{
-			uint32_t const non_morph_material_index = non_morph_material_index_and_face_indices.first;
-			mcrt_vector<uint32_t> &non_morph_material_face_indices = non_morph_material_index_and_face_indices.second;
-
-			mesh_sections_morph_switches.emplace_back(false);
-			mesh_sections_material_indices.emplace_back(non_morph_material_index);
-			mesh_sections_face_indices.emplace_back(std::move(non_morph_material_face_indices));
 		}
 
 #ifndef NDEBUG
@@ -2455,6 +2396,7 @@ static inline void internal_import_mesh_sections(mcrt_vector<mmd_pmx_vertex_t> c
 		if (in_materials[mesh_section_material_index].m_texture_index < in_textures.size())
 		{
 			texture_path = in_textures[in_materials[mesh_section_material_index].m_texture_index].m_path;
+			std::replace(texture_path.begin(), texture_path.end(), '\\', '/');
 		}
 		else
 		{
