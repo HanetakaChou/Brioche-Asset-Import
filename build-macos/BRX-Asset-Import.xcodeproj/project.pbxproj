@@ -1,0 +1,502 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		8494187B2F131EEC0022634B /* internal_import_webp_image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 849418772F131EEC0022634B /* internal_import_webp_image.cpp */; };
+		8494187C2F131EEC0022634B /* internal_import_scene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 849418742F131EEC0022634B /* internal_import_scene.cpp */; };
+		8494187D2F131EEC0022634B /* internal_mmd_vmd.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8494187A2F131EEC0022634B /* internal_mmd_vmd.cpp */; };
+		8494187E2F131EEC0022634B /* brx_asset_import_scene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8494186C2F131EEC0022634B /* brx_asset_import_scene.cpp */; };
+		8494187F2F131EEC0022634B /* internal_mmd_name.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 849418782F131EEC0022634B /* internal_mmd_name.cpp */; };
+		849418802F131EEC0022634B /* internal_mmd_pmx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 849418792F131EEC0022634B /* internal_mmd_pmx.cpp */; };
+		849418812F131EEC0022634B /* brx_asset_import_mesh_scene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8494186A2F131EEC0022634B /* brx_asset_import_mesh_scene.cpp */; };
+		849418822F131EEC0022634B /* internal_import_mmd_motion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 849418722F131EEC0022634B /* internal_import_mmd_motion.cpp */; };
+		849418832F131EEC0022634B /* internal_import_image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8494186F2F131EEC0022634B /* internal_import_image.cpp */; };
+		849418842F131EEC0022634B /* internal_import_mmd_model.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 849418712F131EEC0022634B /* internal_import_mmd_model.cpp */; };
+		849418852F131EEC0022634B /* internal_import_png_image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 849418732F131EEC0022634B /* internal_import_png_image.cpp */; };
+		849418862F131EEC0022634B /* brx_asset_import_rgba_image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8494186B2F131EEC0022634B /* brx_asset_import_rgba_image.cpp */; };
+		849418872F131EEC0022634B /* brx_asset_import_image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 849418692F131EEC0022634B /* brx_asset_import_image.cpp */; };
+		849418882F131EEC0022634B /* internal_import_tga_image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 849418752F131EEC0022634B /* internal_import_tga_image.cpp */; };
+		849418892F131EEC0022634B /* internal_import_vrm_model.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 849418762F131EEC0022634B /* internal_import_vrm_model.cpp */; };
+		8494188A2F131EEC0022634B /* internal_cgltf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8494186D2F131EEC0022634B /* internal_cgltf.cpp */; };
+		8494188B2F131EEC0022634B /* internal_import_exr_image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8494186E2F131EEC0022634B /* internal_import_exr_image.cpp */; };
+		8494188C2F131EEC0022634B /* internal_import_jpeg_image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 849418702F131EEC0022634B /* internal_import_jpeg_image.cpp */; };
+		8494188F2F131EFD0022634B /* DirectXMeshNormals.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8494188D2F131EFD0022634B /* DirectXMeshNormals.cpp */; };
+		849418902F131EFD0022634B /* DirectXMeshTangentFrame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8494188E2F131EFD0022634B /* DirectXMeshTangentFrame.cpp */; };
+		849418932F131FAC0022634B /* jpeg.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 849418922F131FAC0022634B /* jpeg.framework */; };
+		849418972F131FB20022634B /* png.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 849418962F131FB20022634B /* png.framework */; };
+		8494189B2F131FBB0022634B /* webp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8494189A2F131FBB0022634B /* webp.framework */; };
+		8494189F2F131FCA0022634B /* OpenEXRCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8494189E2F131FCA0022634B /* OpenEXRCore.framework */; };
+		849418A32F131FD60022634B /* McRT-Malloc.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 849418A22F131FD60022634B /* McRT-Malloc.framework */; };
+		849418A72F131FE30022634B /* iconv.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 849418A62F131FE30022634B /* iconv.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		8494176E2F12F11F0022634B /* BRX-Asset-Import.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = "BRX-Asset-Import.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
+		849418692F131EEC0022634B /* brx_asset_import_image.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = brx_asset_import_image.cpp; path = ../source/brx_asset_import_image.cpp; sourceTree = SOURCE_ROOT; };
+		8494186A2F131EEC0022634B /* brx_asset_import_mesh_scene.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = brx_asset_import_mesh_scene.cpp; path = ../source/brx_asset_import_mesh_scene.cpp; sourceTree = SOURCE_ROOT; };
+		8494186B2F131EEC0022634B /* brx_asset_import_rgba_image.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = brx_asset_import_rgba_image.cpp; path = ../source/brx_asset_import_rgba_image.cpp; sourceTree = SOURCE_ROOT; };
+		8494186C2F131EEC0022634B /* brx_asset_import_scene.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = brx_asset_import_scene.cpp; path = ../source/brx_asset_import_scene.cpp; sourceTree = SOURCE_ROOT; };
+		8494186D2F131EEC0022634B /* internal_cgltf.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = internal_cgltf.cpp; path = ../source/internal_cgltf.cpp; sourceTree = SOURCE_ROOT; };
+		8494186E2F131EEC0022634B /* internal_import_exr_image.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = internal_import_exr_image.cpp; path = ../source/internal_import_exr_image.cpp; sourceTree = SOURCE_ROOT; };
+		8494186F2F131EEC0022634B /* internal_import_image.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = internal_import_image.cpp; path = ../source/internal_import_image.cpp; sourceTree = SOURCE_ROOT; };
+		849418702F131EEC0022634B /* internal_import_jpeg_image.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = internal_import_jpeg_image.cpp; path = ../source/internal_import_jpeg_image.cpp; sourceTree = SOURCE_ROOT; };
+		849418712F131EEC0022634B /* internal_import_mmd_model.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = internal_import_mmd_model.cpp; path = ../source/internal_import_mmd_model.cpp; sourceTree = SOURCE_ROOT; };
+		849418722F131EEC0022634B /* internal_import_mmd_motion.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = internal_import_mmd_motion.cpp; path = ../source/internal_import_mmd_motion.cpp; sourceTree = SOURCE_ROOT; };
+		849418732F131EEC0022634B /* internal_import_png_image.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = internal_import_png_image.cpp; path = ../source/internal_import_png_image.cpp; sourceTree = SOURCE_ROOT; };
+		849418742F131EEC0022634B /* internal_import_scene.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = internal_import_scene.cpp; path = ../source/internal_import_scene.cpp; sourceTree = SOURCE_ROOT; };
+		849418752F131EEC0022634B /* internal_import_tga_image.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = internal_import_tga_image.cpp; path = ../source/internal_import_tga_image.cpp; sourceTree = SOURCE_ROOT; };
+		849418762F131EEC0022634B /* internal_import_vrm_model.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = internal_import_vrm_model.cpp; path = ../source/internal_import_vrm_model.cpp; sourceTree = SOURCE_ROOT; };
+		849418772F131EEC0022634B /* internal_import_webp_image.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = internal_import_webp_image.cpp; path = ../source/internal_import_webp_image.cpp; sourceTree = SOURCE_ROOT; };
+		849418782F131EEC0022634B /* internal_mmd_name.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = internal_mmd_name.cpp; path = ../source/internal_mmd_name.cpp; sourceTree = SOURCE_ROOT; };
+		849418792F131EEC0022634B /* internal_mmd_pmx.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = internal_mmd_pmx.cpp; path = ../source/internal_mmd_pmx.cpp; sourceTree = SOURCE_ROOT; };
+		8494187A2F131EEC0022634B /* internal_mmd_vmd.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = internal_mmd_vmd.cpp; path = ../source/internal_mmd_vmd.cpp; sourceTree = SOURCE_ROOT; };
+		8494188D2F131EFD0022634B /* DirectXMeshNormals.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = DirectXMeshNormals.cpp; path = ../thirdparty/DirectXMesh/DirectXMesh/DirectXMeshNormals.cpp; sourceTree = SOURCE_ROOT; };
+		8494188E2F131EFD0022634B /* DirectXMeshTangentFrame.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = DirectXMeshTangentFrame.cpp; path = ../thirdparty/DirectXMesh/DirectXMesh/DirectXMeshTangentFrame.cpp; sourceTree = SOURCE_ROOT; };
+		849418922F131FAC0022634B /* jpeg.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = jpeg.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		849418962F131FB20022634B /* png.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = png.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		8494189A2F131FBB0022634B /* webp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = webp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		8494189E2F131FCA0022634B /* OpenEXRCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = OpenEXRCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		849418A22F131FD60022634B /* McRT-Malloc.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = "McRT-Malloc.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
+		849418A62F131FE30022634B /* iconv.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = iconv.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		8494176B2F12F11F0022634B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				849418A72F131FE30022634B /* iconv.framework in Frameworks */,
+				849418972F131FB20022634B /* png.framework in Frameworks */,
+				849418A32F131FD60022634B /* McRT-Malloc.framework in Frameworks */,
+				8494189B2F131FBB0022634B /* webp.framework in Frameworks */,
+				849418932F131FAC0022634B /* jpeg.framework in Frameworks */,
+				8494189F2F131FCA0022634B /* OpenEXRCore.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		849418912F131FAC0022634B /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				849418A62F131FE30022634B /* iconv.framework */,
+				849418A22F131FD60022634B /* McRT-Malloc.framework */,
+				8494189E2F131FCA0022634B /* OpenEXRCore.framework */,
+				8494189A2F131FBB0022634B /* webp.framework */,
+				849418962F131FB20022634B /* png.framework */,
+				849418922F131FAC0022634B /* jpeg.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		84E2D5972F12EC8A00653972 = {
+			isa = PBXGroup;
+			children = (
+				849418692F131EEC0022634B /* brx_asset_import_image.cpp */,
+				8494186A2F131EEC0022634B /* brx_asset_import_mesh_scene.cpp */,
+				8494186B2F131EEC0022634B /* brx_asset_import_rgba_image.cpp */,
+				8494186C2F131EEC0022634B /* brx_asset_import_scene.cpp */,
+				8494186D2F131EEC0022634B /* internal_cgltf.cpp */,
+				8494186E2F131EEC0022634B /* internal_import_exr_image.cpp */,
+				8494186F2F131EEC0022634B /* internal_import_image.cpp */,
+				849418702F131EEC0022634B /* internal_import_jpeg_image.cpp */,
+				849418712F131EEC0022634B /* internal_import_mmd_model.cpp */,
+				849418722F131EEC0022634B /* internal_import_mmd_motion.cpp */,
+				849418732F131EEC0022634B /* internal_import_png_image.cpp */,
+				849418742F131EEC0022634B /* internal_import_scene.cpp */,
+				849418752F131EEC0022634B /* internal_import_tga_image.cpp */,
+				849418762F131EEC0022634B /* internal_import_vrm_model.cpp */,
+				849418772F131EEC0022634B /* internal_import_webp_image.cpp */,
+				849418782F131EEC0022634B /* internal_mmd_name.cpp */,
+				849418792F131EEC0022634B /* internal_mmd_pmx.cpp */,
+				8494187A2F131EEC0022634B /* internal_mmd_vmd.cpp */,
+				8494188D2F131EFD0022634B /* DirectXMeshNormals.cpp */,
+				8494188E2F131EFD0022634B /* DirectXMeshTangentFrame.cpp */,
+				849418912F131FAC0022634B /* Frameworks */,
+				84E2D5A22F12EC8A00653972 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		84E2D5A22F12EC8A00653972 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				8494176E2F12F11F0022634B /* BRX-Asset-Import.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		849417692F12F11F0022634B /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		8494176D2F12F11F0022634B /* BRX-Asset-Import */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 849417752F12F11F0022634B /* Build configuration list for PBXNativeTarget "BRX-Asset-Import" */;
+			buildPhases = (
+				849417692F12F11F0022634B /* Headers */,
+				8494176A2F12F11F0022634B /* Sources */,
+				8494176B2F12F11F0022634B /* Frameworks */,
+				8494176C2F12F11F0022634B /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "BRX-Asset-Import";
+			packageProductDependencies = (
+			);
+			productName = "BRX-Asset-Import";
+			productReference = 8494176E2F12F11F0022634B /* BRX-Asset-Import.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		84E2D5982F12EC8A00653972 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastUpgradeCheck = 2620;
+				TargetAttributes = {
+					8494176D2F12F11F0022634B = {
+						CreatedOnToolsVersion = 26.2;
+					};
+				};
+			};
+			buildConfigurationList = 84E2D59B2F12EC8A00653972 /* Build configuration list for PBXProject "BRX-Asset-Import" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 84E2D5972F12EC8A00653972;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 84E2D5A22F12EC8A00653972 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				8494176D2F12F11F0022634B /* BRX-Asset-Import */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		8494176C2F12F11F0022634B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		8494176A2F12F11F0022634B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8494187B2F131EEC0022634B /* internal_import_webp_image.cpp in Sources */,
+				8494187C2F131EEC0022634B /* internal_import_scene.cpp in Sources */,
+				8494187D2F131EEC0022634B /* internal_mmd_vmd.cpp in Sources */,
+				8494187E2F131EEC0022634B /* brx_asset_import_scene.cpp in Sources */,
+				8494187F2F131EEC0022634B /* internal_mmd_name.cpp in Sources */,
+				849418802F131EEC0022634B /* internal_mmd_pmx.cpp in Sources */,
+				849418812F131EEC0022634B /* brx_asset_import_mesh_scene.cpp in Sources */,
+				849418822F131EEC0022634B /* internal_import_mmd_motion.cpp in Sources */,
+				8494188F2F131EFD0022634B /* DirectXMeshNormals.cpp in Sources */,
+				849418902F131EFD0022634B /* DirectXMeshTangentFrame.cpp in Sources */,
+				849418832F131EEC0022634B /* internal_import_image.cpp in Sources */,
+				849418842F131EEC0022634B /* internal_import_mmd_model.cpp in Sources */,
+				849418852F131EEC0022634B /* internal_import_png_image.cpp in Sources */,
+				849418862F131EEC0022634B /* brx_asset_import_rgba_image.cpp in Sources */,
+				849418872F131EEC0022634B /* brx_asset_import_image.cpp in Sources */,
+				849418882F131EEC0022634B /* internal_import_tga_image.cpp in Sources */,
+				849418892F131EEC0022634B /* internal_import_vrm_model.cpp in Sources */,
+				8494188A2F131EEC0022634B /* internal_cgltf.cpp in Sources */,
+				8494188B2F131EEC0022634B /* internal_import_exr_image.cpp in Sources */,
+				8494188C2F131EEC0022634B /* internal_import_jpeg_image.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		849417722F12F11F0022634B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = x86_64;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
+				CLANG_ENABLE_MODULES = NO;
+				CLANG_ENABLE_OBJC_ARC = NO;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = NO;
+				CLANG_X86_VECTOR_INSTRUCTIONS = avx2;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = NO;
+				DEFINES_MODULE = NO;
+				DEPLOYMENT_POSTPROCESSING = NO;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				EXPORTED_SYMBOLS_FILE = "$(PROJECT_DIR)/BRX-Asset-Import.exp";
+				GCC_C_LANGUAGE_STANDARD = c17;
+				GCC_ENABLE_CPP_EXCEPTIONS = YES;
+				GCC_ENABLE_CPP_RTTI = NO;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"PAL_STDCPP_COMPAT=1",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(PROJECT_DIR)/../../CoreRT/src/Native/inc/unix",
+					"$(PROJECT_DIR)/../../DirectXMath/Inc",
+				);
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				"OTHER_CFLAGS[arch=i386]" = (
+					"$(inherited)",
+					"-mf16c",
+					"-mfma",
+				);
+				"OTHER_CFLAGS[arch=x86_64]" = (
+					"$(inherited)",
+					"-mf16c",
+					"-mfma",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "IO.GitHub.BriochePuppet.BRX-Asset-Import";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRIP_INSTALLED_PRODUCT = NO;
+			};
+			name = Debug;
+		};
+		849417732F12F11F0022634B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = x86_64;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
+				CLANG_ENABLE_MODULES = NO;
+				CLANG_ENABLE_OBJC_ARC = NO;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = NO;
+				CLANG_X86_VECTOR_INSTRUCTIONS = avx2;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = YES;
+				DEFINES_MODULE = NO;
+				DEPLOYMENT_POSTPROCESSING = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				EXPORTED_SYMBOLS_FILE = "$(PROJECT_DIR)/BRX-Asset-Import.exp";
+				GCC_C_LANGUAGE_STANDARD = c17;
+				GCC_ENABLE_CPP_EXCEPTIONS = YES;
+				GCC_ENABLE_CPP_RTTI = NO;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"PAL_STDCPP_COMPAT=1",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(PROJECT_DIR)/../../CoreRT/src/Native/inc/unix",
+					"$(PROJECT_DIR)/../../DirectXMath/Inc",
+				);
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				"OTHER_CFLAGS[arch=i386]" = (
+					"$(inherited)",
+					"-mf16c",
+					"-mfma",
+				);
+				"OTHER_CFLAGS[arch=x86_64]" = (
+					"$(inherited)",
+					"-mf16c",
+					"-mfma",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "IO.GitHub.BriochePuppet.BRX-Asset-Import";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRIP_INSTALLED_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		84E2D5AA2F12EC8A00653972 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = x86_64;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
+				CLANG_ENABLE_MODULES = NO;
+				CLANG_ENABLE_OBJC_ARC = NO;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = NO;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEFINES_MODULE = NO;
+				DEPLOYMENT_POSTPROCESSING = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = c17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_CPP_EXCEPTIONS = NO;
+				GCC_ENABLE_CPP_RTTI = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				STRIP_INSTALLED_PRODUCT = NO;
+			};
+			name = Debug;
+		};
+		84E2D5AB2F12EC8A00653972 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = x86_64;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
+				CLANG_ENABLE_MODULES = NO;
+				CLANG_ENABLE_OBJC_ARC = NO;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = NO;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEFINES_MODULE = NO;
+				DEPLOYMENT_POSTPROCESSING = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = c17;
+				GCC_ENABLE_CPP_EXCEPTIONS = NO;
+				GCC_ENABLE_CPP_RTTI = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"NDEBUG=1",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				STRIP_INSTALLED_PRODUCT = YES;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		849417752F12F11F0022634B /* Build configuration list for PBXNativeTarget "BRX-Asset-Import" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				849417722F12F11F0022634B /* Debug */,
+				849417732F12F11F0022634B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		84E2D59B2F12EC8A00653972 /* Build configuration list for PBXProject "BRX-Asset-Import" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				84E2D5AA2F12EC8A00653972 /* Debug */,
+				84E2D5AB2F12EC8A00653972 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 84E2D5982F12EC8A00653972 /* Project object */;
+}

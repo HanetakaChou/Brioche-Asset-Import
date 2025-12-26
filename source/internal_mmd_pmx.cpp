@@ -1572,7 +1572,7 @@ static inline bool internal_data_read_mmd_pmx_constraints(void const *data_base,
                 return false;
             }
 
-            constexpr float const M_PI = 3.14159265358979323846264338327950288F;
+            constexpr float const INTERNAL_M_PI = 3.14159265358979323846264338327950288F;
 
             out_joints[joint_index].m_translation_limit_min.m_x = 0.0F;
             out_joints[joint_index].m_translation_limit_min.m_y = 0.0F;
@@ -1582,13 +1582,13 @@ static inline bool internal_data_read_mmd_pmx_constraints(void const *data_base,
             out_joints[joint_index].m_translation_limit_max.m_y = 0.0F;
             out_joints[joint_index].m_translation_limit_max.m_z = 0.0F;
 
-            out_joints[joint_index].m_rotation_limit_min.m_x = -M_PI;
-            out_joints[joint_index].m_rotation_limit_min.m_y = -M_PI;
-            out_joints[joint_index].m_rotation_limit_min.m_z = -M_PI;
+            out_joints[joint_index].m_rotation_limit_min.m_x = -INTERNAL_M_PI;
+            out_joints[joint_index].m_rotation_limit_min.m_y = -INTERNAL_M_PI;
+            out_joints[joint_index].m_rotation_limit_min.m_z = -INTERNAL_M_PI;
 
-            out_joints[joint_index].m_rotation_limit_max.m_x = M_PI;
-            out_joints[joint_index].m_rotation_limit_max.m_y = M_PI;
-            out_joints[joint_index].m_rotation_limit_max.m_z = M_PI;
+            out_joints[joint_index].m_rotation_limit_max.m_x = INTERNAL_M_PI;
+            out_joints[joint_index].m_rotation_limit_max.m_y = INTERNAL_M_PI;
+            out_joints[joint_index].m_rotation_limit_max.m_z = INTERNAL_M_PI;
 
             mmd_pmx_vec3_t unused_translation_limit_max;
             if (internal_unlikely(!internal_data_read_mmd_pmx_vec3(data_base, data_size, inout_data_offset, &unused_translation_limit_max)))
