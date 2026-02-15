@@ -75,7 +75,7 @@ LOCAL_C_INCLUDES += $(LOCAL_PATH)/../../CoreRT/src/Native/inc/unix
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/../../DirectXMath/Inc
 
 LOCAL_CPPFLAGS := 
-LOCAL_CPPFLAGS += -std=c++17
+LOCAL_CPPFLAGS += -std=c++20
 
 LOCAL_CPP_FEATURES := 
 LOCAL_CPP_FEATURES += exceptions

@@ -195,7 +195,7 @@ extern bool internal_import_mmd_model(void const *data_base, size_t data_size, m
 				mcrt_vector<uint8_t> base_color_image_url;
 				brx_asset_import_vec4 base_color_factor{1.0F, 1.0F, 1.0F, 1.0F};
 				mcrt_vector<uint8_t> metallic_roughness_image_url;
-				float metallic_factor = 1.0F;
+				float metallic_factor = 0.0F;
 				float roughness_factor = 1.0F;
 				{
 					uint32_t const vertex_count = mesh_section.m_vertices.size();
@@ -389,7 +389,7 @@ extern bool internal_import_mmd_model(void const *data_base, size_t data_size, m
 							assert(metallic_roughness_image_url.empty());
 
 							metallic_factor = 0.0F;
-							roughness_factor = 0.5F;
+							roughness_factor = 1.0F;
 						}
 
 						{
@@ -497,7 +497,7 @@ extern bool internal_import_mmd_model(void const *data_base, size_t data_size, m
 							assert(metallic_roughness_image_url.empty());
 
 							metallic_factor = 0.0F;
-							roughness_factor = 0.5F;
+							roughness_factor = 1.0F;
 						}
 
 						if (!mesh_section.m_texture_path.empty())
