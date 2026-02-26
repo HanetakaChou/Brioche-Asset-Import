@@ -19,30 +19,36 @@
 #include "../../libiconv/include/iconv.h"
 #include <cstring>
 #include <cassert>
+#include <bit>
 
 // [Blender MMD Tools](https://github.com/MMD-Blender/blender_mmd_tools/blob/main/mmd_tools/core/vmd/__init__.py)
 
 #if defined(__GNUC__)
 // GCC or CLANG
-#define internal_likely(x) __builtin_expect(!!(x), 1)
 #define internal_unlikely(x) __builtin_expect(!!(x), 0)
 #if defined(__BYTE_ORDER__) && defined(__ORDER_LITTLE_ENDIAN__) && __ORDER_LITTLE_ENDIAN__ == __BYTE_ORDER__
-static inline uint32_t internal_bswap_32(uint32_t x) { return x; }
+static inline uint32_t internal_le_to_h_32(uint32_t x) { return x; }
 #elif defined(__BYTE_ORDER__) && defined(__ORDER_BIG_ENDIAN__) && __ORDER_BIG_ENDIAN__ == __BYTE_ORDER__
-static inline uint32_t internal_bswap_32(uint32_t x) { return __builtin_bswap32(x); }
+static inline uint32_t internal_le_to_h_32(uint32_t x) { return __builtin_bswap32(x); }
 #else
 #error Unknown Byte Order
 #endif
 #elif defined(_MSC_VER)
-static inline uint32_t internal_bswap_32(uint32_t x) { return x; }
 #if defined(__clang__)
 // CLANG-CL
-#define internal_likely(x) __builtin_expect(!!(x), 1)
 #define internal_unlikely(x) __builtin_expect(!!(x), 0)
+#if defined(__BYTE_ORDER__) && defined(__ORDER_LITTLE_ENDIAN__) && __ORDER_LITTLE_ENDIAN__ == __BYTE_ORDER__
+static inline uint32_t internal_le_to_h_32(uint32_t x) { return x; }
+#elif defined(__BYTE_ORDER__) && defined(__ORDER_BIG_ENDIAN__) && __ORDER_BIG_ENDIAN__ == __BYTE_ORDER__
+static inline uint32_t internal_le_to_h_32(uint32_t x) { return __builtin_bswap32(x); }
+#else
+#error Unknown Byte Order
+#endif
 #else
 // MSVC
-#define internal_likely(x) (!!(x))
 #define internal_unlikely(x) (!!(x))
+// Assume Little Endian
+static inline uint32_t internal_le_to_h_32(uint32_t x) { return x; }
 #endif
 #else
 #error Unknown Compiler
@@ -773,10 +779,13 @@ static inline bool internal_data_read_uint8(void const *data_base, size_t data_s
 
 static inline bool internal_data_read_uint32(void const *data_base, size_t data_size, size_t &inout_data_offset, uint32_t *out_uint32)
 {
-    if (data_size >= (inout_data_offset + sizeof(uint32_t)))
+    if (data_size >= (inout_data_offset + (sizeof(uint8_t) * 4U)))
     {
-        (*out_uint32) = internal_bswap_32(*reinterpret_cast<uint32_t const *>(reinterpret_cast<uintptr_t>(data_base) + inout_data_offset));
-        inout_data_offset += sizeof(uint32_t);
+        uint8_t const *const not_aligned_le_uint32_base = reinterpret_cast<uint8_t const *>(reinterpret_cast<uintptr_t>(data_base) + inout_data_offset);
+        uint8_t const not_aligned_le_uint32[4] = {not_aligned_le_uint32_base[0], not_aligned_le_uint32_base[1], not_aligned_le_uint32_base[2], not_aligned_le_uint32_base[3]};
+        inout_data_offset += (sizeof(uint8_t) * 4U);
+        uint32_t const aligned_le_uint32 = std::bit_cast<uint32_t>(not_aligned_le_uint32);
+        (*out_uint32) = internal_le_to_h_32(aligned_le_uint32);
         return true;
     }
     else
@@ -787,11 +796,14 @@ static inline bool internal_data_read_uint32(void const *data_base, size_t data_
 
 static inline bool internal_data_read_float(void const *data_base, size_t data_size, size_t &inout_data_offset, float *out_float)
 {
-    if (data_size >= (inout_data_offset + sizeof(uint32_t)))
+    if (data_size >= (inout_data_offset + (sizeof(uint8_t) * 4U)))
     {
-        uint32_t float_as_uint = internal_bswap_32(*reinterpret_cast<uint32_t const *>(reinterpret_cast<uintptr_t>(data_base) + inout_data_offset));
-        (*out_float) = (*reinterpret_cast<float *>(&float_as_uint));
-        inout_data_offset += sizeof(uint32_t);
+        uint8_t const *const not_aligned_le_uint32_base = reinterpret_cast<uint8_t const *>(reinterpret_cast<uintptr_t>(data_base) + inout_data_offset);
+        uint8_t const not_aligned_le_uint32[4] = {not_aligned_le_uint32_base[0], not_aligned_le_uint32_base[1], not_aligned_le_uint32_base[2], not_aligned_le_uint32_base[3]};
+        inout_data_offset += (sizeof(uint8_t) * 4U);
+        uint32_t const aligned_le_uint32 = std::bit_cast<uint32_t>(not_aligned_le_uint32);
+        uint32_t const aligned_host_uint32 = internal_le_to_h_32(aligned_le_uint32);
+        (*out_float) = std::bit_cast<float>(aligned_host_uint32);
         return true;
     }
     else
