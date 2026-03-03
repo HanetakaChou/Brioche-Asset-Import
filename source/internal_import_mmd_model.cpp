@@ -1671,22 +1671,41 @@ static inline void internal_import_ragdoll_physics(mcrt_vector<mmd_pmx_rigid_bod
 						{
 							brx_constraint_type = BRX_ASSET_IMPORT_PHYSICS_CONSTRAINT_PRISMATIC;
 
+							brx_twist_axis = mmd_constraint_local_axis_z;
+
+							brx_plane_axis = mmd_constraint_local_axis_x;
+
+							brx_normal_axis = mmd_constraint_local_axis_y;
+
+							brx_twist_limit[0] = mmd_translation_limit_min_z;
+							brx_twist_limit[1] = mmd_translation_limit_max_z;
+
+							brx_plane_limit[0] = 0.0F;
+							brx_plane_limit[1] = 0.0F;
+
+							brx_normal_limit[0] = 0.0F;
+							brx_normal_limit[1] = 0.0F;
+						}
+						else if (mmd_rotation_limit_abs_x <= INTERNAL_EPSILON && mmd_rotation_limit_abs_y <= INTERNAL_EPSILON && mmd_rotation_limit_abs_z <= INTERNAL_EPSILON && mmd_translation_limit_abs_y <= INTERNAL_EPSILON && mmd_translation_limit_abs_z <= INTERNAL_EPSILON)
+						{
+							brx_constraint_type = BRX_ASSET_IMPORT_PHYSICS_CONSTRAINT_PRISMATIC;
+
 							brx_twist_axis = mmd_constraint_local_axis_x;
 
 							brx_plane_axis = mmd_constraint_local_axis_y;
 
 							brx_normal_axis = mmd_constraint_local_axis_z;
 
-							brx_twist_limit[0] = 0.0F;
-							brx_twist_limit[1] = 0.0F;
+							brx_twist_limit[0] = mmd_translation_limit_min_x;
+							brx_twist_limit[1] = mmd_translation_limit_max_x;
 
 							brx_plane_limit[0] = 0.0F;
 							brx_plane_limit[1] = 0.0F;
 
-							brx_normal_limit[0] = mmd_translation_limit_min_z;
-							brx_normal_limit[1] = mmd_translation_limit_max_z;
+							brx_normal_limit[0] = 0.0F;
+							brx_normal_limit[1] = 0.0F;
 						}
-						else if (mmd_rotation_limit_abs_x <= INTERNAL_EPSILON && mmd_rotation_limit_abs_y <= INTERNAL_EPSILON && mmd_rotation_limit_abs_z <= INTERNAL_EPSILON && mmd_translation_limit_abs_y <= INTERNAL_EPSILON && mmd_translation_limit_abs_z <= INTERNAL_EPSILON)
+						else if (mmd_rotation_limit_abs_x <= INTERNAL_EPSILON && mmd_rotation_limit_abs_y <= INTERNAL_EPSILON && mmd_rotation_limit_abs_z <= INTERNAL_EPSILON && mmd_translation_limit_abs_z <= INTERNAL_EPSILON && mmd_translation_limit_abs_x <= INTERNAL_EPSILON)
 						{
 							brx_constraint_type = BRX_ASSET_IMPORT_PHYSICS_CONSTRAINT_PRISMATIC;
 
@@ -1696,33 +1715,14 @@ static inline void internal_import_ragdoll_physics(mcrt_vector<mmd_pmx_rigid_bod
 
 							brx_normal_axis = mmd_constraint_local_axis_x;
 
-							brx_twist_limit[0] = 0.0F;
-							brx_twist_limit[1] = 0.0F;
+							brx_twist_limit[0] = mmd_translation_limit_min_y;
+							brx_twist_limit[1] = mmd_translation_limit_max_y;
 
 							brx_plane_limit[0] = 0.0F;
 							brx_plane_limit[1] = 0.0F;
 
-							brx_normal_limit[0] = mmd_translation_limit_min_x;
-							brx_normal_limit[1] = mmd_translation_limit_max_x;
-						}
-						else if (mmd_rotation_limit_abs_x <= INTERNAL_EPSILON && mmd_rotation_limit_abs_y <= INTERNAL_EPSILON && mmd_rotation_limit_abs_z <= INTERNAL_EPSILON && mmd_translation_limit_abs_z <= INTERNAL_EPSILON && mmd_translation_limit_abs_x <= INTERNAL_EPSILON)
-						{
-							brx_constraint_type = BRX_ASSET_IMPORT_PHYSICS_CONSTRAINT_PRISMATIC;
-
-							brx_twist_axis = mmd_constraint_local_axis_z;
-
-							brx_plane_axis = mmd_constraint_local_axis_x;
-
-							brx_normal_axis = mmd_constraint_local_axis_y;
-
-							brx_twist_limit[0] = 0.0F;
-							brx_twist_limit[1] = 0.0F;
-
-							brx_plane_limit[0] = 0.0F;
-							brx_plane_limit[1] = 0.0F;
-
-							brx_normal_limit[0] = mmd_translation_limit_min_y;
-							brx_normal_limit[1] = mmd_translation_limit_max_y;
+							brx_normal_limit[0] = 0.0F;
+							brx_normal_limit[1] = 0.0F;
 						}
 						else
 						{
