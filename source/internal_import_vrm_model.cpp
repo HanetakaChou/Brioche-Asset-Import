@@ -2621,6 +2621,7 @@ static inline void internal_import_animation_skeleton(cgltf_data const *in_gltf_
             struct internal_scene_depth_first_search_traverse_context
             {
                 uint32_t const in_gltf_skeleton_root_node_index;
+                bool const in_use_dummy_root;
                 mcrt_set<uint32_t> const &in_gltf_skeleton_node_indices;
                 mcrt_vector<DirectX::XMFLOAT4X4> const &in_gltf_node_bind_pose_model_space_matrices;
                 mcrt_vector<uint32_t> &out_animation_skeleton_joint_parent_indices;
@@ -2631,6 +2632,7 @@ static inline void internal_import_animation_skeleton(cgltf_data const *in_gltf_
 
             internal_scene_depth_first_search_traverse_context scene_depth_first_search_traverse_context = {
                 gltf_skeleton_root_node_index,
+                (BRX_ASSET_IMPORT_UINT32_INDEX_INVALID == gltf_skeleton_root_node_index),
                 gltf_skeleton_node_indices,
                 gltf_node_bind_pose_model_space_matrices,
                 out_animation_skeleton_joint_parent_indices,
@@ -2643,6 +2645,7 @@ static inline void internal_import_animation_skeleton(cgltf_data const *in_gltf_
                 [](cgltf_data const *in_gltf_data, cgltf_node const *in_current_gltf_node, cgltf_node const *in_parent_gltf_node, void *user_data) -> void
                 {
                     uint32_t const in_gltf_skeleton_root_node_index = static_cast<internal_scene_depth_first_search_traverse_context *>(user_data)->in_gltf_skeleton_root_node_index;
+                    bool const in_use_dummy_root = static_cast<internal_scene_depth_first_search_traverse_context *>(user_data)->in_use_dummy_root;
                     mcrt_set<uint32_t> const &in_gltf_skeleton_node_indices = static_cast<internal_scene_depth_first_search_traverse_context *>(user_data)->in_gltf_skeleton_node_indices;
                     mcrt_vector<DirectX::XMFLOAT4X4> const &in_gltf_node_bind_pose_model_space_matrices = static_cast<internal_scene_depth_first_search_traverse_context *>(user_data)->in_gltf_node_bind_pose_model_space_matrices;
                     mcrt_vector<uint32_t> &out_animation_skeleton_joint_parent_indices = static_cast<internal_scene_depth_first_search_traverse_context *>(user_data)->out_animation_skeleton_joint_parent_indices;
@@ -2656,7 +2659,25 @@ static inline void internal_import_animation_skeleton(cgltf_data const *in_gltf_
 
                     if ((gltf_current_node_index != in_gltf_skeleton_root_node_index) && (in_gltf_skeleton_node_indices.end() != in_gltf_skeleton_node_indices.find(gltf_current_node_index)))
                     {
-                        uint32_t const parent_joint_index = (NULL != in_parent_gltf_node) ? out_gltf_node_to_animation_skeleton_joint_map[gltf_parent_node_index] : 0U;
+                        uint32_t parent_joint_index;
+                        if (NULL != in_parent_gltf_node)
+                        {
+                            uint32_t const mapped_parent_joint_index = out_gltf_node_to_animation_skeleton_joint_map[gltf_parent_node_index];
+                            if (BRX_ASSET_IMPORT_UINT32_INDEX_INVALID != mapped_parent_joint_index)
+                            {
+                                parent_joint_index = mapped_parent_joint_index;
+                            }
+                            else
+                            {
+                                assert(in_use_dummy_root);
+                                parent_joint_index = 0U;
+                            }
+                        }
+                        else
+                        {
+                            assert(in_use_dummy_root);
+                            parent_joint_index = 0U;
+                        }
                         assert(BRX_ASSET_IMPORT_UINT32_INDEX_INVALID != parent_joint_index);
 
                         out_animation_skeleton_joint_parent_indices.push_back(parent_joint_index);
@@ -2861,7 +2882,7 @@ static inline void internal_import_ragdoll_physics(cgltf_data const *in_gltf_dat
     {
         uint32_t const vrm_collider_group_count = vrm_collider_groups.size();
         uint32_t const vrm_bone_group_count = vrm_bone_groups.size();
-        assert((vrm_collider_group_count + vrm_bone_group_count) < 16U);
+        assert((vrm_collider_group_count + vrm_bone_group_count) <= 16U);
 
         for (uint32_t vrm_collider_group_index = 0U; vrm_collider_group_index < vrm_collider_group_count; ++vrm_collider_group_index)
         {
@@ -3155,11 +3176,13 @@ static inline void internal_import_ragdoll_physics(cgltf_data const *in_gltf_dat
 
                 if (BRX_ASSET_IMPORT_UINT32_INDEX_INVALID != animation_skeleton_parent_joint_index)
                 {
+                    // identity
                     DirectX::XMFLOAT4X4 ragdoll_to_animation_transform_model_space;
                     {
                         DirectX::XMStoreFloat4x4(&ragdoll_to_animation_transform_model_space, DirectX::XMMatrixIdentity());
                     }
 
+                    // equal to animation_current_translation_model_space
                     DirectX::XMFLOAT3 ragdoll_translation_model_space;
                     DirectX::XMFLOAT4 ragdoll_rotation_model_space;
                     {
@@ -3179,7 +3202,7 @@ static inline void internal_import_ragdoll_physics(cgltf_data const *in_gltf_dat
                         DirectX::XMStoreFloat4(&ragdoll_rotation_model_space, simd_ragdoll_model_space_rotation);
                     }
 
-                    BRX_ASSET_IMPORT_PHYSICS_RIGID_BODY_SHAPE_TYPE const rigid_body_shape_type = BRX_ASSET_IMPORT_PHYSICS_RIGID_BODY_SHAPE_SPHERE;
+                    BRX_ASSET_IMPORT_PHYSICS_RIGID_BODY_SHAPE_TYPE const rigid_body_sphere_shape_type = BRX_ASSET_IMPORT_PHYSICS_RIGID_BODY_SHAPE_SPHERE;
                     float const rigid_body_sphere_radius = vrm_bone_groups[vrm_bone_group_index].m_hit_radius;
                     BRX_ASSET_IMPORT_PHYSICS_RIGID_BODY_MOTION_TYPE const rigid_body_motion_type = BRX_ASSET_IMPORT_PHYSICS_RIGID_BODY_MOTION_DYNAMIC;
                     uint32_t const rigid_body_collision_filter_group = vrm_collider_group_count + vrm_bone_group_index;
@@ -3217,7 +3240,7 @@ static inline void internal_import_ragdoll_physics(cgltf_data const *in_gltf_dat
                              {ragdoll_translation_model_space.x,
                               ragdoll_translation_model_space.y,
                               ragdoll_translation_model_space.z}},
-                            rigid_body_shape_type,
+                            rigid_body_sphere_shape_type,
                             {
                                 rigid_body_sphere_radius,
                                 0.0F,
@@ -3261,43 +3284,151 @@ static inline void internal_import_ragdoll_physics(cgltf_data const *in_gltf_dat
                                  ragdoll_to_animation_transform_model_space.m[3][3],
                              }}});
 
+                    // convention
+                    //
+                    // pivot: child bone (head) position
+                    //
+                    // rigid body reference: mapped to parent bone, centered at the midpoint of parent bone (head) position and child bone (head) position
+                    //
+                    // rigid body attached: mapped to child bone, centered at the midpoint of child bone (head) position and "child of child" bone (head) position
+
+                    DirectX::XMFLOAT3 animation_current_translation_model_space;
+                    {
+                        DirectX::XMVECTOR simd_animation_current_model_space_translation;
+                        DirectX::XMVECTOR simd_animation_current_model_space_scale;
+                        DirectX::XMVECTOR simd_animation_current_model_space_rotation;
+                        bool const directx_xm_matrix_decompose = DirectX::XMMatrixDecompose(&simd_animation_current_model_space_scale, &simd_animation_current_model_space_rotation, &simd_animation_current_model_space_translation, DirectX::XMLoadFloat4x4(&in_animation_skeleton_bind_pose_model_space[animation_skeleton_current_joint_index]));
+                        assert(directx_xm_matrix_decompose);
+
+                        constexpr float const INTERNAL_SCALE_EPSILON = 1E-7F;
+                        assert(DirectX::XMVector3Less(DirectX::XMVectorAbs(DirectX::XMVectorSubtract(simd_animation_current_model_space_scale, DirectX::XMVectorSplatOne())), DirectX::XMVectorReplicate(INTERNAL_SCALE_EPSILON)));
+
+                        DirectX::XMStoreFloat3(&animation_current_translation_model_space, simd_animation_current_model_space_translation);
+                    }
+
+#ifndef NDEBUG
+                    {
+                        constexpr float const INTERNAL_TRANSLATION_EPSILON = 1E-7F;
+
+                        assert(DirectX::XMVector3Less(DirectX::XMVectorAbs(DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&animation_current_translation_model_space), DirectX::XMLoadFloat3(&ragdoll_translation_model_space))), DirectX::XMVectorReplicate(INTERNAL_TRANSLATION_EPSILON)));
+                    }
+#endif
+
+                    DirectX::XMFLOAT3 animation_parent_translation_model_space;
+                    DirectX::XMFLOAT4 animation_parent_rotation_model_space;
+                    {
+                        DirectX::XMVECTOR simd_animation_parent_model_space_translation;
+                        DirectX::XMVECTOR simd_animation_parent_model_space_scale;
+                        DirectX::XMVECTOR simd_animation_parent_model_space_rotation;
+                        bool const directx_xm_matrix_decompose = DirectX::XMMatrixDecompose(&simd_animation_parent_model_space_scale, &simd_animation_parent_model_space_rotation, &simd_animation_parent_model_space_translation, DirectX::XMLoadFloat4x4(&in_animation_skeleton_bind_pose_model_space[animation_skeleton_parent_joint_index]));
+                        assert(directx_xm_matrix_decompose);
+
+                        constexpr float const INTERNAL_SCALE_EPSILON = 1E-7F;
+                        assert(DirectX::XMVector3Less(DirectX::XMVectorAbs(DirectX::XMVectorSubtract(simd_animation_parent_model_space_scale, DirectX::XMVectorSplatOne())), DirectX::XMVectorReplicate(INTERNAL_SCALE_EPSILON)));
+
+                        DirectX::XMStoreFloat3(&animation_parent_translation_model_space, simd_animation_parent_model_space_translation);
+                        DirectX::XMStoreFloat4(&animation_parent_rotation_model_space, simd_animation_parent_model_space_rotation);
+                    }
+
                     BRX_ASSET_IMPORT_PHYSICS_CONSTRAINT_TYPE const brx_constraint_type = BRX_ASSET_IMPORT_PHYSICS_CONSTRAINT_RAGDOLL;
-                    float const brx_twist_limit[2] = {-0.0F, 0.0F};
+                    float const brx_twist_limit[2] = {-DirectX::XM_PIDIV4 * 0.25F, DirectX::XM_PIDIV4 * 0.25F};
                     float const brx_plane_limit[2] = {-DirectX::XM_PIDIV4, DirectX::XM_PIDIV4};
                     float const brx_normal_limit[2] = {-DirectX::XM_PIDIV4, DirectX::XM_PIDIV4};
 
-                    assert(ragdoll_skeleton_parent_joint_index < out_ragdoll_skeleton_rigid_bodies.size());
-                    DirectX::XMFLOAT3 brx_pivot;
-                    {
-                        DirectX::XMFLOAT3 const constraint_translation_model_space(
-                            out_ragdoll_skeleton_rigid_bodies[ragdoll_skeleton_current_joint_index].m_model_space_transform.m_translation[0],
-                            out_ragdoll_skeleton_rigid_bodies[ragdoll_skeleton_current_joint_index].m_model_space_transform.m_translation[1],
-                            out_ragdoll_skeleton_rigid_bodies[ragdoll_skeleton_current_joint_index].m_model_space_transform.m_translation[2]);
-
-                        brx_pivot = constraint_translation_model_space;
-                    }
+                    DirectX::XMFLOAT3 brx_pivot = animation_current_translation_model_space;
 
                     DirectX::XMFLOAT3 brx_twist_axis;
                     DirectX::XMFLOAT3 brx_plane_axis;
                     DirectX::XMFLOAT3 brx_normal_axis;
                     {
-                        DirectX::XMFLOAT4 const constraint_rotation_model_space(
-                            out_ragdoll_skeleton_rigid_bodies[ragdoll_skeleton_current_joint_index].m_model_space_transform.m_rotation[0],
-                            out_ragdoll_skeleton_rigid_bodies[ragdoll_skeleton_current_joint_index].m_model_space_transform.m_rotation[1],
-                            out_ragdoll_skeleton_rigid_bodies[ragdoll_skeleton_current_joint_index].m_model_space_transform.m_rotation[2],
-                            out_ragdoll_skeleton_rigid_bodies[ragdoll_skeleton_current_joint_index].m_model_space_transform.m_rotation[3]);
+                        constexpr float const INTERNAL_ROTATION_EPSILON = 1E-7F;
 
-                        DirectX::XMMATRIX constraint_rotation_matrix_model_space = DirectX::XMMatrixRotationQuaternion(DirectX::XMLoadFloat4(&constraint_rotation_model_space));
+                        DirectX::XMFLOAT3 parent_down;
+                        DirectX::XMFLOAT3 parent_right;
+                        DirectX::XMFLOAT3 parent_back;
+                        {
+                            DirectX::XMFLOAT3 const down(0.0F, -1.0F, 0.0F);
+                            DirectX::XMFLOAT3 const right(-1.0F, 0.0, 0.0F);
+                            DirectX::XMFLOAT3 const back(0.0F, 0.0, -1.0F);
 
-                        DirectX::XMFLOAT3 local_axis_x(1.0F, 0.0F, 0.0F);
-                        DirectX::XMStoreFloat3(&brx_twist_axis, DirectX::XMVector3TransformNormal(DirectX::XMLoadFloat3(&local_axis_x), constraint_rotation_matrix_model_space));
+                            DirectX::XMVECTOR simd_animation_parent_rotation_model_space = DirectX::XMLoadFloat4(&animation_parent_rotation_model_space);
 
-                        DirectX::XMFLOAT3 local_axis_y(0.0F, 1.0F, 0.0F);
-                        DirectX::XMStoreFloat3(&brx_plane_axis, DirectX::XMVector3TransformNormal(DirectX::XMLoadFloat3(&local_axis_y), constraint_rotation_matrix_model_space));
+                            DirectX::XMStoreFloat3(&parent_down, DirectX::XMVector3Rotate(DirectX::XMLoadFloat3(&down), simd_animation_parent_rotation_model_space));
+                            DirectX::XMStoreFloat3(&parent_right, DirectX::XMVector3Rotate(DirectX::XMLoadFloat3(&right), simd_animation_parent_rotation_model_space));
+                            DirectX::XMStoreFloat3(&parent_back, DirectX::XMVector3Rotate(DirectX::XMLoadFloat3(&back), simd_animation_parent_rotation_model_space));
+                        }
 
-                        DirectX::XMFLOAT3 local_axis_z(0.0F, 0.0F, 1.0F);
-                        DirectX::XMStoreFloat3(&brx_normal_axis, DirectX::XMVector3TransformNormal(DirectX::XMLoadFloat3(&local_axis_z), constraint_rotation_matrix_model_space));
+                        DirectX::XMFLOAT3 twist_axis;
+                        {
+                            DirectX::XMVECTOR simd_non_normalized_twist_axis = DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&animation_current_translation_model_space), DirectX::XMLoadFloat3(&animation_parent_translation_model_space));
+
+                            float twist_axis_length = DirectX::XMVectorGetX(DirectX::XMVector3Length(simd_non_normalized_twist_axis));
+                            if (twist_axis_length > INTERNAL_ROTATION_EPSILON)
+                            {
+                                DirectX::XMStoreFloat3(&twist_axis, DirectX::XMVectorScale(simd_non_normalized_twist_axis, 1.0F / twist_axis_length));
+                            }
+                            else
+                            {
+                                twist_axis = parent_down;
+                                assert(false);
+                            }
+                        }
+
+                        float absolute_projection_parent_down;
+                        float absolute_projection_parent_right;
+                        float absolute_projection_parent_back;
+                        {
+                            DirectX::XMVECTOR simd_twist_axis = DirectX::XMLoadFloat3(&twist_axis);
+                            absolute_projection_parent_down = std::abs(DirectX::XMVectorGetX(DirectX::XMVector3Dot(simd_twist_axis, DirectX::XMLoadFloat3(&parent_down))));
+                            absolute_projection_parent_right = std::abs(DirectX::XMVectorGetX(DirectX::XMVector3Dot(simd_twist_axis, DirectX::XMLoadFloat3(&parent_right))));
+                            absolute_projection_parent_back = std::abs(DirectX::XMVectorGetX(DirectX::XMVector3Dot(simd_twist_axis, DirectX::XMLoadFloat3(&parent_back))));
+                        }
+
+                        DirectX::XMFLOAT3 most_perpendicular;
+                        {
+                            float best_absolute_projection = absolute_projection_parent_down;
+                            most_perpendicular = parent_down;
+
+                            if (absolute_projection_parent_right < best_absolute_projection)
+                            {
+                                best_absolute_projection = absolute_projection_parent_right;
+                                most_perpendicular = parent_right;
+                            }
+
+                            if (absolute_projection_parent_back < best_absolute_projection)
+                            {
+                                // best_absolute_projection = absolute_projection_parent_back;
+                                most_perpendicular = parent_back;
+                            }
+                        }
+
+                        DirectX::XMFLOAT3 normal_axis;
+                        {
+                            DirectX::XMVECTOR simd_non_normalized_normal_axis = DirectX::XMVector3Cross(DirectX::XMLoadFloat3(&twist_axis), DirectX::XMLoadFloat3(&most_perpendicular));
+
+                            float normal_axis_length = DirectX::XMVectorGetX(DirectX::XMVector3Length(simd_non_normalized_normal_axis));
+                            if (normal_axis_length > INTERNAL_ROTATION_EPSILON)
+                            {
+                                DirectX::XMStoreFloat3(&normal_axis, DirectX::XMVectorScale(simd_non_normalized_normal_axis, 1.0F / normal_axis_length));
+                            }
+                            else
+                            {
+                                normal_axis = parent_back;
+                                assert(false);
+                            }
+                        }
+
+                        DirectX::XMFLOAT3 plane_axis;
+                        {
+                            DirectX::XMStoreFloat3(&plane_axis, DirectX::XMVector3Normalize(DirectX::XMVector3Cross(DirectX::XMLoadFloat3(&normal_axis), DirectX::XMLoadFloat3(&twist_axis))));
+                        }
+
+                        brx_twist_axis = twist_axis;
+                        brx_plane_axis = plane_axis;
+                        brx_normal_axis = normal_axis;
                     }
+
+                    assert(ragdoll_skeleton_parent_joint_index < out_ragdoll_skeleton_rigid_bodies.size());
 
                     out_ragdoll_skeleton_constraints.push_back(
                         brx_asset_import_physics_constraint{
@@ -3336,6 +3467,144 @@ static inline void internal_import_ragdoll_physics(cgltf_data const *in_gltf_dat
                                 brx_normal_limit[0],
                                 brx_normal_limit[1],
                             }});
+
+                    // sphere -> capsule
+                    // rigid body reference: mapped to parent bone, centered at the midpoint of parent bone (head) position and child bone (head) position
+                    brx_asset_import_physics_rigid_body &ragdoll_skeleton_parent_rigid_body = out_ragdoll_skeleton_rigid_bodies[ragdoll_skeleton_parent_joint_index];
+                    brx_asset_import_physics_rigid_body &ragdoll_skeleton_current_rigid_body = out_ragdoll_skeleton_rigid_bodies[ragdoll_skeleton_current_joint_index];
+
+                    assert(0 == ((1U << ragdoll_skeleton_parent_rigid_body.m_collision_filter_group) & ragdoll_skeleton_current_rigid_body.m_collision_filter_mask));
+                    assert(0 == (ragdoll_skeleton_parent_rigid_body.m_collision_filter_mask & (1U << ragdoll_skeleton_current_rigid_body.m_collision_filter_group)));
+
+                    if (BRX_ASSET_IMPORT_PHYSICS_RIGID_BODY_MOTION_DYNAMIC == ragdoll_skeleton_parent_rigid_body.m_motion_type)
+                    {
+                        if (BRX_ASSET_IMPORT_PHYSICS_RIGID_BODY_SHAPE_SPHERE == ragdoll_skeleton_parent_rigid_body.m_shape_type)
+                        {
+                            assert(BRX_ASSET_IMPORT_PHYSICS_RIGID_BODY_MOTION_DYNAMIC == ragdoll_skeleton_current_rigid_body.m_motion_type);
+                            assert((ragdoll_skeleton_parent_joint_index + 1U) == ragdoll_skeleton_current_joint_index);
+
+                            ragdoll_skeleton_parent_rigid_body.m_shape_type = BRX_ASSET_IMPORT_PHYSICS_RIGID_BODY_SHAPE_CAPSULE;
+
+                            float const capsule_radius = std::max(0.0F, ragdoll_skeleton_parent_rigid_body.m_shape_size[0]);
+                            float const capsule_height = std::max(0.0F, DirectX::XMVectorGetX(DirectX::XMVector3Length(DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&animation_current_translation_model_space), DirectX::XMLoadFloat3(&animation_parent_translation_model_space)))) - 2.0F * capsule_radius);
+                            ragdoll_skeleton_parent_rigid_body.m_shape_size[0] = capsule_radius;
+                            ragdoll_skeleton_parent_rigid_body.m_shape_size[1] = capsule_height;
+
+                            DirectX::XMFLOAT3 capsule_ragdoll_translation_model_space;
+                            DirectX::XMStoreFloat3(&capsule_ragdoll_translation_model_space, DirectX::XMVectorScale(DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&animation_current_translation_model_space), DirectX::XMLoadFloat3(&animation_parent_translation_model_space)), 0.5F));
+                            //
+                            DirectX::XMFLOAT4 capsule_ragdoll_rotation_model_space;
+                            {
+                                DirectX::XMFLOAT3 const capsule_axis_x = brx_normal_axis;
+                                DirectX::XMFLOAT3 const capsule_axis_y = brx_twist_axis;
+                                DirectX::XMFLOAT3 const capsule_axis_z = brx_plane_axis;
+
+                                constexpr float const INTERNAL_ROTATION_EPSILON = 5E-6F;
+                                assert(std::abs(DirectX::XMVectorGetX(DirectX::XMVector3Length(DirectX::XMLoadFloat3(&capsule_axis_x))) - 1.0F) < INTERNAL_ROTATION_EPSILON);
+                                assert(std::abs(DirectX::XMVectorGetX(DirectX::XMVector3Length(DirectX::XMLoadFloat3(&capsule_axis_y))) - 1.0F) < INTERNAL_ROTATION_EPSILON);
+                                assert(std::abs(DirectX::XMVectorGetX(DirectX::XMVector3Length(DirectX::XMLoadFloat3(&capsule_axis_z))) - 1.0F) < INTERNAL_ROTATION_EPSILON);
+                                assert(std::abs(DirectX::XMVectorGetX(DirectX::XMVector3Dot(DirectX::XMLoadFloat3(&capsule_axis_x), DirectX::XMLoadFloat3(&capsule_axis_y)))) < INTERNAL_ROTATION_EPSILON);
+                                assert(std::abs(DirectX::XMVectorGetX(DirectX::XMVector3Dot(DirectX::XMLoadFloat3(&capsule_axis_y), DirectX::XMLoadFloat3(&capsule_axis_z)))) < INTERNAL_ROTATION_EPSILON);
+                                assert(std::abs(DirectX::XMVectorGetX(DirectX::XMVector3Dot(DirectX::XMLoadFloat3(&capsule_axis_z), DirectX::XMLoadFloat3(&capsule_axis_x)))) < INTERNAL_ROTATION_EPSILON);
+                                assert(DirectX::XMVector3Less(DirectX::XMVectorAbs(DirectX::XMVectorSubtract(DirectX::XMVector3Cross(DirectX::XMLoadFloat3(&capsule_axis_x), DirectX::XMLoadFloat3(&capsule_axis_y)), DirectX::XMLoadFloat3(&capsule_axis_z))), DirectX::XMVectorReplicate(INTERNAL_ROTATION_EPSILON)));
+
+                                DirectX::XMFLOAT4X4 const capsule_ragdoll_rotation_model_space_matrix(
+                                    capsule_axis_x.x, capsule_axis_x.y, capsule_axis_x.z, 0.0F,
+                                    capsule_axis_y.x, capsule_axis_y.y, capsule_axis_y.z, 0.0F,
+                                    capsule_axis_z.x, capsule_axis_z.y, capsule_axis_z.z, 0.0F,
+                                    0.0F, 0.0F, 0.0F, 1.0F);
+
+                                DirectX::XMVECTOR simd_capsule_rotation_model_space = DirectX::XMQuaternionRotationMatrix(DirectX::XMLoadFloat4x4(&capsule_ragdoll_rotation_model_space_matrix));
+
+                                assert(std::abs(DirectX::XMVectorGetX(DirectX::XMVector4Length(simd_capsule_rotation_model_space)) - 1.0F) < INTERNAL_ROTATION_EPSILON);
+
+                                DirectX::XMStoreFloat4(&capsule_ragdoll_rotation_model_space, DirectX::XMQuaternionNormalize(simd_capsule_rotation_model_space));
+                            }
+                            //
+                            ragdoll_skeleton_parent_rigid_body.m_model_space_transform.m_translation[0] = capsule_ragdoll_translation_model_space.x;
+                            ragdoll_skeleton_parent_rigid_body.m_model_space_transform.m_translation[1] = capsule_ragdoll_translation_model_space.y;
+                            ragdoll_skeleton_parent_rigid_body.m_model_space_transform.m_translation[2] = capsule_ragdoll_translation_model_space.z;
+                            //
+                            ragdoll_skeleton_parent_rigid_body.m_model_space_transform.m_rotation[0] = capsule_ragdoll_rotation_model_space.x;
+                            ragdoll_skeleton_parent_rigid_body.m_model_space_transform.m_rotation[1] = capsule_ragdoll_rotation_model_space.y;
+                            ragdoll_skeleton_parent_rigid_body.m_model_space_transform.m_rotation[2] = capsule_ragdoll_rotation_model_space.z;
+                            ragdoll_skeleton_parent_rigid_body.m_model_space_transform.m_rotation[3] = capsule_ragdoll_rotation_model_space.w;
+
+                            DirectX::XMFLOAT4X4 capsule_ragdoll_to_animation_transform_model_space;
+                            {
+                                DirectX::XMMATRIX capsule_ragdoll_transform_model_space = DirectX::XMMatrixMultiply(DirectX::XMMatrixRotationQuaternion(DirectX::XMLoadFloat4(&capsule_ragdoll_rotation_model_space)), DirectX::XMMatrixTranslationFromVector(DirectX::XMLoadFloat3(&capsule_ragdoll_translation_model_space)));
+
+                                DirectX::XMVECTOR unused_determinant;
+                                DirectX::XMStoreFloat4x4(&capsule_ragdoll_to_animation_transform_model_space, DirectX::XMMatrixMultiply(DirectX::XMLoadFloat4x4(&in_animation_skeleton_bind_pose_model_space[animation_skeleton_parent_joint_index]), DirectX::XMMatrixInverse(&unused_determinant, capsule_ragdoll_transform_model_space)));
+                            }
+                            capsule_ragdoll_to_animation_transform_model_space.m[3][3] = 1.0F;
+
+#ifndef NDEBUG
+                            bool found_ragdoll_to_animation_direct_mapping = false;
+#endif
+                            for (brx_asset_import_ragdoll_direct_mapping &ragdoll_to_animation_direct_mapping : out_ragdoll_to_animation_direct_mapping)
+                            {
+                                if (ragdoll_skeleton_parent_joint_index == ragdoll_to_animation_direct_mapping.m_joint_index_a)
+                                {
+                                    //
+                                    assert(1.0F == ragdoll_to_animation_direct_mapping.m_a_to_b_transform_model_space[0][0]);
+                                    assert(0.0F == ragdoll_to_animation_direct_mapping.m_a_to_b_transform_model_space[0][1]);
+                                    assert(0.0F == ragdoll_to_animation_direct_mapping.m_a_to_b_transform_model_space[0][2]);
+                                    assert(0.0F == ragdoll_to_animation_direct_mapping.m_a_to_b_transform_model_space[0][3]);
+                                    //
+                                    assert(0.0F == ragdoll_to_animation_direct_mapping.m_a_to_b_transform_model_space[1][0]);
+                                    assert(1.0F == ragdoll_to_animation_direct_mapping.m_a_to_b_transform_model_space[1][1]);
+                                    assert(0.0F == ragdoll_to_animation_direct_mapping.m_a_to_b_transform_model_space[1][2]);
+                                    assert(0.0F == ragdoll_to_animation_direct_mapping.m_a_to_b_transform_model_space[1][3]);
+                                    //
+                                    assert(0.0F == ragdoll_to_animation_direct_mapping.m_a_to_b_transform_model_space[2][0]);
+                                    assert(0.0F == ragdoll_to_animation_direct_mapping.m_a_to_b_transform_model_space[2][1]);
+                                    assert(1.0F == ragdoll_to_animation_direct_mapping.m_a_to_b_transform_model_space[2][2]);
+                                    assert(0.0F == ragdoll_to_animation_direct_mapping.m_a_to_b_transform_model_space[2][3]);
+                                    //
+                                    assert(0.0F == ragdoll_to_animation_direct_mapping.m_a_to_b_transform_model_space[3][0]);
+                                    assert(0.0F == ragdoll_to_animation_direct_mapping.m_a_to_b_transform_model_space[3][1]);
+                                    assert(0.0F == ragdoll_to_animation_direct_mapping.m_a_to_b_transform_model_space[3][2]);
+                                    assert(1.0F == ragdoll_to_animation_direct_mapping.m_a_to_b_transform_model_space[3][3]);
+
+                                    //
+                                    ragdoll_to_animation_direct_mapping.m_a_to_b_transform_model_space[0][0] = capsule_ragdoll_to_animation_transform_model_space.m[0][0];
+                                    ragdoll_to_animation_direct_mapping.m_a_to_b_transform_model_space[0][1] = capsule_ragdoll_to_animation_transform_model_space.m[0][1];
+                                    ragdoll_to_animation_direct_mapping.m_a_to_b_transform_model_space[0][2] = capsule_ragdoll_to_animation_transform_model_space.m[0][2];
+                                    ragdoll_to_animation_direct_mapping.m_a_to_b_transform_model_space[0][3] = capsule_ragdoll_to_animation_transform_model_space.m[0][3];
+                                    //
+                                    ragdoll_to_animation_direct_mapping.m_a_to_b_transform_model_space[1][0] = capsule_ragdoll_to_animation_transform_model_space.m[1][0];
+                                    ragdoll_to_animation_direct_mapping.m_a_to_b_transform_model_space[1][1] = capsule_ragdoll_to_animation_transform_model_space.m[1][1];
+                                    ragdoll_to_animation_direct_mapping.m_a_to_b_transform_model_space[1][2] = capsule_ragdoll_to_animation_transform_model_space.m[1][2];
+                                    ragdoll_to_animation_direct_mapping.m_a_to_b_transform_model_space[1][3] = capsule_ragdoll_to_animation_transform_model_space.m[1][3];
+                                    //
+                                    ragdoll_to_animation_direct_mapping.m_a_to_b_transform_model_space[2][0] = capsule_ragdoll_to_animation_transform_model_space.m[2][0];
+                                    ragdoll_to_animation_direct_mapping.m_a_to_b_transform_model_space[2][1] = capsule_ragdoll_to_animation_transform_model_space.m[2][1];
+                                    ragdoll_to_animation_direct_mapping.m_a_to_b_transform_model_space[2][2] = capsule_ragdoll_to_animation_transform_model_space.m[2][2];
+                                    ragdoll_to_animation_direct_mapping.m_a_to_b_transform_model_space[2][3] = capsule_ragdoll_to_animation_transform_model_space.m[2][3];
+                                    //
+                                    ragdoll_to_animation_direct_mapping.m_a_to_b_transform_model_space[3][0] = capsule_ragdoll_to_animation_transform_model_space.m[3][0];
+                                    ragdoll_to_animation_direct_mapping.m_a_to_b_transform_model_space[3][1] = capsule_ragdoll_to_animation_transform_model_space.m[3][1];
+                                    ragdoll_to_animation_direct_mapping.m_a_to_b_transform_model_space[3][2] = capsule_ragdoll_to_animation_transform_model_space.m[3][2];
+                                    ragdoll_to_animation_direct_mapping.m_a_to_b_transform_model_space[3][3] = capsule_ragdoll_to_animation_transform_model_space.m[3][3];
+#ifndef NDEBUG
+                                    found_ragdoll_to_animation_direct_mapping = true;
+#endif
+                                    break;
+                                }
+                            }
+                            assert(found_ragdoll_to_animation_direct_mapping);
+                        }
+                        else
+                        {
+                            // multiple children
+                            assert(false);
+                        }
+                    }
+                    else
+                    {
+                        // Do Nothing
+                    }
                 }
                 else
                 {
@@ -5634,17 +5903,42 @@ static inline void internal_import_surface(cgltf_data const *in_gltf_data, mcrt_
 
                         if (mesh_section_morph_switch)
                         {
+                            internal_vrm_morph_target_vertex_t const zero_morph_target_vertex{
+                                {0.0F, 0.0F, 0.0F},
+                                {0.0F, 0.0F, 0.0F},
+                                {0.0F, 0.0F, 0.0F, 0.0F},
+                                {0.0F, 0.0F}};
+
+                            uint32_t const material_mesh_section_new_vertex_count = material_mesh_section_vertex_count + new_vertex_count;
+
+                            for (auto &material_mesh_section_morph_target_name_and_vertices : material_mesh_section.m_morph_targets_vertices)
+                            {
+                                auto &material_mesh_section_morph_target_vertices = material_mesh_section_morph_target_name_and_vertices.second;
+                                assert(material_mesh_section_morph_target_vertices.size() == material_mesh_section_vertex_count);
+                                material_mesh_section_morph_target_vertices.resize(material_mesh_section_new_vertex_count, zero_morph_target_vertex);
+                            }
+
                             for (auto const &new_morph_target_name_and_vertices : new_morph_targets_vertices)
                             {
                                 BRX_ASSET_IMPORT_MORPH_TARGET_NAME const new_morph_target_name = new_morph_target_name_and_vertices.first;
                                 auto const &new_morph_target_vertices = new_morph_target_name_and_vertices.second;
 
-                                auto &material_mesh_section_morph_target_vertices = material_mesh_section.m_morph_targets_vertices[new_morph_target_name];
-                                assert(material_mesh_section_morph_target_vertices.empty() || material_mesh_section_morph_target_vertices.size() == material_mesh_section_vertex_count);
+                                assert(new_morph_target_vertices.size() == new_vertex_count);
 
-                                material_mesh_section_morph_target_vertices.resize(material_mesh_section_vertex_count + new_vertex_count, internal_vrm_morph_target_vertex_t{{0.0F, 0.0F, 0.0F}, {0.0F, 0.0F, 0.0F}, {0.0F, 0.0F, 0.0F, 0.0F}, {0.0F, 0.0F}});
+                                auto found_material_mesh_section_morph_target_vertices = material_mesh_section.m_morph_targets_vertices.find(new_morph_target_name);
+                                if (material_mesh_section.m_morph_targets_vertices.end() == found_material_mesh_section_morph_target_vertices)
+                                {
+                                    auto emplace_result = material_mesh_section.m_morph_targets_vertices.emplace(
+                                        new_morph_target_name,
+                                        mcrt_vector<internal_vrm_morph_target_vertex_t>(static_cast<size_t>(material_mesh_section_new_vertex_count), zero_morph_target_vertex));
 
-                                for (uint32_t new_vertex_index = 0; new_vertex_index < new_vertex_count; ++new_vertex_index)
+                                    found_material_mesh_section_morph_target_vertices = emplace_result.first;
+                                }
+
+                                auto &material_mesh_section_morph_target_vertices = found_material_mesh_section_morph_target_vertices->second;
+                                assert(material_mesh_section_morph_target_vertices.size() == material_mesh_section_new_vertex_count);
+
+                                for (uint32_t new_vertex_index = 0U; new_vertex_index < new_vertex_count; ++new_vertex_index)
                                 {
                                     material_mesh_section_morph_target_vertices[material_mesh_section_vertex_count + new_vertex_index] = new_morph_target_vertices[new_vertex_index];
                                 }

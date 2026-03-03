@@ -39,6 +39,7 @@
 #include <algorithm>
 #include <cstring>
 #include <cassert>
+#include <bit>
 
 #if defined(__GNUC__)
 // GCC or CLANG
@@ -91,9 +92,13 @@ static inline mmd_pmx_vec3_t internal_transform_normal(mmd_pmx_vec3_t const &v);
 
 static inline mmd_pmx_vec4_t internal_transform_rotation(mmd_pmx_vec3_t const &v);
 
-static inline mmd_pmx_vec3_t internal_transform_translation_limit(mmd_pmx_vec3_t const &v);
+static inline mmd_pmx_vec3_t internal_transform_translation_limit_min(mmd_pmx_vec3_t const &v_min, mmd_pmx_vec3_t const &v_max);
 
-static inline mmd_pmx_vec3_t internal_transform_rotation_limit(mmd_pmx_vec3_t const &v);
+static inline mmd_pmx_vec3_t internal_transform_translation_limit_max(mmd_pmx_vec3_t const &v_min, mmd_pmx_vec3_t const &v_max);
+
+static inline mmd_pmx_vec3_t internal_transform_rotation_limit_min(mmd_pmx_vec3_t const &v_min, mmd_pmx_vec3_t const &v_max);
+
+static inline mmd_pmx_vec3_t internal_transform_rotation_limit_max(mmd_pmx_vec3_t const &v_min, mmd_pmx_vec3_t const &v_max);
 
 static inline mmd_pmx_vec3_t internal_transform_shape_size(mmd_pmx_vec3_t const &v);
 
@@ -611,11 +616,14 @@ static inline void internal_import_morph_targets(mcrt_vector<mmd_pmx_vertex_t> c
 				for (size_t mmd_morph_offset_index = 0U; mmd_morph_offset_index < mmd_morph_offset_count; ++mmd_morph_offset_index)
 				{
 					internal_mmd_morph_target_vertex_t morph_target_vertex;
+					uint32_t vertex_index;
 					if (1U == in_mmd_morphs[mmd_morph_current_index].m_morph_type)
 					{
 						mmd_pmx_vec3_t const mmd_morph_vertex_position = internal_transform_translation(in_mmd_morphs[mmd_morph_current_index].m_offsets[mmd_morph_offset_index].m_vertex_position.m_vertex_position);
 
 						morph_target_vertex = internal_mmd_morph_target_vertex_t{{mmd_morph_vertex_position.m_x, mmd_morph_vertex_position.m_y, mmd_morph_vertex_position.m_z}, {0.0F, 0.0F}};
+
+						vertex_index = in_mmd_morphs[mmd_morph_current_index].m_offsets[mmd_morph_offset_index].m_vertex_position.m_vertex_index;
 					}
 					else
 					{
@@ -624,9 +632,9 @@ static inline void internal_import_morph_targets(mcrt_vector<mmd_pmx_vertex_t> c
 						mmd_pmx_vec2_t const in_vertex_uv = in_mmd_morphs[mmd_morph_current_index].m_offsets[mmd_morph_offset_index].m_vertex_uv.m_vertex_uv;
 
 						morph_target_vertex = internal_mmd_morph_target_vertex_t{{0.0F, 0.0F, 0.0F}, {in_vertex_uv.m_x, in_vertex_uv.m_y}};
-					}
 
-					uint32_t const vertex_index = in_mmd_morphs[mmd_morph_current_index].m_offsets[mmd_morph_offset_index].m_vertex_position.m_vertex_index;
+						vertex_index = in_mmd_morphs[mmd_morph_current_index].m_offsets[mmd_morph_offset_index].m_vertex_uv.m_vertex_index;
+					}
 
 					auto found_vertex_index = current_morph_target.find(vertex_index);
 					if (current_morph_target.end() == found_vertex_index)
@@ -999,13 +1007,15 @@ static inline void internal_import_animation_skeleton(mcrt_vector<mmd_pmx_bone_t
 						out_animation_skeleton_joint_constraints_storages.back().resize(animation_skeleton_joint_copy_transform_constraint.m_copy_transform.m_source_weight_count);
 						static_assert(sizeof(float) == sizeof(uint32_t), "");
 						static_assert(alignof(float) == alignof(uint32_t), "");
-						animation_skeleton_joint_copy_transform_constraint.m_copy_transform.m_source_weights = reinterpret_cast<float *>(out_animation_skeleton_joint_constraints_storages.back().data());
+						uint32_t *const source_weights_uint32 = out_animation_skeleton_joint_constraints_storages.back().data();
 
 						for (uint32_t source_weight_index = 0U; !ancestors.empty(); ++source_weight_index)
 						{
-							animation_skeleton_joint_copy_transform_constraint.m_copy_transform.m_source_weights[source_weight_index] = in_mmd_model_nodes[ancestors.back()].m_append_rate;
+							source_weights_uint32[source_weight_index] = std::bit_cast<uint32_t>(in_mmd_model_nodes[ancestors.back()].m_append_rate);
 							ancestors.pop_back();
 						}
+
+						animation_skeleton_joint_copy_transform_constraint.m_copy_transform.m_source_weights = reinterpret_cast<float *>(source_weights_uint32);
 					}
 					else
 					{
@@ -1016,9 +1026,11 @@ static inline void internal_import_animation_skeleton(mcrt_vector<mmd_pmx_bone_t
 						out_animation_skeleton_joint_constraints_storages.back().resize(animation_skeleton_joint_copy_transform_constraint.m_copy_transform.m_source_weight_count);
 						static_assert(sizeof(float) == sizeof(uint32_t), "");
 						static_assert(alignof(float) == alignof(uint32_t), "");
-						animation_skeleton_joint_copy_transform_constraint.m_copy_transform.m_source_weights = reinterpret_cast<float *>(out_animation_skeleton_joint_constraints_storages.back().data());
+						uint32_t *const source_weights_uint32 = out_animation_skeleton_joint_constraints_storages.back().data();
 
-						animation_skeleton_joint_copy_transform_constraint.m_copy_transform.m_source_weights[0] = in_mmd_model_nodes[model_node_index].m_append_rate;
+						source_weights_uint32[0] = std::bit_cast<uint32_t>(in_mmd_model_nodes[model_node_index].m_append_rate);
+
+						animation_skeleton_joint_copy_transform_constraint.m_copy_transform.m_source_weights = reinterpret_cast<float *>(source_weights_uint32);
 					}
 
 					out_animation_skeleton_joint_constraints.push_back(animation_skeleton_joint_copy_transform_constraint);
@@ -1568,11 +1580,10 @@ static inline void internal_import_ragdoll_physics(mcrt_vector<mmd_pmx_rigid_bod
 			{
 				if (0 != in_mmd_rigid_bodies[mmd_constraint.m_rigid_body_a_index].m_rigid_body_type || 0 != in_mmd_rigid_bodies[mmd_constraint.m_rigid_body_b_index].m_rigid_body_type)
 				{
-
-					mmd_pmx_vec3_t const mmd_constraint_translation_limit_min = internal_transform_translation_limit(mmd_constraint.m_translation_limit_min);
-					mmd_pmx_vec3_t const mmd_constraint_translation_limit_max = internal_transform_translation_limit(mmd_constraint.m_translation_limit_max);
-					mmd_pmx_vec3_t const mmd_constraint_rotation_limit_min = internal_transform_rotation_limit(mmd_constraint.m_rotation_limit_min);
-					mmd_pmx_vec3_t const mmd_constraint_rotation_limit_max = internal_transform_rotation_limit(mmd_constraint.m_rotation_limit_max);
+					mmd_pmx_vec3_t const mmd_constraint_translation_limit_min = internal_transform_translation_limit_min(mmd_constraint.m_translation_limit_min, mmd_constraint.m_translation_limit_max);
+					mmd_pmx_vec3_t const mmd_constraint_translation_limit_max = internal_transform_translation_limit_max(mmd_constraint.m_translation_limit_min, mmd_constraint.m_translation_limit_max);
+					mmd_pmx_vec3_t const mmd_constraint_rotation_limit_min = internal_transform_rotation_limit_min(mmd_constraint.m_rotation_limit_min, mmd_constraint.m_rotation_limit_max);
+					mmd_pmx_vec3_t const mmd_constraint_rotation_limit_max = internal_transform_rotation_limit_max(mmd_constraint.m_rotation_limit_min, mmd_constraint.m_rotation_limit_max);
 
 					float mmd_translation_limit_min_x = std::min(mmd_constraint_translation_limit_min.m_x, mmd_constraint_translation_limit_max.m_x);
 					float mmd_translation_limit_max_x = std::max(mmd_constraint_translation_limit_min.m_x, mmd_constraint_translation_limit_max.m_x);
@@ -1671,22 +1682,41 @@ static inline void internal_import_ragdoll_physics(mcrt_vector<mmd_pmx_rigid_bod
 						{
 							brx_constraint_type = BRX_ASSET_IMPORT_PHYSICS_CONSTRAINT_PRISMATIC;
 
+							brx_twist_axis = mmd_constraint_local_axis_z;
+
+							brx_plane_axis = mmd_constraint_local_axis_x;
+
+							brx_normal_axis = mmd_constraint_local_axis_y;
+
+							brx_twist_limit[0] = mmd_translation_limit_min_z;
+							brx_twist_limit[1] = mmd_translation_limit_max_z;
+
+							brx_plane_limit[0] = 0.0F;
+							brx_plane_limit[1] = 0.0F;
+
+							brx_normal_limit[0] = 0.0F;
+							brx_normal_limit[1] = 0.0F;
+						}
+						else if (mmd_rotation_limit_abs_x <= INTERNAL_EPSILON && mmd_rotation_limit_abs_y <= INTERNAL_EPSILON && mmd_rotation_limit_abs_z <= INTERNAL_EPSILON && mmd_translation_limit_abs_y <= INTERNAL_EPSILON && mmd_translation_limit_abs_z <= INTERNAL_EPSILON)
+						{
+							brx_constraint_type = BRX_ASSET_IMPORT_PHYSICS_CONSTRAINT_PRISMATIC;
+
 							brx_twist_axis = mmd_constraint_local_axis_x;
 
 							brx_plane_axis = mmd_constraint_local_axis_y;
 
 							brx_normal_axis = mmd_constraint_local_axis_z;
 
-							brx_twist_limit[0] = 0.0F;
-							brx_twist_limit[1] = 0.0F;
+							brx_twist_limit[0] = mmd_translation_limit_min_x;
+							brx_twist_limit[1] = mmd_translation_limit_max_x;
 
 							brx_plane_limit[0] = 0.0F;
 							brx_plane_limit[1] = 0.0F;
 
-							brx_normal_limit[0] = mmd_translation_limit_min_z;
-							brx_normal_limit[1] = mmd_translation_limit_max_z;
+							brx_normal_limit[0] = 0.0F;
+							brx_normal_limit[1] = 0.0F;
 						}
-						else if (mmd_rotation_limit_abs_x <= INTERNAL_EPSILON && mmd_rotation_limit_abs_y <= INTERNAL_EPSILON && mmd_rotation_limit_abs_z <= INTERNAL_EPSILON && mmd_translation_limit_abs_y <= INTERNAL_EPSILON && mmd_translation_limit_abs_z <= INTERNAL_EPSILON)
+						else if (mmd_rotation_limit_abs_x <= INTERNAL_EPSILON && mmd_rotation_limit_abs_y <= INTERNAL_EPSILON && mmd_rotation_limit_abs_z <= INTERNAL_EPSILON && mmd_translation_limit_abs_z <= INTERNAL_EPSILON && mmd_translation_limit_abs_x <= INTERNAL_EPSILON)
 						{
 							brx_constraint_type = BRX_ASSET_IMPORT_PHYSICS_CONSTRAINT_PRISMATIC;
 
@@ -1696,33 +1726,14 @@ static inline void internal_import_ragdoll_physics(mcrt_vector<mmd_pmx_rigid_bod
 
 							brx_normal_axis = mmd_constraint_local_axis_x;
 
-							brx_twist_limit[0] = 0.0F;
-							brx_twist_limit[1] = 0.0F;
+							brx_twist_limit[0] = mmd_translation_limit_min_y;
+							brx_twist_limit[1] = mmd_translation_limit_max_y;
 
 							brx_plane_limit[0] = 0.0F;
 							brx_plane_limit[1] = 0.0F;
 
-							brx_normal_limit[0] = mmd_translation_limit_min_x;
-							brx_normal_limit[1] = mmd_translation_limit_max_x;
-						}
-						else if (mmd_rotation_limit_abs_x <= INTERNAL_EPSILON && mmd_rotation_limit_abs_y <= INTERNAL_EPSILON && mmd_rotation_limit_abs_z <= INTERNAL_EPSILON && mmd_translation_limit_abs_z <= INTERNAL_EPSILON && mmd_translation_limit_abs_x <= INTERNAL_EPSILON)
-						{
-							brx_constraint_type = BRX_ASSET_IMPORT_PHYSICS_CONSTRAINT_PRISMATIC;
-
-							brx_twist_axis = mmd_constraint_local_axis_z;
-
-							brx_plane_axis = mmd_constraint_local_axis_x;
-
-							brx_normal_axis = mmd_constraint_local_axis_y;
-
-							brx_twist_limit[0] = 0.0F;
-							brx_twist_limit[1] = 0.0F;
-
-							brx_plane_limit[0] = 0.0F;
-							brx_plane_limit[1] = 0.0F;
-
-							brx_normal_limit[0] = mmd_translation_limit_min_y;
-							brx_normal_limit[1] = mmd_translation_limit_max_y;
+							brx_normal_limit[0] = 0.0F;
+							brx_normal_limit[1] = 0.0F;
 						}
 						else
 						{
@@ -1958,13 +1969,18 @@ static inline void internal_import_ragdoll_physics(mcrt_vector<mmd_pmx_rigid_bod
 									brx_normal_axis.y = 0.0F - temp_plane_axis.y;
 									brx_normal_axis.z = 0.0F - temp_plane_axis.z;
 
+									float temp_twist_limit[2] = {brx_twist_limit[0], brx_twist_limit[1]};
+
+									brx_twist_limit[0] = 0.0F - temp_twist_limit[1];
+									brx_twist_limit[1] = 0.0F - temp_twist_limit[0];
+
 									float temp_plane_limit[2] = {brx_plane_limit[0], brx_plane_limit[1]};
 
-									brx_plane_limit[0] = brx_normal_limit[0];
-									brx_plane_limit[1] = brx_normal_limit[1];
+									brx_plane_limit[0] = 0.0F - brx_normal_limit[1];
+									brx_plane_limit[1] = 0.0F - brx_normal_limit[0];
 
-									brx_normal_limit[0] = temp_plane_limit[0];
-									brx_normal_limit[1] = temp_plane_limit[1];
+									brx_normal_limit[0] = 0.0F - temp_plane_limit[1];
+									brx_normal_limit[1] = 0.0F - temp_plane_limit[0];
 								}
 
 								// Bullet Cone-Twist Constraint
@@ -2466,20 +2482,29 @@ static inline mmd_pmx_vec4_t internal_transform_rotation(mmd_pmx_vec3_t const &v
 	return mmd_pmx_vec4_t{q.x, q.y, q.z, q.w};
 }
 
-static inline mmd_pmx_vec3_t internal_transform_translation_limit(mmd_pmx_vec3_t const &v)
+static inline mmd_pmx_vec3_t internal_transform_translation_limit_min(mmd_pmx_vec3_t const &v_min, mmd_pmx_vec3_t const &v_max)
 {
-	return mmd_pmx_vec3_t{v.m_x * INTERNAL_IMPORT_PMX_SCALE, v.m_y * INTERNAL_IMPORT_PMX_SCALE, -v.m_z * INTERNAL_IMPORT_PMX_SCALE};
+	return mmd_pmx_vec3_t{v_min.m_x * INTERNAL_IMPORT_PMX_SCALE, v_min.m_y * INTERNAL_IMPORT_PMX_SCALE, -v_max.m_z * INTERNAL_IMPORT_PMX_SCALE};
 }
 
-static inline mmd_pmx_vec3_t internal_transform_rotation_limit(mmd_pmx_vec3_t const &v)
+static inline mmd_pmx_vec3_t internal_transform_translation_limit_max(mmd_pmx_vec3_t const &v_min, mmd_pmx_vec3_t const &v_max)
 {
-	// TODO: we do NOT need to change anything ???
-	return v;
+	return mmd_pmx_vec3_t{v_max.m_x * INTERNAL_IMPORT_PMX_SCALE, v_max.m_y * INTERNAL_IMPORT_PMX_SCALE, -v_min.m_z * INTERNAL_IMPORT_PMX_SCALE};
+}
+
+static inline mmd_pmx_vec3_t internal_transform_rotation_limit_min(mmd_pmx_vec3_t const &v_min, mmd_pmx_vec3_t const &v_max)
+{
+	return mmd_pmx_vec3_t{-v_max.m_x, -v_max.m_y, v_min.m_z};
+}
+
+static inline mmd_pmx_vec3_t internal_transform_rotation_limit_max(mmd_pmx_vec3_t const &v_min, mmd_pmx_vec3_t const &v_max)
+{
+	return mmd_pmx_vec3_t{-v_min.m_x, -v_min.m_y, v_max.m_z};
 }
 
 static inline mmd_pmx_vec3_t internal_transform_shape_size(mmd_pmx_vec3_t const &v)
 {
-	return mmd_pmx_vec3_t{v.m_x * INTERNAL_IMPORT_PMX_SCALE, v.m_y * INTERNAL_IMPORT_PMX_SCALE, -v.m_z * INTERNAL_IMPORT_PMX_SCALE};
+	return mmd_pmx_vec3_t{v.m_x * INTERNAL_IMPORT_PMX_SCALE, v.m_y * INTERNAL_IMPORT_PMX_SCALE, v.m_z * INTERNAL_IMPORT_PMX_SCALE};
 }
 
 static inline float internal_asin(float y, float z)
@@ -2491,7 +2516,7 @@ static inline float internal_asin(float y, float z)
 	{
 		if (std::abs(y) > INTERNAL_EPSILON)
 		{
-			float const sin = (y / z);
+			float const sin = std::min(std::max(-1.0F, (y / z)), 1.0F);
 			return DirectX::XMScalarASin(sin);
 		}
 		else
@@ -2505,7 +2530,7 @@ static inline float internal_asin(float y, float z)
 		{
 			return (INTERNAL_PI * 0.5F);
 		}
-		else if (y < INTERNAL_EPSILON)
+		else if (y < -INTERNAL_EPSILON)
 		{
 			return (0.0F - (INTERNAL_PI * 0.5F));
 		}
