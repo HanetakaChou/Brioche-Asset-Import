@@ -1514,12 +1514,12 @@ static inline bool internal_data_read_mmd_pmx_constraints(void const *data_base,
             return false;
         }
 
-        if (internal_unlikely(!internal_data_read_mmd_pmx_signed_index(data_base, data_size, inout_data_offset, rigid_body_index_size, &out_joints[joint_index].m_rigid_body_a_index)))
+        if (internal_unlikely(!internal_data_read_mmd_pmx_signed_index(data_base, data_size, inout_data_offset, rigid_body_index_size, &out_joints[joint_index].m_rigid_body_reference_index)))
         {
             return false;
         }
 
-        if (internal_unlikely(!internal_data_read_mmd_pmx_signed_index(data_base, data_size, inout_data_offset, rigid_body_index_size, &out_joints[joint_index].m_rigid_body_b_index)))
+        if (internal_unlikely(!internal_data_read_mmd_pmx_signed_index(data_base, data_size, inout_data_offset, rigid_body_index_size, &out_joints[joint_index].m_rigid_body_attached_index)))
         {
             return false;
         }
@@ -1558,14 +1558,12 @@ static inline bool internal_data_read_mmd_pmx_constraints(void const *data_base,
                 return false;
             }
 
-            mmd_pmx_vec3_t unused_spring_translation;
-            if (internal_unlikely(!internal_data_read_mmd_pmx_vec3(data_base, data_size, inout_data_offset, &unused_spring_translation)))
+            if (internal_unlikely(!internal_data_read_mmd_pmx_vec3(data_base, data_size, inout_data_offset, &out_joints[joint_index].m_spring_translation)))
             {
                 return false;
             }
 
-            mmd_pmx_vec3_t unused_spring_rotation;
-            if (internal_unlikely(!internal_data_read_mmd_pmx_vec3(data_base, data_size, inout_data_offset, &unused_spring_rotation)))
+            if (internal_unlikely(!internal_data_read_mmd_pmx_vec3(data_base, data_size, inout_data_offset, &out_joints[joint_index].m_spring_rotation)))
             {
                 return false;
             }

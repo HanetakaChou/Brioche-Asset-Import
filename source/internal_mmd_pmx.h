@@ -151,14 +151,16 @@ struct mmd_pmx_rigid_body_t
 struct mmd_pmx_constraint_t
 {
     mcrt_string m_name;
-    uint32_t m_rigid_body_a_index;
-    uint32_t m_rigid_body_b_index;
+    uint32_t m_rigid_body_reference_index;
+    uint32_t m_rigid_body_attached_index;
     mmd_pmx_vec3_t m_translation;
     mmd_pmx_vec3_t m_rotation;
     mmd_pmx_vec3_t m_translation_limit_min;
     mmd_pmx_vec3_t m_translation_limit_max;
     mmd_pmx_vec3_t m_rotation_limit_min;
     mmd_pmx_vec3_t m_rotation_limit_max;
+    mmd_pmx_vec3_t m_spring_translation;
+    mmd_pmx_vec3_t m_spring_rotation;
 };
 
 struct mmd_pmx_t

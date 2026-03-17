@@ -100,9 +100,11 @@ static inline mmd_pmx_vec3_t internal_transform_rotation_limit_min(mmd_pmx_vec3_
 
 static inline mmd_pmx_vec3_t internal_transform_rotation_limit_max(mmd_pmx_vec3_t const &v_min, mmd_pmx_vec3_t const &v_max);
 
-static inline mmd_pmx_vec3_t internal_transform_shape_size(mmd_pmx_vec3_t const &v);
+static inline mmd_pmx_vec3_t internal_transform_translation_spring(mmd_pmx_vec3_t const &v);
 
-static inline float internal_asin(float y, float z);
+static inline mmd_pmx_vec3_t internal_transform_rotation_spring(mmd_pmx_vec3_t const &v);
+
+static inline mmd_pmx_vec3_t internal_transform_shape_size(mmd_pmx_vec3_t const &v);
 
 static inline void internal_import_morph_targets(mcrt_vector<mmd_pmx_vertex_t> const &in_vertices, mcrt_vector<mmd_pmx_face_t> const &in_faces, mcrt_vector<mmd_pmx_material_t> const &in_materials, mcrt_vector<mmd_pmx_morph_t> const &in_mmd_morphs, mcrt_vector<BRX_ASSET_IMPORT_MORPH_TARGET_NAME> &out_morph_target_names, mcrt_vector<mcrt_map<uint32_t, internal_mmd_morph_target_vertex_t>> &out_morph_targets_vertices);
 
@@ -1318,8 +1320,8 @@ static inline void internal_import_ragdoll_physics(mcrt_vector<mmd_pmx_rigid_bod
 		mcrt_vector<uint32_t> rigid_body_parent_indices(static_cast<size_t>(rigid_body_count), BRX_ASSET_IMPORT_UINT32_INDEX_INVALID);
 		for (mmd_pmx_constraint_t const &mmd_constraint : in_mmd_constraints)
 		{
-			uint32_t const parent_index = mmd_constraint.m_rigid_body_a_index;
-			uint32_t const child_index = mmd_constraint.m_rigid_body_b_index;
+			uint32_t const parent_index = mmd_constraint.m_rigid_body_reference_index;
+			uint32_t const child_index = mmd_constraint.m_rigid_body_attached_index;
 
 			if (parent_index < child_index)
 			{
@@ -1576,482 +1578,63 @@ static inline void internal_import_ragdoll_physics(mcrt_vector<mmd_pmx_rigid_bod
 
 		for (mmd_pmx_constraint_t const &mmd_constraint : in_mmd_constraints)
 		{
-			if ((mmd_constraint.m_rigid_body_a_index < in_mmd_rigid_bodies.size()) && (mmd_constraint.m_rigid_body_b_index < in_mmd_rigid_bodies.size()) && (mmd_constraint.m_rigid_body_a_index != mmd_constraint.m_rigid_body_b_index))
+			if ((mmd_constraint.m_rigid_body_reference_index < in_mmd_rigid_bodies.size()) && (mmd_constraint.m_rigid_body_attached_index < in_mmd_rigid_bodies.size()) && (mmd_constraint.m_rigid_body_reference_index != mmd_constraint.m_rigid_body_attached_index))
 			{
-				if (0 != in_mmd_rigid_bodies[mmd_constraint.m_rigid_body_a_index].m_rigid_body_type || 0 != in_mmd_rigid_bodies[mmd_constraint.m_rigid_body_b_index].m_rigid_body_type)
+				if (0 != in_mmd_rigid_bodies[mmd_constraint.m_rigid_body_reference_index].m_rigid_body_type || 0 != in_mmd_rigid_bodies[mmd_constraint.m_rigid_body_attached_index].m_rigid_body_type)
 				{
 					mmd_pmx_vec3_t const mmd_constraint_translation_limit_min = internal_transform_translation_limit_min(mmd_constraint.m_translation_limit_min, mmd_constraint.m_translation_limit_max);
 					mmd_pmx_vec3_t const mmd_constraint_translation_limit_max = internal_transform_translation_limit_max(mmd_constraint.m_translation_limit_min, mmd_constraint.m_translation_limit_max);
 					mmd_pmx_vec3_t const mmd_constraint_rotation_limit_min = internal_transform_rotation_limit_min(mmd_constraint.m_rotation_limit_min, mmd_constraint.m_rotation_limit_max);
 					mmd_pmx_vec3_t const mmd_constraint_rotation_limit_max = internal_transform_rotation_limit_max(mmd_constraint.m_rotation_limit_min, mmd_constraint.m_rotation_limit_max);
 
-					float mmd_translation_limit_min_x = std::min(mmd_constraint_translation_limit_min.m_x, mmd_constraint_translation_limit_max.m_x);
-					float mmd_translation_limit_max_x = std::max(mmd_constraint_translation_limit_min.m_x, mmd_constraint_translation_limit_max.m_x);
-					float mmd_translation_limit_min_y = std::min(mmd_constraint_translation_limit_min.m_y, mmd_constraint_translation_limit_max.m_y);
-					float mmd_translation_limit_max_y = std::max(mmd_constraint_translation_limit_min.m_y, mmd_constraint_translation_limit_max.m_y);
-					float mmd_translation_limit_min_z = std::min(mmd_constraint_translation_limit_min.m_z, mmd_constraint_translation_limit_max.m_z);
-					float mmd_translation_limit_max_z = std::max(mmd_constraint_translation_limit_min.m_z, mmd_constraint_translation_limit_max.m_z);
-
-					float mmd_rotation_limit_min_x = std::min(mmd_constraint_rotation_limit_min.m_x, mmd_constraint_rotation_limit_max.m_x);
-					float mmd_rotation_limit_max_x = std::max(mmd_constraint_rotation_limit_min.m_x, mmd_constraint_rotation_limit_max.m_x);
-					float mmd_rotation_limit_min_y = std::min(mmd_constraint_rotation_limit_min.m_y, mmd_constraint_rotation_limit_max.m_y);
-					float mmd_rotation_limit_max_y = std::max(mmd_constraint_rotation_limit_min.m_y, mmd_constraint_rotation_limit_max.m_y);
-					float mmd_rotation_limit_min_z = std::min(mmd_constraint_rotation_limit_min.m_z, mmd_constraint_rotation_limit_max.m_z);
-					float mmd_rotation_limit_max_z = std::max(mmd_constraint_rotation_limit_min.m_z, mmd_constraint_rotation_limit_max.m_z);
-
-					DirectX::XMFLOAT3 mmd_constraint_local_origin;
-					{
-						mmd_pmx_vec3_t const mmd_constraint_translation = internal_transform_translation(mmd_constraint.m_translation);
-
-						mmd_constraint_local_origin = DirectX::XMFLOAT3(mmd_constraint_translation.m_x, mmd_constraint_translation.m_y, mmd_constraint_translation.m_z);
-					}
-
-					DirectX::XMFLOAT3 mmd_constraint_local_axis_x;
-					DirectX::XMFLOAT3 mmd_constraint_local_axis_y;
-					DirectX::XMFLOAT3 mmd_constraint_local_axis_z;
-					{
-						mmd_pmx_vec4_t const mmd_constraint_rotation = internal_transform_rotation(mmd_constraint.m_rotation);
-
-						DirectX::XMFLOAT4 const constraint_rotation_model_space(mmd_constraint_rotation.m_x, mmd_constraint_rotation.m_y, mmd_constraint_rotation.m_z, mmd_constraint_rotation.m_w);
-
-						DirectX::XMMATRIX constraint_rotation_matrix_model_space = DirectX::XMMatrixRotationQuaternion(DirectX::XMLoadFloat4(&constraint_rotation_model_space));
-
-						DirectX::XMFLOAT3 local_axis_x(1.0F, 0.0F, 0.0F);
-						DirectX::XMStoreFloat3(&mmd_constraint_local_axis_x, DirectX::XMVector3TransformNormal(DirectX::XMLoadFloat3(&local_axis_x), constraint_rotation_matrix_model_space));
-
-						DirectX::XMFLOAT3 local_axis_y(0.0F, 1.0F, 0.0F);
-						DirectX::XMStoreFloat3(&mmd_constraint_local_axis_y, DirectX::XMVector3TransformNormal(DirectX::XMLoadFloat3(&local_axis_y), constraint_rotation_matrix_model_space));
-
-						DirectX::XMFLOAT3 local_axis_z(0.0F, 0.0F, 1.0F);
-						DirectX::XMStoreFloat3(&mmd_constraint_local_axis_z, DirectX::XMVector3TransformNormal(DirectX::XMLoadFloat3(&local_axis_z), constraint_rotation_matrix_model_space));
-					}
-
-					DirectX::XMFLOAT3 const rigid_body_a_translation(
-						in_mmd_rigid_bodies[mmd_constraint.m_rigid_body_a_index].m_translation.m_x,
-						in_mmd_rigid_bodies[mmd_constraint.m_rigid_body_a_index].m_translation.m_y,
-						in_mmd_rigid_bodies[mmd_constraint.m_rigid_body_a_index].m_translation.m_z);
-
-					DirectX::XMFLOAT3 const rigid_body_b_translation(
-						in_mmd_rigid_bodies[mmd_constraint.m_rigid_body_b_index].m_translation.m_x,
-						in_mmd_rigid_bodies[mmd_constraint.m_rigid_body_b_index].m_translation.m_y,
-						in_mmd_rigid_bodies[mmd_constraint.m_rigid_body_b_index].m_translation.m_z);
-
-					BRX_ASSET_IMPORT_PHYSICS_CONSTRAINT_TYPE brx_constraint_type;
-					DirectX::XMFLOAT3 brx_pivot;
-					DirectX::XMFLOAT3 brx_twist_axis;
-					DirectX::XMFLOAT3 brx_plane_axis;
-					DirectX::XMFLOAT3 brx_normal_axis;
-					float brx_twist_limit[2];
-					float brx_plane_limit[2];
-					float brx_normal_limit[2];
-					{
-						brx_pivot = mmd_constraint_local_origin;
-
-						constexpr float const INTERNAL_EPSILON = 1E-6F;
-						// constexpr float const INTERNAL_PI = DirectX::XM_PI;
-						constexpr float const INTERNAL_NEAR_PI_DIV_2 = DirectX::XM_PIDIV2 - INTERNAL_EPSILON;
-
-						float mmd_translation_limit_abs_x = std::max(std::abs(mmd_translation_limit_min_x), std::abs(mmd_translation_limit_max_x));
-						float mmd_translation_limit_abs_y = std::max(std::abs(mmd_translation_limit_min_y), std::abs(mmd_translation_limit_max_y));
-						float mmd_translation_limit_abs_z = std::max(std::abs(mmd_translation_limit_min_z), std::abs(mmd_translation_limit_max_z));
-
-						float mmd_rotation_limit_abs_x = std::max(std::abs(mmd_rotation_limit_min_x), std::abs(mmd_rotation_limit_max_x));
-						float mmd_rotation_limit_abs_y = std::max(std::abs(mmd_rotation_limit_min_y), std::abs(mmd_rotation_limit_max_y));
-						float mmd_rotation_limit_abs_z = std::max(std::abs(mmd_rotation_limit_min_z), std::abs(mmd_rotation_limit_max_z));
-
-						if (mmd_rotation_limit_abs_x <= INTERNAL_EPSILON && mmd_rotation_limit_abs_y <= INTERNAL_EPSILON && mmd_rotation_limit_abs_z <= INTERNAL_EPSILON && mmd_translation_limit_abs_x <= INTERNAL_EPSILON && mmd_translation_limit_abs_y <= INTERNAL_EPSILON && mmd_translation_limit_abs_z <= INTERNAL_EPSILON)
-						{
-							brx_constraint_type = BRX_ASSET_IMPORT_PHYSICS_CONSTRAINT_FIXED;
-
-							brx_twist_axis = mmd_constraint_local_axis_x;
-
-							brx_plane_axis = mmd_constraint_local_axis_y;
-
-							brx_normal_axis = mmd_constraint_local_axis_z;
-
-							brx_twist_limit[0] = 0.0F;
-							brx_twist_limit[1] = 0.0F;
-
-							brx_plane_limit[0] = 0.0F;
-							brx_plane_limit[1] = 0.0F;
-
-							brx_normal_limit[0] = 0.0F;
-							brx_normal_limit[1] = 0.0F;
-						}
-						else if (mmd_rotation_limit_abs_x <= INTERNAL_EPSILON && mmd_rotation_limit_abs_y <= INTERNAL_EPSILON && mmd_rotation_limit_abs_z <= INTERNAL_EPSILON && mmd_translation_limit_abs_x <= INTERNAL_EPSILON && mmd_translation_limit_abs_y <= INTERNAL_EPSILON)
-						{
-							brx_constraint_type = BRX_ASSET_IMPORT_PHYSICS_CONSTRAINT_PRISMATIC;
-
-							brx_twist_axis = mmd_constraint_local_axis_z;
-
-							brx_plane_axis = mmd_constraint_local_axis_x;
-
-							brx_normal_axis = mmd_constraint_local_axis_y;
-
-							brx_twist_limit[0] = mmd_translation_limit_min_z;
-							brx_twist_limit[1] = mmd_translation_limit_max_z;
-
-							brx_plane_limit[0] = 0.0F;
-							brx_plane_limit[1] = 0.0F;
-
-							brx_normal_limit[0] = 0.0F;
-							brx_normal_limit[1] = 0.0F;
-						}
-						else if (mmd_rotation_limit_abs_x <= INTERNAL_EPSILON && mmd_rotation_limit_abs_y <= INTERNAL_EPSILON && mmd_rotation_limit_abs_z <= INTERNAL_EPSILON && mmd_translation_limit_abs_y <= INTERNAL_EPSILON && mmd_translation_limit_abs_z <= INTERNAL_EPSILON)
-						{
-							brx_constraint_type = BRX_ASSET_IMPORT_PHYSICS_CONSTRAINT_PRISMATIC;
-
-							brx_twist_axis = mmd_constraint_local_axis_x;
-
-							brx_plane_axis = mmd_constraint_local_axis_y;
-
-							brx_normal_axis = mmd_constraint_local_axis_z;
-
-							brx_twist_limit[0] = mmd_translation_limit_min_x;
-							brx_twist_limit[1] = mmd_translation_limit_max_x;
-
-							brx_plane_limit[0] = 0.0F;
-							brx_plane_limit[1] = 0.0F;
-
-							brx_normal_limit[0] = 0.0F;
-							brx_normal_limit[1] = 0.0F;
-						}
-						else if (mmd_rotation_limit_abs_x <= INTERNAL_EPSILON && mmd_rotation_limit_abs_y <= INTERNAL_EPSILON && mmd_rotation_limit_abs_z <= INTERNAL_EPSILON && mmd_translation_limit_abs_z <= INTERNAL_EPSILON && mmd_translation_limit_abs_x <= INTERNAL_EPSILON)
-						{
-							brx_constraint_type = BRX_ASSET_IMPORT_PHYSICS_CONSTRAINT_PRISMATIC;
-
-							brx_twist_axis = mmd_constraint_local_axis_y;
-
-							brx_plane_axis = mmd_constraint_local_axis_z;
-
-							brx_normal_axis = mmd_constraint_local_axis_x;
-
-							brx_twist_limit[0] = mmd_translation_limit_min_y;
-							brx_twist_limit[1] = mmd_translation_limit_max_y;
-
-							brx_plane_limit[0] = 0.0F;
-							brx_plane_limit[1] = 0.0F;
-
-							brx_normal_limit[0] = 0.0F;
-							brx_normal_limit[1] = 0.0F;
-						}
-						else
-						{
-							// convert from translation to rotation
-							if (mmd_translation_limit_abs_x >= INTERNAL_EPSILON || mmd_translation_limit_abs_y >= INTERNAL_EPSILON || mmd_translation_limit_abs_z >= INTERNAL_EPSILON)
-							{
-								assert((mmd_rotation_limit_abs_x >= INTERNAL_EPSILON || mmd_rotation_limit_abs_y >= INTERNAL_EPSILON || mmd_rotation_limit_abs_z >= INTERNAL_EPSILON) || (mmd_translation_limit_abs_x >= INTERNAL_EPSILON && mmd_translation_limit_abs_y >= INTERNAL_EPSILON && mmd_translation_limit_abs_z >= INTERNAL_EPSILON));
-
-								float rigid_body_b_body_space_translation_length = DirectX::XMVectorGetX(DirectX::XMVector3Length(DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&rigid_body_b_translation), DirectX::XMLoadFloat3(&mmd_constraint_local_origin))));
-
-								if (std::abs(mmd_rotation_limit_abs_x - mmd_rotation_limit_abs_y) <= INTERNAL_EPSILON && std::abs(mmd_rotation_limit_abs_y - mmd_rotation_limit_abs_z) <= INTERNAL_EPSILON && std::abs(mmd_rotation_limit_abs_z - mmd_rotation_limit_abs_x) <= INTERNAL_EPSILON)
-								{
-									if (mmd_translation_limit_abs_x <= mmd_translation_limit_abs_y && mmd_translation_limit_abs_x <= mmd_translation_limit_abs_z)
-									{
-										mmd_rotation_limit_min_y = std::min(mmd_rotation_limit_min_y, internal_asin(mmd_translation_limit_min_z, rigid_body_b_body_space_translation_length));
-										mmd_rotation_limit_min_z = std::min(mmd_rotation_limit_min_z, internal_asin(mmd_translation_limit_min_y, rigid_body_b_body_space_translation_length));
-
-										mmd_rotation_limit_max_y = std::max(mmd_rotation_limit_max_y, internal_asin(mmd_translation_limit_max_z, rigid_body_b_body_space_translation_length));
-										mmd_rotation_limit_max_z = std::max(mmd_rotation_limit_max_z, internal_asin(mmd_translation_limit_max_y, rigid_body_b_body_space_translation_length));
-									}
-									else if (mmd_translation_limit_abs_y <= mmd_translation_limit_abs_z && mmd_translation_limit_abs_y <= mmd_translation_limit_abs_x)
-									{
-										mmd_rotation_limit_min_x = std::min(mmd_rotation_limit_min_x, internal_asin(mmd_translation_limit_min_z, rigid_body_b_body_space_translation_length));
-										mmd_rotation_limit_min_z = std::min(mmd_rotation_limit_min_z, internal_asin(mmd_translation_limit_min_x, rigid_body_b_body_space_translation_length));
-
-										mmd_rotation_limit_max_x = std::max(mmd_rotation_limit_max_x, internal_asin(mmd_translation_limit_max_z, rigid_body_b_body_space_translation_length));
-										mmd_rotation_limit_max_z = std::max(mmd_rotation_limit_max_z, internal_asin(mmd_translation_limit_max_x, rigid_body_b_body_space_translation_length));
-									}
-									else
-									{
-										assert(mmd_translation_limit_abs_z <= mmd_translation_limit_abs_x && mmd_translation_limit_abs_z <= mmd_translation_limit_abs_y);
-
-										mmd_rotation_limit_min_x = std::min(mmd_rotation_limit_min_x, internal_asin(mmd_translation_limit_min_y, rigid_body_b_body_space_translation_length));
-										mmd_rotation_limit_min_y = std::min(mmd_rotation_limit_min_y, internal_asin(mmd_translation_limit_min_x, rigid_body_b_body_space_translation_length));
-
-										mmd_rotation_limit_max_x = std::max(mmd_rotation_limit_max_x, internal_asin(mmd_translation_limit_max_y, rigid_body_b_body_space_translation_length));
-										mmd_rotation_limit_max_y = std::max(mmd_rotation_limit_max_y, internal_asin(mmd_translation_limit_max_x, rigid_body_b_body_space_translation_length));
-									}
-								}
-								else if (mmd_rotation_limit_abs_x <= mmd_rotation_limit_abs_y && mmd_rotation_limit_abs_x <= mmd_rotation_limit_abs_z)
-								{
-									mmd_rotation_limit_min_y = std::min(mmd_rotation_limit_min_y, internal_asin(mmd_translation_limit_min_z, rigid_body_b_body_space_translation_length));
-									mmd_rotation_limit_min_z = std::min(mmd_rotation_limit_min_z, internal_asin(mmd_translation_limit_min_y, rigid_body_b_body_space_translation_length));
-
-									mmd_rotation_limit_max_y = std::max(mmd_rotation_limit_max_y, internal_asin(mmd_translation_limit_max_z, rigid_body_b_body_space_translation_length));
-									mmd_rotation_limit_max_z = std::max(mmd_rotation_limit_max_z, internal_asin(mmd_translation_limit_max_y, rigid_body_b_body_space_translation_length));
-								}
-								else if (mmd_rotation_limit_abs_y <= mmd_rotation_limit_abs_z && mmd_rotation_limit_abs_y <= mmd_rotation_limit_abs_x)
-								{
-									mmd_rotation_limit_min_x = std::min(mmd_rotation_limit_min_x, internal_asin(mmd_translation_limit_min_z, rigid_body_b_body_space_translation_length));
-									mmd_rotation_limit_min_z = std::min(mmd_rotation_limit_min_z, internal_asin(mmd_translation_limit_min_x, rigid_body_b_body_space_translation_length));
-
-									mmd_rotation_limit_max_x = std::max(mmd_rotation_limit_max_x, internal_asin(mmd_translation_limit_max_z, rigid_body_b_body_space_translation_length));
-									mmd_rotation_limit_max_z = std::max(mmd_rotation_limit_max_z, internal_asin(mmd_translation_limit_max_x, rigid_body_b_body_space_translation_length));
-								}
-								else
-								{
-									assert(mmd_rotation_limit_abs_z <= mmd_rotation_limit_abs_x && mmd_rotation_limit_abs_z <= mmd_rotation_limit_abs_y);
-
-									mmd_rotation_limit_min_x = std::min(mmd_rotation_limit_min_x, internal_asin(mmd_translation_limit_min_y, rigid_body_b_body_space_translation_length));
-									mmd_rotation_limit_min_y = std::min(mmd_rotation_limit_min_y, internal_asin(mmd_translation_limit_min_x, rigid_body_b_body_space_translation_length));
-
-									mmd_rotation_limit_max_x = std::max(mmd_rotation_limit_max_x, internal_asin(mmd_translation_limit_max_y, rigid_body_b_body_space_translation_length));
-									mmd_rotation_limit_max_y = std::max(mmd_rotation_limit_max_y, internal_asin(mmd_translation_limit_max_x, rigid_body_b_body_space_translation_length));
-								}
-
-								mmd_rotation_limit_abs_x = std::max(std::abs(mmd_rotation_limit_min_x), std::abs(mmd_rotation_limit_max_x));
-								mmd_rotation_limit_abs_y = std::max(std::abs(mmd_rotation_limit_min_y), std::abs(mmd_rotation_limit_max_y));
-								mmd_rotation_limit_abs_z = std::max(std::abs(mmd_rotation_limit_min_z), std::abs(mmd_rotation_limit_max_z));
-
-								mmd_translation_limit_min_x = 0.0F;
-								mmd_translation_limit_max_x = 0.0F;
-								mmd_translation_limit_min_y = 0.0F;
-								mmd_translation_limit_max_y = 0.0F;
-								mmd_translation_limit_min_z = 0.0F;
-								mmd_translation_limit_max_z = 0.0F;
-
-								mmd_translation_limit_abs_x = std::max(std::abs(mmd_translation_limit_min_x), std::abs(mmd_translation_limit_max_x));
-								mmd_translation_limit_abs_y = std::max(std::abs(mmd_translation_limit_min_y), std::abs(mmd_translation_limit_max_y));
-								mmd_translation_limit_abs_z = std::max(std::abs(mmd_translation_limit_min_z), std::abs(mmd_translation_limit_max_z));
-							}
-
-							assert(mmd_rotation_limit_abs_x >= INTERNAL_EPSILON || mmd_rotation_limit_abs_y >= INTERNAL_EPSILON || mmd_rotation_limit_abs_z >= INTERNAL_EPSILON);
-
-							if (mmd_rotation_limit_abs_x <= INTERNAL_EPSILON && mmd_rotation_limit_abs_y <= INTERNAL_EPSILON)
-							{
-								brx_constraint_type = BRX_ASSET_IMPORT_PHYSICS_CONSTRAINT_HINGE;
-
-								brx_twist_axis = mmd_constraint_local_axis_x;
-
-								brx_plane_axis = mmd_constraint_local_axis_y;
-
-								brx_normal_axis = mmd_constraint_local_axis_z;
-
-								brx_twist_limit[0] = 0.0F;
-								brx_twist_limit[1] = 0.0F;
-
-								brx_plane_limit[0] = 0.0F;
-								brx_plane_limit[1] = 0.0F;
-
-								brx_normal_limit[0] = mmd_rotation_limit_min_z;
-								brx_normal_limit[1] = mmd_rotation_limit_max_z;
-							}
-							else if (mmd_rotation_limit_abs_y <= INTERNAL_EPSILON && mmd_rotation_limit_abs_z <= INTERNAL_EPSILON)
-							{
-								brx_constraint_type = BRX_ASSET_IMPORT_PHYSICS_CONSTRAINT_HINGE;
-
-								brx_twist_axis = mmd_constraint_local_axis_y;
-
-								brx_plane_axis = mmd_constraint_local_axis_z;
-
-								brx_normal_axis = mmd_constraint_local_axis_x;
-
-								brx_twist_limit[0] = 0.0F;
-								brx_twist_limit[1] = 0.0F;
-
-								brx_plane_limit[0] = 0.0F;
-								brx_plane_limit[1] = 0.0F;
-
-								brx_normal_limit[0] = mmd_rotation_limit_min_x;
-								brx_normal_limit[1] = mmd_rotation_limit_max_x;
-							}
-							else if (mmd_rotation_limit_abs_z <= INTERNAL_EPSILON && mmd_rotation_limit_abs_x <= INTERNAL_EPSILON)
-							{
-								brx_constraint_type = BRX_ASSET_IMPORT_PHYSICS_CONSTRAINT_HINGE;
-
-								brx_twist_axis = mmd_constraint_local_axis_z;
-
-								brx_plane_axis = mmd_constraint_local_axis_x;
-
-								brx_normal_axis = mmd_constraint_local_axis_y;
-
-								brx_twist_limit[0] = 0.0F;
-								brx_twist_limit[1] = 0.0F;
-
-								brx_plane_limit[0] = 0.0F;
-								brx_plane_limit[1] = 0.0F;
-
-								brx_normal_limit[0] = mmd_rotation_limit_min_y;
-								brx_normal_limit[1] = mmd_rotation_limit_max_y;
-							}
-							else if ((std::abs(mmd_rotation_limit_abs_x) >= INTERNAL_NEAR_PI_DIV_2 && std::abs(mmd_rotation_limit_abs_y) >= INTERNAL_NEAR_PI_DIV_2) || (std::abs(mmd_rotation_limit_abs_y) >= INTERNAL_NEAR_PI_DIV_2 && std::abs(mmd_rotation_limit_abs_z) >= INTERNAL_NEAR_PI_DIV_2) || (std::abs(mmd_rotation_limit_abs_z) >= INTERNAL_NEAR_PI_DIV_2 && std::abs(mmd_rotation_limit_abs_x) >= INTERNAL_NEAR_PI_DIV_2))
-							{
-								brx_constraint_type = BRX_ASSET_IMPORT_PHYSICS_CONSTRAINT_BALL_AND_SOCKET;
-
-								brx_twist_axis = mmd_constraint_local_axis_x;
-
-								brx_plane_axis = mmd_constraint_local_axis_y;
-
-								brx_normal_axis = mmd_constraint_local_axis_z;
-
-								brx_twist_limit[0] = 0.0F;
-								brx_twist_limit[1] = 0.0F;
-
-								brx_plane_limit[0] = 0.0F;
-								brx_plane_limit[1] = 0.0F;
-
-								brx_normal_limit[0] = 0.0F;
-								brx_normal_limit[1] = 0.0F;
-							}
-							else
-							{
-								brx_constraint_type = BRX_ASSET_IMPORT_PHYSICS_CONSTRAINT_RAGDOLL;
-
-								if (mmd_rotation_limit_abs_x <= mmd_rotation_limit_abs_y && mmd_rotation_limit_abs_x <= mmd_rotation_limit_abs_z)
-								{
-									brx_twist_axis = mmd_constraint_local_axis_x;
-
-									brx_plane_axis = mmd_constraint_local_axis_y;
-
-									brx_normal_axis = mmd_constraint_local_axis_z;
-
-									brx_twist_limit[0] = mmd_rotation_limit_min_x;
-									brx_twist_limit[1] = mmd_rotation_limit_max_x;
-
-									brx_plane_limit[0] = mmd_rotation_limit_min_y;
-									brx_plane_limit[1] = mmd_rotation_limit_max_y;
-
-									brx_normal_limit[0] = mmd_rotation_limit_min_z;
-									brx_normal_limit[1] = mmd_rotation_limit_max_z;
-								}
-								else if (mmd_rotation_limit_abs_y <= mmd_rotation_limit_abs_z && mmd_rotation_limit_abs_y <= mmd_rotation_limit_abs_x)
-								{
-
-									brx_twist_axis = mmd_constraint_local_axis_y;
-
-									brx_plane_axis = mmd_constraint_local_axis_z;
-
-									brx_normal_axis = mmd_constraint_local_axis_x;
-
-									brx_twist_limit[0] = mmd_rotation_limit_min_y;
-									brx_twist_limit[1] = mmd_rotation_limit_max_y;
-
-									brx_plane_limit[0] = mmd_rotation_limit_min_z;
-									brx_plane_limit[1] = mmd_rotation_limit_max_z;
-
-									brx_normal_limit[0] = mmd_rotation_limit_min_x;
-									brx_normal_limit[1] = mmd_rotation_limit_max_x;
-								}
-								else
-								{
-									assert(mmd_rotation_limit_abs_z <= mmd_rotation_limit_abs_x && mmd_rotation_limit_abs_z <= mmd_rotation_limit_abs_y);
-
-									brx_twist_axis = mmd_constraint_local_axis_z;
-
-									brx_plane_axis = mmd_constraint_local_axis_x;
-
-									brx_normal_axis = mmd_constraint_local_axis_y;
-
-									brx_twist_limit[0] = mmd_rotation_limit_min_z;
-									brx_twist_limit[1] = mmd_rotation_limit_max_z;
-
-									brx_plane_limit[0] = mmd_rotation_limit_min_x;
-									brx_plane_limit[1] = mmd_rotation_limit_max_x;
-
-									brx_normal_limit[0] = mmd_rotation_limit_min_y;
-									brx_normal_limit[1] = mmd_rotation_limit_max_y;
-								}
-
-								if (DirectX::XMVectorGetX(DirectX::XMVector3Dot(DirectX::XMLoadFloat3(&brx_twist_axis), DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&rigid_body_b_translation), DirectX::XMLoadFloat3(&rigid_body_a_translation)))) < (-INTERNAL_EPSILON))
-								{
-									brx_twist_axis.x = 0.0F - brx_twist_axis.x;
-									brx_twist_axis.y = 0.0F - brx_twist_axis.y;
-									brx_twist_axis.z = 0.0F - brx_twist_axis.z;
-
-									DirectX::XMFLOAT3 temp_plane_axis = brx_plane_axis;
-
-									brx_plane_axis.x = 0.0F - brx_normal_axis.x;
-									brx_plane_axis.y = 0.0F - brx_normal_axis.y;
-									brx_plane_axis.z = 0.0F - brx_normal_axis.z;
-
-									brx_normal_axis.x = 0.0F - temp_plane_axis.x;
-									brx_normal_axis.y = 0.0F - temp_plane_axis.y;
-									brx_normal_axis.z = 0.0F - temp_plane_axis.z;
-
-									float temp_twist_limit[2] = {brx_twist_limit[0], brx_twist_limit[1]};
-
-									brx_twist_limit[0] = 0.0F - temp_twist_limit[1];
-									brx_twist_limit[1] = 0.0F - temp_twist_limit[0];
-
-									float temp_plane_limit[2] = {brx_plane_limit[0], brx_plane_limit[1]};
-
-									brx_plane_limit[0] = 0.0F - brx_normal_limit[1];
-									brx_plane_limit[1] = 0.0F - brx_normal_limit[0];
-
-									brx_normal_limit[0] = 0.0F - temp_plane_limit[1];
-									brx_normal_limit[1] = 0.0F - temp_plane_limit[0];
-								}
-
-								// Bullet Cone-Twist Constraint
-								// https://help.autodesk.com/view/MAYAUL/2024/ENU/?guid=GUID-CDB3638D-23AF-49EF-8EF6-53081EE4D39D
-								// twist_span
-								// swing_span2 (plane)
-								// swing_span1 (normal)
-
-								// float const twist_span = std::min(std::max(std::abs(brx_twist_limit[0]), std::abs(brx_twist_limit[1])), (INTERNAL_PI * 1.0F));
-								// float const swing_span2 = std::min(std::max(std::abs(brx_plane_limit[0]), std::abs(brx_plane_limit[1])), (INTERNAL_PI * 0.5F));
-								// float const swing_span1 = std::min(std::max(std::abs(brx_normal_limit[0]), std::abs(brx_normal_limit[1])), (INTERNAL_PI * 0.5F));
-
-								// brx_twist_limit[0] = 0.0F - twist_span;
-								// brx_twist_limit[1] = twist_span;
-
-								// brx_plane_limit[0] = 0.0F - swing_span2;
-								// brx_plane_limit[1] = swing_span2;
-
-								// brx_normal_limit[0] = 0.0F - swing_span1;
-								// brx_normal_limit[1] = swing_span1;
-							}
-						}
-					}
-
-					assert(mmd_constraint.m_rigid_body_a_index < rigid_body_to_ragdoll_skeleton_joint_map.size());
-
-					assert(mmd_constraint.m_rigid_body_b_index < rigid_body_to_ragdoll_skeleton_joint_map.size());
-
-					uint32_t const skeleton_joint_index_a = rigid_body_to_ragdoll_skeleton_joint_map[mmd_constraint.m_rigid_body_a_index];
-					assert(ragdoll_skeleton_joint_to_rigid_body_map[skeleton_joint_index_a] == mmd_constraint.m_rigid_body_a_index);
-
-					uint32_t const skeleton_joint_index_b = rigid_body_to_ragdoll_skeleton_joint_map[mmd_constraint.m_rigid_body_b_index];
-					assert(ragdoll_skeleton_joint_to_rigid_body_map[skeleton_joint_index_b] == mmd_constraint.m_rigid_body_b_index);
-
-					out_ragdoll_skeleton_constraints.push_back(
-						brx_asset_import_physics_constraint{
-							skeleton_joint_index_a,
-							skeleton_joint_index_b,
-							brx_constraint_type,
-							{
-								brx_pivot.x,
-								brx_pivot.y,
-								brx_pivot.z,
-							},
-							{
-								brx_twist_axis.x,
-								brx_twist_axis.y,
-								brx_twist_axis.z,
-							},
-							{
-								brx_plane_axis.x,
-								brx_plane_axis.y,
-								brx_plane_axis.z,
-							},
-							{
-								brx_normal_axis.x,
-								brx_normal_axis.y,
-								brx_normal_axis.z,
-							},
-							{
-								brx_twist_limit[0],
-								brx_twist_limit[1],
-							},
-							{
-								brx_plane_limit[0],
-								brx_plane_limit[1],
-							},
-							{
-								brx_normal_limit[0],
-								brx_normal_limit[1],
-							}});
+					mmd_pmx_vec3_t const mmd_constraint_translation = internal_transform_translation(mmd_constraint.m_translation);
+
+					mmd_pmx_vec4_t const mmd_constraint_rotation = internal_transform_rotation(mmd_constraint.m_rotation);
+
+					mmd_pmx_vec3_t const mmd_constraint_translation_spring = internal_transform_translation_spring(mmd_constraint.m_spring_translation);
+
+					mmd_pmx_vec3_t const mmd_constraint_rotation_spring = internal_transform_rotation_spring(mmd_constraint.m_spring_rotation);
+
+					assert(mmd_constraint.m_rigid_body_reference_index < rigid_body_to_ragdoll_skeleton_joint_map.size());
+
+					assert(mmd_constraint.m_rigid_body_attached_index < rigid_body_to_ragdoll_skeleton_joint_map.size());
+
+					uint32_t const skeleton_joint_index_a = rigid_body_to_ragdoll_skeleton_joint_map[mmd_constraint.m_rigid_body_reference_index];
+					assert(ragdoll_skeleton_joint_to_rigid_body_map[skeleton_joint_index_a] == mmd_constraint.m_rigid_body_reference_index);
+
+					uint32_t const skeleton_joint_index_b = rigid_body_to_ragdoll_skeleton_joint_map[mmd_constraint.m_rigid_body_attached_index];
+					assert(ragdoll_skeleton_joint_to_rigid_body_map[skeleton_joint_index_b] == mmd_constraint.m_rigid_body_attached_index);
+
+					brx_asset_import_physics_constraint animation_physics_6dof_constraint;
+					animation_physics_6dof_constraint.m_rigid_body_reference_index = skeleton_joint_index_a;
+					animation_physics_6dof_constraint.m_rigid_body_attached_index = skeleton_joint_index_b;
+					animation_physics_6dof_constraint.m_constraint_type = BRX_ASSET_IMPORT_PHYSICS_CONSTRAINT_6DOF;
+					animation_physics_6dof_constraint.m_6dof.m_rotation[0] = mmd_constraint_rotation.m_x;
+					animation_physics_6dof_constraint.m_6dof.m_rotation[1] = mmd_constraint_rotation.m_y;
+					animation_physics_6dof_constraint.m_6dof.m_rotation[2] = mmd_constraint_rotation.m_z;
+					animation_physics_6dof_constraint.m_6dof.m_rotation[3] = mmd_constraint_rotation.m_w;
+					animation_physics_6dof_constraint.m_6dof.m_translation[0] = mmd_constraint_translation.m_x;
+					animation_physics_6dof_constraint.m_6dof.m_translation[1] = mmd_constraint_translation.m_y;
+					animation_physics_6dof_constraint.m_6dof.m_translation[2] = mmd_constraint_translation.m_z;
+					animation_physics_6dof_constraint.m_6dof.m_rotation_limit_min[0] = mmd_constraint_rotation_limit_min.m_x;
+					animation_physics_6dof_constraint.m_6dof.m_rotation_limit_min[1] = mmd_constraint_rotation_limit_min.m_y;
+					animation_physics_6dof_constraint.m_6dof.m_rotation_limit_min[2] = mmd_constraint_rotation_limit_min.m_z;
+					animation_physics_6dof_constraint.m_6dof.m_rotation_limit_max[0] = mmd_constraint_rotation_limit_max.m_x;
+					animation_physics_6dof_constraint.m_6dof.m_rotation_limit_max[1] = mmd_constraint_rotation_limit_max.m_y;
+					animation_physics_6dof_constraint.m_6dof.m_rotation_limit_max[2] = mmd_constraint_rotation_limit_max.m_z;
+					animation_physics_6dof_constraint.m_6dof.m_translation_limit_min[0] = mmd_constraint_translation_limit_min.m_x;
+					animation_physics_6dof_constraint.m_6dof.m_translation_limit_min[1] = mmd_constraint_translation_limit_min.m_y;
+					animation_physics_6dof_constraint.m_6dof.m_translation_limit_min[2] = mmd_constraint_translation_limit_min.m_z;
+					animation_physics_6dof_constraint.m_6dof.m_translation_limit_max[0] = mmd_constraint_translation_limit_max.m_x;
+					animation_physics_6dof_constraint.m_6dof.m_translation_limit_max[1] = mmd_constraint_translation_limit_max.m_y;
+					animation_physics_6dof_constraint.m_6dof.m_translation_limit_max[2] = mmd_constraint_translation_limit_max.m_z;
+					animation_physics_6dof_constraint.m_6dof.m_rotation_spring[0] = mmd_constraint_rotation_spring.m_x;
+					animation_physics_6dof_constraint.m_6dof.m_rotation_spring[1] = mmd_constraint_rotation_spring.m_y;
+					animation_physics_6dof_constraint.m_6dof.m_rotation_spring[2] = mmd_constraint_rotation_spring.m_z;
+					animation_physics_6dof_constraint.m_6dof.m_translation_spring[0] = mmd_constraint_translation_spring.m_x;
+					animation_physics_6dof_constraint.m_6dof.m_translation_spring[1] = mmd_constraint_translation_spring.m_y;
+					animation_physics_6dof_constraint.m_6dof.m_translation_spring[2] = mmd_constraint_translation_spring.m_z;
+					out_ragdoll_skeleton_constraints.push_back(animation_physics_6dof_constraint);
 				}
 				else
 				{
@@ -2062,7 +1645,7 @@ static inline void internal_import_ragdoll_physics(mcrt_vector<mmd_pmx_rigid_bod
 			else
 			{
 				// TODO: allow self constraint???
-				assert((BRX_ASSET_IMPORT_UINT32_INDEX_INVALID == mmd_constraint.m_rigid_body_a_index) || (BRX_ASSET_IMPORT_UINT32_INDEX_INVALID == mmd_constraint.m_rigid_body_b_index) || (mmd_constraint.m_rigid_body_a_index == mmd_constraint.m_rigid_body_b_index));
+				assert((BRX_ASSET_IMPORT_UINT32_INDEX_INVALID == mmd_constraint.m_rigid_body_reference_index) || (BRX_ASSET_IMPORT_UINT32_INDEX_INVALID == mmd_constraint.m_rigid_body_attached_index) || (mmd_constraint.m_rigid_body_reference_index == mmd_constraint.m_rigid_body_attached_index));
 			}
 		}
 
@@ -2129,7 +1712,7 @@ static inline void internal_import_mesh_sections(mcrt_vector<mmd_pmx_vertex_t> c
 		assert((morph_face_indices.size() + non_morph_face_indices.size()) == face_count);
 
 		// TODO: we may not merge the surface since the alpha blending depends on the vertex order?
-		auto const material_compare = [&in_materials](uint32_t const &lhs, uint32_t const &rhs) -> bool
+		auto const material_compare = [](uint32_t const &lhs, uint32_t const &rhs) -> bool
 		{
 			return lhs < rhs;
 		};
@@ -2441,7 +2024,7 @@ static inline void internal_import_mesh_sections(mcrt_vector<mmd_pmx_vertex_t> c
 }
 
 // [ImportPmx.scale](https://github.com/MMD-Blender/blender_mmd_tools/blob/main/mmd_tools/operators/fileio.py#L94)
-constexpr float const INTERNAL_IMPORT_PMX_SCALE = 0.1F;
+constexpr float const INTERNAL_IMPORT_PMX_SCALE = 0.08F;
 
 // MMD
 // LH
@@ -2502,41 +2085,17 @@ static inline mmd_pmx_vec3_t internal_transform_rotation_limit_max(mmd_pmx_vec3_
 	return mmd_pmx_vec3_t{-v_min.m_x, -v_min.m_y, v_max.m_z};
 }
 
+static inline mmd_pmx_vec3_t internal_transform_translation_spring(mmd_pmx_vec3_t const &v)
+{
+	return mmd_pmx_vec3_t{v.m_x, v.m_y, v.m_z};
+}
+
+static inline mmd_pmx_vec3_t internal_transform_rotation_spring(mmd_pmx_vec3_t const &v)
+{
+	return mmd_pmx_vec3_t{v.m_x, v.m_y, v.m_z};
+}
+
 static inline mmd_pmx_vec3_t internal_transform_shape_size(mmd_pmx_vec3_t const &v)
 {
 	return mmd_pmx_vec3_t{v.m_x * INTERNAL_IMPORT_PMX_SCALE, v.m_y * INTERNAL_IMPORT_PMX_SCALE, v.m_z * INTERNAL_IMPORT_PMX_SCALE};
-}
-
-static inline float internal_asin(float y, float z)
-{
-	constexpr float const INTERNAL_EPSILON = 1E-6F;
-	constexpr float const INTERNAL_PI = 3.14159265358979323846264338327950288F;
-
-	if (z > INTERNAL_EPSILON)
-	{
-		if (std::abs(y) > INTERNAL_EPSILON)
-		{
-			float const sin = std::min(std::max(-1.0F, (y / z)), 1.0F);
-			return DirectX::XMScalarASin(sin);
-		}
-		else
-		{
-			return 0.0F;
-		}
-	}
-	else
-	{
-		if (y > INTERNAL_EPSILON)
-		{
-			return (INTERNAL_PI * 0.5F);
-		}
-		else if (y < -INTERNAL_EPSILON)
-		{
-			return (0.0F - (INTERNAL_PI * 0.5F));
-		}
-		else
-		{
-			return 0.0F;
-		}
-	}
 }
