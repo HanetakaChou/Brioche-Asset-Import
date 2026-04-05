@@ -3429,29 +3429,29 @@ static inline void internal_import_ragdoll_physics(cgltf_data const *in_gltf_dat
 
                     assert(ragdoll_skeleton_parent_joint_index < out_ragdoll_skeleton_rigid_bodies.size());
 
-                    brx_asset_import_physics_constraint physics_6dof_constraint;
-                    physics_6dof_constraint.m_rigid_body_reference_index = ragdoll_skeleton_parent_joint_index;
-                    physics_6dof_constraint.m_rigid_body_attached_index = ragdoll_skeleton_current_joint_index;
-                    physics_6dof_constraint.m_constraint_type = BRX_ASSET_IMPORT_PHYSICS_CONSTRAINT_RAGDOLL;
-                    physics_6dof_constraint.m_ragdoll.m_pivot[0] = brx_pivot.x;
-                    physics_6dof_constraint.m_ragdoll.m_pivot[1] = brx_pivot.y;
-                    physics_6dof_constraint.m_ragdoll.m_pivot[2] = brx_pivot.z;
-                    physics_6dof_constraint.m_ragdoll.m_twist_axis[0] = brx_twist_axis.x;
-                    physics_6dof_constraint.m_ragdoll.m_twist_axis[1] = brx_twist_axis.y;
-                    physics_6dof_constraint.m_ragdoll.m_twist_axis[2] = brx_twist_axis.z;
-                    physics_6dof_constraint.m_ragdoll.m_plane_axis[0] = brx_plane_axis.x;
-                    physics_6dof_constraint.m_ragdoll.m_plane_axis[1] = brx_plane_axis.y;
-                    physics_6dof_constraint.m_ragdoll.m_plane_axis[2] = brx_plane_axis.z;
-                    physics_6dof_constraint.m_ragdoll.m_normal_axis[0] = brx_normal_axis.x;
-                    physics_6dof_constraint.m_ragdoll.m_normal_axis[1] = brx_normal_axis.y;
-                    physics_6dof_constraint.m_ragdoll.m_normal_axis[2] = brx_normal_axis.z;
-                    physics_6dof_constraint.m_ragdoll.m_twist_limit[0] = brx_twist_limit[0];
-                    physics_6dof_constraint.m_ragdoll.m_twist_limit[1] = brx_twist_limit[1];
-                    physics_6dof_constraint.m_ragdoll.m_plane_limit[0] = brx_plane_limit[0];
-                    physics_6dof_constraint.m_ragdoll.m_plane_limit[1] = brx_plane_limit[1];
-                    physics_6dof_constraint.m_ragdoll.m_normal_limit[0] = brx_normal_limit[0];
-                    physics_6dof_constraint.m_ragdoll.m_normal_limit[1] = brx_normal_limit[1];
-                    out_ragdoll_skeleton_constraints.push_back(physics_6dof_constraint);
+                    brx_asset_import_physics_constraint physics_ragdoll_constraint;
+                    physics_ragdoll_constraint.m_rigid_body_reference_index = ragdoll_skeleton_parent_joint_index;
+                    physics_ragdoll_constraint.m_rigid_body_attached_index = ragdoll_skeleton_current_joint_index;
+                    physics_ragdoll_constraint.m_constraint_type = BRX_ASSET_IMPORT_PHYSICS_CONSTRAINT_RAGDOLL;
+                    physics_ragdoll_constraint.m_ragdoll.m_pivot[0] = brx_pivot.x;
+                    physics_ragdoll_constraint.m_ragdoll.m_pivot[1] = brx_pivot.y;
+                    physics_ragdoll_constraint.m_ragdoll.m_pivot[2] = brx_pivot.z;
+                    physics_ragdoll_constraint.m_ragdoll.m_twist_axis[0] = brx_twist_axis.x;
+                    physics_ragdoll_constraint.m_ragdoll.m_twist_axis[1] = brx_twist_axis.y;
+                    physics_ragdoll_constraint.m_ragdoll.m_twist_axis[2] = brx_twist_axis.z;
+                    physics_ragdoll_constraint.m_ragdoll.m_plane_axis[0] = brx_plane_axis.x;
+                    physics_ragdoll_constraint.m_ragdoll.m_plane_axis[1] = brx_plane_axis.y;
+                    physics_ragdoll_constraint.m_ragdoll.m_plane_axis[2] = brx_plane_axis.z;
+                    physics_ragdoll_constraint.m_ragdoll.m_normal_axis[0] = brx_normal_axis.x;
+                    physics_ragdoll_constraint.m_ragdoll.m_normal_axis[1] = brx_normal_axis.y;
+                    physics_ragdoll_constraint.m_ragdoll.m_normal_axis[2] = brx_normal_axis.z;
+                    physics_ragdoll_constraint.m_ragdoll.m_twist_limit[0] = brx_twist_limit[0];
+                    physics_ragdoll_constraint.m_ragdoll.m_twist_limit[1] = brx_twist_limit[1];
+                    physics_ragdoll_constraint.m_ragdoll.m_plane_limit[0] = brx_plane_limit[0];
+                    physics_ragdoll_constraint.m_ragdoll.m_plane_limit[1] = brx_plane_limit[1];
+                    physics_ragdoll_constraint.m_ragdoll.m_normal_limit[0] = brx_normal_limit[0];
+                    physics_ragdoll_constraint.m_ragdoll.m_normal_limit[1] = brx_normal_limit[1];
+                    out_ragdoll_skeleton_constraints.push_back(physics_ragdoll_constraint);
 
                     // sphere -> capsule
                     // rigid body reference: mapped to parent bone, centered at the midpoint of parent bone (head) position and child bone (head) position
